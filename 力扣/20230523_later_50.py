@@ -313,13 +313,88 @@ class Solution:
         nums.sort()
         return nums[len(nums)//2]
 
+    def search(self, nums: List[int], target: int) -> int:
+        """
+        33.搜索旋转排序数组
+        2023.05.28 中等
+        题解：O(logn)则二分查找
+        """
+        l, r = 0, len(nums) - 1
+        while l <= r:   # 二分查找，似乎都是≤
+            m = (l + r) // 2
+            if nums[m] == target:
+                return m
+            if nums[l] <= nums[m]:  # 判断升序
+                if nums[l] <= target < nums[m]:
+                    r = m - 1
+                else:
+                    l = m + 1
+            else:   # 判断升序
+                if nums[m] < target <= nums[r]:
+                    l = m + 1
+                else:
+                    r = m - 1
+        return -1
+
+        # 参考答案写的
+        # l, r = 0, len(nums) - 1
+        # while l <= r:
+        #     m = (l + r) // 2
+        #     if nums[m] == target:
+        #         return m
+        #     if nums[l] <= nums[m]:  # 如果左半段是升序
+        #         if nums[l] <= target < nums[m]:
+        #             r = m - 1
+        #         else:
+        #             l = m + 1
+        #     else:
+        #         if nums[m] < target <= nums[r]:
+        #             l = m + 1
+        #         else:
+        #             r = m - 1
+        # return -1
+
+    def searchRange(self, nums: List[int], target: int) -> List[int]:
+        """
+        34.在排序数组中查找元素的第一个和最后一个位置
+        2023.05.28 中等
+        题解：参考33. 要求在有序数组实现时间复杂度O(logn)则想到二分查找
+        """
+        l, r = 0, len(nums) - 1
+        pos = -1
+        while l <= r:
+            m = (l + r) // 2
+            if nums[m] == target:
+                pos = m
+                break
+            elif nums[m] < target:
+                l = m + 1
+            else:
+                r = m - 1
+        if pos == -1:
+            return [-1, -1]
+        # 沿索引pos向左探测
+        left = pos - 1
+        while left >= 0 and nums[left] == nums[pos]:
+            left -= 1
+        left += 1   # 思考一下while的终止条件，要么越界跳出，要么值不相等跳出。要让left回到最边上且相等的位置上
+        # 沿索引pos向右探测
+        right = pos + 1
+        while right <= len(nums) - 1 and nums[right] == nums[pos]:
+            right += 1
+        right -= 1
+        return [left, right]
 
 if __name__ == '__main__':
     sl = Solution()
 
-    nums = [1, 3, 2]
-    sl.nextPermutation(nums)
-    print(nums)
+    nums = [1]
+    target = 0
+    print(sl.search(nums, target))
+
+    # nums = [1, 3, 2]
+    # sl.nextPermutation(nums)
+    # print(nums)
 
     # print(sl.generateParenthesis(3))
     # s = "(){}}{"
