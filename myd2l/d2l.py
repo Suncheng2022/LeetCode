@@ -72,6 +72,7 @@ def NMS(boxes, confs, iou_threshold):
         picked_score.append(score[index])
 
         # 计算intersection区域坐标
+        # np.max()计算序列的最值，np.maximum()2个序列逐位比较取较大值。参考：https://blog.csdn.net/lanchunhui/article/details/52700895
         x1 = np.maximum((boxes[index:, 0], boxes[orders[:-1], 0]))
         y1 = np.maximum((boxes[index:, 1], boxes[orders[:-1], 1]))
         x2 = np.minimum((boxes[index:, 2], boxes[orders[:-1], 2]))
@@ -123,7 +124,7 @@ def NMS(bboxes, confs, iou_threshold):
 # 2.iou
 def cal_iou(bbox1, bbox2):
     """
-    计算bbox之间的iou
+    计算bbox之间的iou  JustRepeat.py实现的更好些，增加了注释
     :param bbox1: [x1,y1,x2,y2]
     :param bbox2: [x1,y1,x2,y2]
     :return: 
@@ -145,3 +146,70 @@ def cal_iou(bbox1, bbox2):
     inter = w * h
     iou = inter / (s1 + s2 - inter)
     return iou
+
+
+def cal_iou01(bbox1, bbox2):
+    """ 计算iou：bbox1 bbox2各代表1个bbox """
+    # 获取bbox1、bbox2坐标
+    xmin1, ymin1, xmax1, ymax1 = bbox1
+    xmin2, ymin2, xmax2, ymax2 = bbox1
+    # 计算bbox1、bbox2面积
+    area1 = (xmax1 - xmin1 + 1) * (ymax1 - ymin1 + 1)   # 这里计算的是像素的个数，所以+1
+    area2 = (xmax2 - xmin2 + 1) * (ymax2 - ymin2 + 1)
+    # 计算bbox1、bbox2相交区域坐标
+    x1 = max(xmin1, xmin2)
+    y1 = max(ymin1, ymin2)
+    x2 = min(xmax1, xmax2)
+    y2 = min(ymax1, ymax2)
+    w = max(0, x2 - x1 + 1)     # 这里+1同样是计算像素数目
+    h = max(0, y2 - y1 + 1)
+    inter = w * h
+    # 计算iou
+    iou = inter / (area1 + area2 - inter)
+    return iou
+
+
+def cal_iou02(bboxes1, bboxes2):
+    """ 计算iou，bboxes1、bboxes2代表多个boxes """
+    A = bboxes1.shape[0]
+    B = bboxes2.shape[0]
+
+    areas1 = (bboxes1[:, 2] - bboxes1[:, 0] + 1) * (bboxes1[:, 3] - bboxes1[:, 1])
+    areas2 = (bboxes2[:, 2] - bboxes2[:, 0] + 1) * (bboxes2[:, 3] - bboxes2[:, 1])
+
+    xy_min = np.maximum(bboxes1[:, np.newaxis, :2].repeat(B, axis=1),
+                        np.broadcast_to(B[:, :2], (A, B, 2)))
+    xy_max = np.minimum(bboxes1[:, np.newaxis, 2:].repeat(B, axis=1),
+                        np.broadcast_to(bboxes2[:, 2:], (A, B, 2)))
+
+    inter = np.clip(xy_max - xy_min, a_min=0, a_max=np.inf)
+    inter = inter[:, :, 0] * inter[:, :, 1]
+    ious = inter / (areas1[:, np.newaxis].repeat(B, axis=1) +
+                    areas2[:, np.newaxis].repeat(A, axis=1) -
+                    inter)
+
+
+def cal_iou02(bboxes1, bboxes2):
+    """ 再写一遍 多对多 """
+    A = bboxes1.shape[0]
+    B = bboxes2.shape[0]
+
+    # 计算交集坐标
+    xy_min = np.maximum(bboxes1[:, np.newaxis, :2].repeat(B, axis=1),   # [A, 2]->[A, B, 2]
+                        np.broadcast_to(bboxes2[:, :2], (A, B, 2)))     # [A, 2]->[A, B, 2]
+    xy_max = np.minimum(bboxes1[:, np.newaxis, 2:].repeat(B, axis=1),
+                        np.broadcast_to(bboxes2[:, 2:], (A, B, 2)))
+
+    # 计算交集面积
+    inter = np.clip(xy_max - xy_min, a_min=0, a_max=np.inf)     # [A, B, 1]
+    inter = inter[:, :, 0] * inter[:, :, 1]
+
+    # 计算bboxes1、bboxes2面积
+    # [A, 1]->[A, B, 1]
+    areas1 = ((bboxes1[:, 2] - bboxes1[:, 0]) * (bboxes1[:, 3] - bboxes1[:, 1]))[:, np.newaxis, :].repeat(B, axis=1)
+    # [B, 1]->[A, B, 1]
+    areas2 = ((bboxes2[:, 2] - bboxes2[:, 0]) * (bboxes2[:, 3] - bboxes2[:, 1]))[np.newaxis, :, :].repeat(A, axis=0)
+
+    # 计算iou
+    ious = inter / (areas1 + areas2 - inter)    # [A, B, 1]
+    return ious
