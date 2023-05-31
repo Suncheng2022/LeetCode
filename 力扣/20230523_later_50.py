@@ -262,6 +262,74 @@ class Solution:
                 nums[j:] = sorted(nums[j:])     # 这里要注意，使用nums[j:].sort()得不到正确结果
                 break
 
+    def search(self, nums: List[int], target: int) -> int:
+        """
+        33.搜索旋转排序数组
+        2023.05.30 中等
+        题解：O(logn)且有序，想到二分查找。数组从中间分开肯定是有一半有序的，判断哪一半有序，从中找是否有target
+        """
+        l, r = 0, len(nums) - 1
+        while l <= r:
+            m = (l + r) // 2
+            if nums[m] == target:
+                return m
+            if nums[l] <= nums[m]:  # 假如索引1~m是升序
+                if nums[l] <= target < nums[m]:
+                    r = m - 1
+                else:
+                    l = m + 1
+            else:   # 假如另一半是升序
+                if nums[m] < target <= nums[r]:
+                    l = m + 1
+                else:
+                    r = m - 1
+        return -1
+
+    def searchRange(self, nums: List[int], target: int) -> List[int]:
+        """
+        34.在排序数组中查找元素的第一个和最后一个位置
+        2023.05.30 中等
+        题解：题目要求O(logn)且又给了升序的条件，想到二分查找，又想到33.
+        """
+        l, r = 0, len(nums) - 1
+        while l <= r:
+            m = (l + r) // 2
+            if nums[m] == target:
+                left = m - 1
+                while left >= 0 and nums[left] == target:
+                    left -= 1
+                left += 1   # 这个后处理，因为while跳出的时候，要么越界、要么不等，所以left要往回走一下
+
+                right = m + 1
+                while right <= len(nums) - 1 and nums[right] == target:
+                    right += 1
+                right -= 1
+                return [left, right]
+            elif nums[m] < target:
+                l = m + 1
+            else:
+                r = m - 1
+        return [-1, -1]
+
+
+    def setZeroes(self, matrix: List[List[int]]) -> None:
+        """
+        Do not return anything, modify matrix in-place instead.
+        73.矩阵置零
+        2023.05.30 中等
+        题解：面试题 遍历记录0元素行列索引，再遍历置零
+        """
+        numRows, numCols = len(matrix), len(matrix[0])
+        zeroInds = []
+        for i in range(numRows):
+            for j in range(numCols):
+                if matrix[i][j] == 0:
+                    zeroInds.append([i, j])
+        for i, j in zeroInds:
+            matrix[i] = [0] * numCols
+            for k in range(numRows):
+                matrix[k][j] = 0
+
 
     def numIslands(self, grid: List[List[str]]) -> int:
         """
