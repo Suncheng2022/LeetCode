@@ -115,8 +115,9 @@ def BubbleSrot(nums):
 
 
 # 7.3.2快速排序
-def QuickSort(nums):
+def QuickSort(nums, low, high):
     """
+    【实现错误！已改正】
     思路：先进行划分并返回所选基准的索引，之后分别对索引左右子序列递归快排
         划分算法是将基准放到最终位置上，且小于基准的在左侧、大于基准的在右侧
     时间复杂度：O(n^2)
@@ -126,11 +127,9 @@ def QuickSort(nums):
     :param nums:
     :return:
     """
-    low, high = 0, len(nums) - 1
-
     def paritition(nums, low, high):
+        pivot = nums[low]   # 基准只能选一次
         while low < high:
-            pivot = nums[low]
             while low < high and nums[high] >= pivot:
                 high -= 1
             nums[low] = nums[high]
@@ -142,8 +141,8 @@ def QuickSort(nums):
 
     if low < high:
         k = paritition(nums, low, high)
-        QuickSort(nums[low:k - 1])
-        QuickSort(nums[k + 1:high])
+        QuickSort(nums, low, k - 1)
+        QuickSort(nums, k + 1, high)
     return nums
 
 
@@ -294,9 +293,9 @@ if __name__ == "__main__":
     nums = [random.randint(1, 100) for _ in range(10)]
     print(f'{nums} -- nums')
     # print(f'{BubbleSrot(nums)} -- BubbleSort')
-    # print(f'{QuickSort(nums)} -- QuickSort')
+    print(f'{QuickSort(nums, 0, len(nums) - 1)} -- QuickSort')
     # print(f'{SelectSort(nums)} -- SelectSort')
     # print(f'{HeapSort(nums)} -- HeapSort')
-    print(f'------------ 归并排序 --------------')      # 中间进行排序，会修改nums，所以一个一个排序运行吧
-    print(f'{MergeSort(nums)} -- MergeSort')
+    # print(f'------------ 归并排序 --------------')      # 中间进行排序，会修改nums，所以一个一个排序运行吧
+    # print(f'{MergeSort(nums)} -- MergeSort')
 
