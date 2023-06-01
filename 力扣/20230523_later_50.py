@@ -311,6 +311,56 @@ class Solution:
                 r = m - 1
         return [-1, -1]
 
+    def combinationSum(self, candidates: List[int], target: int) -> List[List[int]]:
+        """
+        39.组合总和
+        2023.06.01 中等
+        题解：回溯[深度优先]
+        """
+        def dfs(candidates, path, res, begin, size, target):
+            if target < 0:
+                return
+            elif target == 0:
+                res.append(path)
+                return
+            else:
+                for i in range(begin, size):
+                    dfs(candidates, path + [candidates[i]], res, i, size, target - candidates[i])
+
+        size = len(candidates)
+        if size == 0:
+            return []
+        path = []
+        res = []
+        dfs(candidates, path, res, 0, size, target)
+        return res
+
+    def permute(self, nums: List[int]) -> List[List[int]]:
+        """
+        46.全排列
+        2023.06.01
+        题解：回溯[深度优先]
+        """
+        def dfs(nums, path, res, depth, size, used):
+            if depth == size:
+                res.append(path[:])
+                return
+            for i in range(size):
+                if not used[i]:
+                    path.append(nums[i])
+                    used[i] = True
+                    dfs(nums, path, res, depth + 1, size, used)
+                    path.pop()
+                    used[i] = False
+
+        size = len(nums)
+        if size == 0:
+            return []
+        path, res = [], []
+        used = [False for _ in range(size)]
+        dfs(nums, path, res, 0, size, used)
+        return res
+
 
     def setZeroes(self, matrix: List[List[int]]) -> None:
         """
