@@ -1,3 +1,4 @@
+import copy
 from typing import List, Optional
 
 
@@ -361,6 +362,45 @@ class Solution:
         dfs(nums, path, res, 0, size, used)
         return res
 
+    def rotate(self, matrix: List[List[int]]) -> None:
+        """
+        Do not return anything, modify matrix in-place instead.
+        48.旋转图像
+        2023.06.02 中等
+        题解：原矩阵第row行第i个元素 对应 旋转矩阵倒数第row列的第个元素
+        """
+        n = len(matrix)
+        matrix_res = copy.deepcopy(matrix)
+        for i in range(n):
+            for j in range(n):
+                # 我知道错的原因了，这里不是两者交换，是要每一个元素值分别映射到正确的位置
+                # matrix[i][j], matrix[j][-i - 1] = matrix[j][-i - 1], matrix[i][j]
+                matrix_res[j][-i - 1] = matrix[i][j]
+        # print(matrix_res)
+        matrix[:] = matrix_res      # 这样给原来的矩阵赋值
+
+    def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
+        """
+        49.字母异位词分组
+        2023.06.03 中等
+        题解：首先想到的是用set
+        """
+        # 参考答案，一次遍历就能完成
+        from collections import defaultdict
+        res = defaultdict(list)     # 定义一个val为list类型的字典
+        for word in strs:
+            res["".join(sorted(word))].append(word)
+        return list(res.values())
+
+        # 自己写的，复杂度有点高
+        # tmp = set()
+        # for word in strs:
+        #     if "".join(sorted(word)) not in tmp:
+        #         tmp.add("".join(sorted(word)))
+        # tmp = {key: [] for key in tmp}
+        # for word in strs:
+        #     tmp["".join(sorted(word))].append(word)
+        # return list(tmp.values())
 
     def setZeroes(self, matrix: List[List[int]]) -> None:
         """
@@ -503,12 +543,53 @@ class Solution:
         right -= 1
         return [left, right]
 
+    def maxSubArray(self, nums: List[int]) -> int:
+        """
+        53.最大子数组和
+        2023.06.03 中等
+        题解：直接看答案代码，一下明了：自己想的思路还是有一部分是对的，比如每个索引位置都计算一个最大值。
+                                    遍历，前一个最大值<=0，则当前值加上的话只会不变或变小；
+                                         前一个最大值>0，则当前值加上的话只会变大，所以加上。
+        """
+        if len(nums) == 1:
+            return nums[0]
+        resList = [nums[0]]
+        for i in range(1, len(nums)):
+            if resList[-1] <= 0:
+                resList.append(nums[i])
+            else:
+                resList.append(nums[i] + resList[-1])
+        return max(resList)
+
+    def canJump(self, nums: List[int]) -> bool:
+        """
+        55.跳跃游戏
+        2023.06.03 中等
+        题解：直接看答案吧，一下明了
+        """
+        maxStep = 0
+        for i, num in enumerate(nums):
+            if i <= maxStep < i + nums[i]:
+                maxStep = i + nums[i]
+        return maxStep >= len(nums) - 1
+
+
+
 if __name__ == '__main__':
     sl = Solution()
 
-    nums = [1]
-    target = 0
-    print(sl.search(nums, target))
+    nums = [-2, 1, -3, 4, -1, 2, 1, -5, 4]
+    print(sl.maxSubArray(nums))
+
+    # strs = ["eat", "tea", "tan", "ate", "nat", "bat"]
+    # print(sl.groupAnagrams(strs))
+    # matrix = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+    # sl.rotate(matrix)
+    # print(matrix)
+
+    # nums = [1]
+    # target = 0
+    # print(sl.search(nums, target))
 
     # nums = [1, 3, 2]
     # sl.nextPermutation(nums)
