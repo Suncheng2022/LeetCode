@@ -573,13 +573,65 @@ class Solution:
                 maxStep = i + nums[i]
         return maxStep >= len(nums) - 1
 
+    def merge(self, intervals: List[List[int]]) -> List[List[int]]:
+        """
+        56.合并区间
+        2023.06.04
+        题解：前一个尾元素 <= 后一个的首元素 则合并
+        """
+        intervals.sort(key=lambda x: x[0])
+        res = []
+        for inter in intervals:
+            if not res or res[-1][-1] < inter[0]:
+                res.append(inter)
+            else:
+                res[-1][-1] = max(res[-1][-1], inter[1])
+        return res
 
+    def uniquePaths(self, m: int, n: int) -> int:
+        """
+        62.不同路径
+        2023.06.04 中等
+        """
+        res = [[1] * n] + [[1] + [0] * (n - 1) for _ in range(m - 1)]
+        for i in range(1, m):
+            for j in range(1, n):
+                res[i][j] = res[i - 1][j] + res[i][j - 1]
+        return res[-1][-1]
+
+    def minPathSum(self, grid: List[List[int]]) -> int:
+        """
+        64.最小路径和
+        2023.06.04 中等
+        """
+        m = len(grid)
+        n = len(grid[0])
+        # res = [[grid[0][0]] + [0] * (n - 1)] + [[0] * n for _ in range(m - 1)]
+        for i in range(0, m):
+            for j in range(0, n):
+                if i - 1 < 0 and j - 1 < 0:     # 第0行第0列
+                    grid[i][j] = grid[i][j]
+                elif i - 1 < 0 and j - 1 >= 0:  # 第0行
+                    grid[i][j] += grid[i][j - 1]
+                elif i - 1 >= 0 and j - 1 < 0:  # 第0列
+                    grid[i][j] += grid[i - 1][j]
+                elif i - 1 >= 0 and j - 1 >= 0: # 除第0行第0列之外的元素
+                    grid[i][j] = min(grid[i][j] + grid[i - 1][j], grid[i][j] + grid[i][j - 1])
+        return grid[-1][-1]
 
 if __name__ == '__main__':
     sl = Solution()
 
-    nums = [-2, 1, -3, 4, -1, 2, 1, -5, 4]
-    print(sl.maxSubArray(nums))
+    grid = [[1,2,3],[4,5,6]]
+    print(sl.minPathSum(grid))
+
+    # print(sl.uniquePaths(3, 3))
+
+    # intervals = [[1,4],[4,5]]
+    # print(sl.merge(intervals))
+
+    # nums = [-2, 1, -3, 4, -1, 2, 1, -5, 4]
+    # print(sl.maxSubArray(nums))
 
     # strs = ["eat", "tea", "tan", "ate", "nat", "bat"]
     # print(sl.groupAnagrams(strs))
