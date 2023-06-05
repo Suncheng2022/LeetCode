@@ -1,4 +1,5 @@
 import copy
+import random
 from typing import List, Optional
 
 
@@ -619,11 +620,95 @@ class Solution:
                     grid[i][j] = min(grid[i][j] + grid[i - 1][j], grid[i][j] + grid[i][j - 1])
         return grid[-1][-1]
 
+    def climbStairs(self, n: int) -> int:
+        """
+        70.爬楼梯
+        2023.06.05 简单
+        题解：费锲那波数列
+        """
+        # dp = [-1] * n
+        # if n == 1:
+        #     return 1
+        # dp[0] = 1
+        # dp[1] = 2
+        # for i in range(2, n):
+        #     dp[i] = dp[i - 1] + dp[i - 2]
+        # return dp[-1]
+
+        # 不能处理n=1的情况
+        if n == 1:
+            return 1
+        dp = [-1] * (n + 1)
+        dp[1] = 1
+        dp[2] = 2
+        for i in range(3, len(dp)):
+            dp[i] = dp[i - 1] + dp[i - 2]
+        return dp[-1]
+
+    def sortColors(self, nums: List[int]) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        75.颜色分类
+        2023.06.05 中等
+        题解：原地排序，也就是不使用额外空间，O(1)可不可以呢。不就是从小到大排序吗
+        """
+        # 答案 双指针
+        p0 = p1 = 0
+        for i in range(len(nums)):
+            if nums[i] == 0:
+                # 遍历到0，与p0交换；
+                # 若此时p0<p1，肯定把1换走了，因为p0、p1初始指向同一位置，需要把1再换回到1元素的末尾；
+                # 要注意p0、p1都要往后移动
+                nums[i], nums[p0] = nums[p0], nums[i]
+                if p0 < p1:
+                    nums[i], nums[p1] = nums[p1], nums[i]
+                p0 += 1
+                p1 += 1
+            elif nums[i] == 1:
+                nums[i], nums[p1] = nums[p1], nums[i]
+                p1 += 1
+
+
+        # 冒泡试一下
+        # for i in range(len(nums) - 1):
+        #     for j in range(len(nums) - 1 - i):
+        #         if nums[j] > nums[j + 1]:
+        #             nums[j], nums[j + 1] = nums[j + 1], nums[j]
+
+    def subsets(self, nums: List[int]) -> List[List[int]]:
+        """
+        78.子集
+        2023.06.05 中等
+        题解：能想到递归
+        """
+        def backtracking(startInd):
+            res.append(path[:])
+            if startInd >= len(nums):
+                return
+            for i in range(startInd, len(nums)):
+                path.append(nums[i])
+                backtracking(i + 1)
+                path.pop()
+
+        path = []
+        res = []
+        backtracking(0)
+        return res
+
 if __name__ == '__main__':
     sl = Solution()
+    nums = [0]
+    print(sl.subsets(nums))
 
-    grid = [[1,2,3],[4,5,6]]
-    print(sl.minPathSum(grid))
+    # nums = [random.randint(0, 3) for _ in range(10)]
+    # print(nums)
+    # print(sl.sortColors(nums))
+    # print(nums)
+
+    # print(sl.climbStairs(3))
+
+    # grid = [[1,2,3],[4,5,6]]
+    # print(sl.minPathSum(grid))
 
     # print(sl.uniquePaths(3, 3))
 
