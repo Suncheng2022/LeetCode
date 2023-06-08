@@ -8,6 +8,14 @@ class ListNode:
         self.val = val
         self.next = next
 
+
+# Definition for a binary tree node.
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
 class Solution:
     def addTwoNumbers(self, l1: Optional[ListNode], l2: Optional[ListNode]) -> Optional[ListNode]:
         """
@@ -679,7 +687,7 @@ class Solution:
         """
         78.子集
         2023.06.05 中等
-        题解：能想到递归
+        题解：能想到递归回溯 https://programmercarl.com/0078.%E5%AD%90%E9%9B%86.html#c-%E4%BB%A3%E7%A0%81
         """
         def backtracking(startInd):
             res.append(path[:])
@@ -695,10 +703,321 @@ class Solution:
         backtracking(0)
         return res
 
+    def exist(self, board: List[List[str]], word: str) -> bool:
+        """
+        79.单词搜索
+        2023.06.06 中等
+        题解：似乎也是回溯. 回溯方法中cur_i cur_j变量很重要，否则错误
+        """
+        # 重写一遍
+        def backtracking(i, j, word):
+            if len(word) == 0:      # 代表回溯过程中word已经全部匹配到
+                return True
+            for d in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+                cur_i = i + d[0]    # 这里另定义cur_i, cur_j是很重要的，为什么？--每层都定义新的索引，否则会影响上一层的递归
+                cur_j = j + d[1]
+                if 0 <= cur_i < m and 0 <= cur_j < n and board[cur_i][cur_j] == word[0]:
+                    if marked[cur_i][cur_j]:    # 表示这个方向的元素已经探索过了，则探索另一个方向
+                        continue
+                    marked[cur_i][cur_j] = True
+                    if backtracking(cur_i, cur_j, word[1:]):
+                        return True
+                    marked[cur_i][cur_j] = False
+            return False
+
+        m, n = len(board), len(board[0])
+        marked = [[False] * n for _ in range(m)]
+        for i in range(m):
+            for j in range(n):
+                if board[i][j] == word[0]:
+                    marked[i][j] = True
+                    if backtracking(i, j, word[1:]):
+                        return True
+                    marked[i][j] = False
+        return False
+
+        # m = len(board)
+        # n = len(board[0])
+        # directs = [(-1, 0), (1, 0), (0, -1), (0, 1)]     # 上下左右四个方向
+        # marked = [[False] * n for _ in range(m)]
+        #
+        # def backtracking(i, j, word):
+        #     if len(word) == 0:
+        #         return True
+        #     for d in directs:
+        #         cur_i = i + d[0]
+        #         cur_j = j + d[1]
+        #         if 0 <= cur_i < m and 0 <= cur_j < n and board[cur_i][cur_j] == word[0]:
+        #             if marked[cur_i][cur_j]:    # 这个方向探索过，尝试下一个方向
+        #                 continue
+        #             marked[cur_i][cur_j] = True
+        #             if backtracking(cur_i, cur_j, word[1:]):
+        #                 return True
+        #             else:
+        #                 marked[cur_i][cur_j] = False
+        #     return False
+        #
+        # for i in range(m):
+        #     for j in range(n):
+        #         if board[i][j] == word[0]:
+        #             marked[i][j] = True
+        #             if backtracking(i, j, word[1:]):
+        #                 return True
+        #             else:
+        #                 marked[i][j] = False    # 回溯
+        # return False
+
+    def inorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
+        """
+        94.二叉树的中序遍历
+        2023.06.06 简单
+        题解：还是看答案吧，并不简单
+        """
+        # 迭代：其实是模拟递归
+        stack = []      # 模拟递归的栈
+        res = []
+        while stack or root:    # 初次进入stack空，后面不断遍历可能root空
+            if root:    # 先通过while循环把所有“左孩子”放进 栈，方便后面的迭代；所有的“左孩子”里是包含“中间孩子”的概念的，细想一下，对吧
+                stack.append(root)
+                root = root.left
+            else:       # “左孩子”都消耗完了，则“右孩子”开始进 栈
+                node = stack.pop()
+                res.append(node.val)
+                root = node.right
+        return res
+
+        # 递归。若3个if改为if elif elif结构，是错误的，这样只能判断1个条件了，而不是3个if时能判断3个条件。
+        # 比如node是叶子节点时就该添加到res，而不是什么都不做。
+        res = []
+
+        def fun(node):
+            if node and node.left:  # 当前节点不空，且有左孩子节点
+                fun(node.left)
+            if node:
+                res.append(node.val)
+            if node and node.right:
+                fun(node.right)
+
+        fun(root)
+        return res
+
+    def numTrees(self, n: int) -> int:
+        """
+        96.不同的二叉搜索树
+        2023.06.06 中等
+        题解：step1.若k为root，则1~k-1构建左子树、k+1~n构建右子树
+             step2.设有i个数构建子树，除去根节点还有i-1个节点，则有j个数构建左子树、i-1-j个数构建右子树；即i个数能构建BST共那么多个
+        """
+        dp = [0] * (n + 1)
+        dp[0] = 1   # 0个节点只能构成1种BST，空树
+        dp[1] = 1   # 1个节点只能构成1种BST，只有1个节点的树
+        for i in range(2, len(dp)):     # 计算i个数能组成多少种BST
+            for j in range(0, i):   # 注意j的范围[0, i-1]，则另一子树范围为对应的i-1-j，因为一共有i-1个节点
+                dp[i] += (dp[j] * dp[i - 1 - j])
+        return dp[n]
+
+    def isValidBST(self, root: Optional[TreeNode]) -> bool:
+        """
+        98.验证二叉搜索树
+        2023.06.07 中等
+        题解：对BST中序遍历，当前访问节点值肯定大于前一节点值，否则不是BST
+             递归思路判断BST反而不好实现
+        """
+        # 迭代 中序遍历
+        stack = []
+        res = []
+        while stack or root:    # root不空，则不断收集“左孩子”；root空，stack不空，弹出节点
+            if root:
+                stack.append(root)
+                root = root.left
+            else:
+                node = stack.pop()
+                if len(res) and node.val <= res[-1]:    # BST的中序遍历严格递增
+                    return False
+                res.append(node.val)
+                root = node.right
+        return True
+
+    def isSymmetric(self, root: Optional[TreeNode]) -> bool:
+        """
+        101.对称二叉树
+        2023.06.07 简单
+        题解：首先想到了依然是中序遍历，自己写递归有测试用例没通过，即考虑的不完全
+            答案 递归，但不是中序遍历的思路
+        """
+        # 递归
+        # def dfs(left, right):
+        #     if not (left or right):     # 都空
+        #         return True
+        #     elif not (left and right):  # 仅1个空-->你想呀，上面判断都空，能到这里肯定不是都空，至少有1个；若2个均不空，进不去
+        #         return False
+        #     elif left.val != right.val: # 都不空，但值不等-->经过上面两个判断，这里只能是都不空
+        #         return False
+        #     else:                       # 都不空，值相等
+        #         return dfs(left.left, right.right) and dfs(left.right, right.left)
+        #
+        # return dfs(root.left, root.right)
+
+        # 迭代
+        # 基本的判断条件还是不变
+        if not root or not (root.left or root.right):   # 如果root空 或者 root不空但没有孩子节点
+            return True
+        queue = [root.left, root.right]  # 用辅助队列实现迭代；放入的时候必须同时放入两个，取的时候必须同时取两个
+        while queue:
+            # 还是那几种情况的判断，但注意判断之后的执行语句
+            left = queue.pop(0)
+            right = queue.pop(0)
+            if not (left or right):     # 均空
+                continue
+            elif not (left and right):  # 至少有1个不空（考虑上个判断），若要进入此条件则只能1个空1个不空
+                return False
+            elif left.val != right.val: # 均不空（考虑上面两个判断），但值不能
+                return False
+            else:                       # 均不空，且值相等
+                queue.append(left.left)
+                queue.append(right.right)
+                queue.append(left.right)
+                queue.append(right.left)
+        return True
+
+    def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:
+        """
+        102.二叉树的层序遍历
+        2023.06.07 中等
+        题解：这题还中等，简单
+        """
+        if not root:    # root为空
+            return []
+        queue = [root]
+        res = []
+        while queue:
+            tmpVals = []
+            tmpNodes = []
+            while queue:
+                node = queue.pop(0)
+                if node:
+                    tmpVals.append(node.val)
+                    tmpNodes.append(node)
+            res.append(tmpVals)
+            queue = tmpNodes
+        return res
+
+    def maxDepth(self, root: Optional[TreeNode]) -> int:
+        """
+        104.二叉树的最大深度
+        2023.06.07 简单
+        题解：最先想到的是层序遍历
+        """
+        if not root:
+            return 0
+        queue = [root]
+        res = []
+        while queue:
+            tmpVals = []
+            tmpNodes = []
+            while queue:    # 耗尽一层的节点
+                node = queue.pop(0)
+                if node:
+                    tmpVals.append(node.val)
+                if node.left:
+                    tmpNodes.append(node.left)
+                if node.right:
+                    tmpNodes.append(node.right)
+            res.append(tmpVals)
+            queue = tmpNodes
+        return len(res)     # 返回的层数
+
+    def buildTree(self, preorder: List[int], inorder: List[int]) -> Optional[TreeNode]:
+        """
+        105.从前序遍历与中序遍历序列构造二叉树
+        2023.06.07 中等
+        题解：递归 参数：指示同一子树的先序起终点索引、中序起终点索引
+        """
+        key2ind_inorder = {key: ind for ind, key in enumerate(inorder)}     # 哈希表，加速查找
+
+        def fun(preorder_left, preorder_right, inorder_left, inorder_right):
+            if preorder_left > preorder_right:      # 递归终止条件
+                return None
+            root_idx_inorder = key2ind_inorder[preorder[preorder_left]]   # fun()参数所指子树中，根节点所在中序遍历索引
+            root = TreeNode(preorder[preorder_left])
+            left_subtree_len = root_idx_inorder - inorder_left      # 计算fun()参数所指子树 的 左子树长度
+            root.left = fun(preorder_left + 1, preorder_left + left_subtree_len,
+                            inorder_left, root_idx_inorder - 1)
+            root.right = fun(preorder_left + left_subtree_len + 1, preorder_right,
+                             root_idx_inorder + 1, inorder_right)
+            return root
+
+        n = len(preorder)
+        return fun(0, n - 1, 0, n - 1)
+
+    def flatten(self, root: Optional[TreeNode]) -> None:
+        """
+        Do not return anything, modify root in-place instead.
+        114.二叉树展开为链表
+        2023.06.08 中等
+        题解：按题目要求展开就是先序遍历，所以总体思路就是不断地把“左子树”放到“右子树”的位置，而“右子树”放到“左子树”的右下，这样才能达到先序遍历的效果
+            root的左子树放到右子树的位置，右子树放到刚才左子树的最右下
+        """
+        if not root:
+            return
+        while root:
+            if not root.left:       # 当前节点没有左子树
+                root = root.right
+            else:                   # 当前节点有左子树
+                rootLeft = root.left
+                while rootLeft.right:   # 寻找左子树的最右下
+                    rootLeft = rootLeft.right
+                rootLeft.right = root.right     # 将右子树挂到左子树的最右
+                root.right = root.left          # 将左子树放到右子树的位置
+                root.left = None
+                root = root.right       # 继续操作下一个节点，只能是当前节点的右孩子
+
+        # 再写一遍
+        # if not root:
+        #     return
+        # while root:
+        #     if not root.left:   # 没有左孩子，则直接处理右孩子
+        #         root = root.right
+        #     else:   # 有左孩子，则寻找其最右下节点
+        #         tmp = root.left     # tmp从左孩子寻找最右下节点
+        #         while tmp.right:
+        #             tmp = tmp.right
+        #         tmp.right = root.right
+        #         root.right = root.left
+        #         root.left = None
+        #         root = root.right
+
+    def maxProfit(self, prices: List[int]) -> int:
+        """
+        121.买卖股票的最佳时机
+        2023.06.08 简单
+        题解：一次遍历
+        """
+        minVal = float('inf')
+        maxProfit = 0
+        for n in prices:
+            if n < minVal:
+                minVal = n
+            if n - minVal > maxProfit:
+                maxProfit = n - minVal
+        return maxProfit
+
+
 if __name__ == '__main__':
     sl = Solution()
-    nums = [0]
-    print(sl.subsets(nums))
+
+    prices = [7, 6, 4, 3, 1]
+    print(sl.maxProfit(prices))
+
+    # n = 1
+    # print(sl.numTrees(n))
+
+    # board = [["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]]
+    # word = "ABCCED"
+    # print(sl.exist(board, word))
+
+    # nums = [0]
+    # print(sl.subsets(nums))
 
     # nums = [random.randint(0, 3) for _ in range(10)]
     # print(nums)
