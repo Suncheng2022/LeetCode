@@ -135,8 +135,44 @@ def SelectSort(nums):
     return nums
 
 
+def HeapSort(nums):
+    """
+    堆排序 索引0作哨兵
+    时间复杂度：
+    空间复杂度：
+    稳定性：
+    """
+    BuildHeap(nums)
+    for i in range(len(nums) - 1, 0, -1):   # i指示有效堆的最后一个元素
+        print(nums[1], end=', ')
+        nums[1], nums[i] = nums[i], nums[1]
+        AdjustDown(nums, 1, i - 1)
+    # return nums   # 最终的返回结果是依次取nums[1]，似乎不能直接返回nums
+
+def BuildHeap(nums):
+    i = len(nums) // 2
+    while i >= 1:   # 索引0是哨兵
+        AdjustDown(nums, i, len(nums) - 1)
+        i -= 1
+
+def AdjustDown(nums, k, length):
+    """ 向下调整/自上而下调整, 控制从小到大排序还是从大到小排序
+        :param k: 待向下调整的节点索引
+        :param length: 有效堆的长度 """
+    nums[0] = nums[k]
+    i = 2 * k
+    while i <= length:
+        if i < length and nums[i] > nums[i + 1]:
+            i += 1
+        if nums[i] < nums[0]:   # 为什么？？？——自己在脑子想象一下向下调整的动态图，是把索引k节点往下不断地比较移动
+            nums[k] = nums[i]
+            k = i
+        i *= 2
+    nums[k] = nums[0]
+
 
 if __name__ == "__main__":
+    random.seed(1)
     nums = [random.randint(0, 20) for _ in range(10)]
     print(nums)
     print(InsertSort(copy.deepcopy(nums)), 'InsertSort')
@@ -145,3 +181,4 @@ if __name__ == "__main__":
     print(BubbleSort(copy.deepcopy(nums)), 'BubbleSort')
     print(QuickSort(copy.deepcopy(nums), 0, len(nums) - 1), 'QuickSort')
     print(SelectSort(copy.deepcopy(nums)), 'SelectSort')
+    print(HeapSort(copy.deepcopy(nums)), 'HeapSort')
