@@ -16,6 +16,62 @@ class TreeNode:
         self.left = left
         self.right = right
 
+
+class LRUCache:
+    """
+    146.LRU缓存
+    2023.06.11 中等
+    题解：自己实现 and OrderedDict，另一个方法不好记
+    """
+    # 自己实现的方法，复杂度高
+    # def __init__(self, capacity: int):
+    #     self.capacity = capacity
+    #     self.keys = []       # 维护最近使用状态
+    #     self.cache = {}
+    #
+    # def get(self, key: int) -> int:
+    #     if key in self.keys:
+    #         self.keys.remove(key)
+    #         self.keys.insert(0, key)
+    #         return self.cache[key]
+    #     return -1
+    #
+    # def put(self, key: int, value: int) -> None:
+    #     if key in self.keys:
+    #         self.keys.remove(key)
+    #         self.keys.insert(0, key)
+    #         self.cache[key] = value
+    #     else:
+    #         self.keys.insert(0, key)
+    #         self.cache[key] = value
+    #         if len(self.keys) > self.capacity:
+    #             k = self.keys.pop()
+    #             self.cache.pop(k)
+
+    # 答案之不推荐之我只能记住这个了，OrderedDict
+    def __init__(self, capacity: int):
+        from collections import OrderedDict
+
+        self.capacity = capacity
+        self.d = OrderedDict()
+
+    def get(self, key: int) -> int:
+        if key in self.d:
+            self.d.move_to_end(key, last=False)
+            return self.d[key]
+        return -1
+
+    def put(self, key: int, value: int) -> None:
+        if key in self.d:
+            self.d.move_to_end(key, last=False)
+            self.d[key] = value
+        else:
+            self.d[key] = value
+            self.d.move_to_end(key, last=False)
+            if self.d.__len__() > self.capacity:
+                self.d.popitem(last=True)
+
+
 class Solution:
     def addTwoNumbers(self, l1: Optional[ListNode], l2: Optional[ListNode]) -> Optional[ListNode]:
         """
@@ -1001,6 +1057,85 @@ class Solution:
             if n - minVal > maxProfit:
                 maxProfit = n - minVal
         return maxProfit
+
+    def longestConsecutive(self, nums: List[int]) -> int:
+        """
+        128.最长连续序列
+        2023.06.09 中等
+        题解：暴力既不好实现、又不符合复杂度要求。
+            答案，哈希大幅减少查找速度
+        """
+        numsSet = set(nums)     # 去重、哈希，加快查找速度
+        longestLen = 0
+        for n in numsSet:
+            if n - 1 not in numsSet:
+                curLen = 1      # 当前长度
+                while n + 1 in numsSet:
+                    n += 1
+                    curLen += 1
+                longestLen = max(longestLen, curLen)
+        return longestLen
+
+    def singleNumber(self, nums: List[int]) -> int:
+        """
+        136.只出现一次的数字
+        2023.06.09 简单
+        题解：异或
+        """
+        res = nums[0]
+        for n in nums[1:]:
+            res ^= n
+        return res
+
+        # 感觉不符合题意
+        # import collections
+        # key2counts = collections.Counter(nums)
+        # for k, c in key2counts.items():
+        #     if c == 1:
+        #         return k
+
+    def wordBreak(self, s: str, wordDict: List[str]) -> bool:
+        """
+        139.单词拆分
+        2023.06.09 中等
+        题解：动态规划
+        """
+        # 要注意 dp[i]的索引i 与 字符串s的索引[i:j]，两个i是有区别的
+        # dp的i是指前i个字符，可以是0；s的i是字符串的起始索引，数值上两个i相同，意义上s的i要比dp的i往右一位，你品一下
+        # n = len(s)
+        # dp = [False for _ in range(n + 1)]      # 前 索引i 个字符组成的子串能否被wordDict表示
+        # dp[0] = True
+        # for i in range(n):
+        #     for j in range(i + 1, n + 1):
+        #         if dp[i] and s[i:j] in wordDict:
+        #             dp[j] = True
+        # return dp[-1]
+
+        # 再写一遍
+        n = len(s)
+        dp = [False for _ in range(n + 1)]
+        dp[0] = True
+        for i in range(n):
+            for j in range(i + 1, n + 1):
+                if dp[i] and s[i:j] in wordDict:
+                    dp[j] = True
+        return dp[-1]
+
+    def hasCycle(self, head: Optional[ListNode]) -> bool:
+        """
+        141.环形链表
+        142.环形链表II
+        2023.06.11 中等
+        题解：答案，使用set。不必非得遍历完，遍历过程中只要发现了重复节点就返回True，否则返回False.
+        """
+        seen = set()
+        while head:
+            if head in seen:
+                return True
+            seen.add(head)
+            head = head.next
+        return False
+
 
 
 if __name__ == '__main__':
