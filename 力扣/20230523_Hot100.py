@@ -17,6 +17,57 @@ class TreeNode:
         self.right = right
 
 
+class MinStack:
+    """
+    155.最小栈
+    2023.06.12 中等
+    题解：就是实现一个栈，唯一注意的是跟踪最小元素
+    """
+    # 答案，维护最小值的方法很巧妙！
+    def __init__(self):
+        # 注意维护最小值的处理方法，很巧妙
+        self.stack = []
+        self.minVal = []
+
+    def push(self, val: int) -> None:
+        self.stack.append(val)
+        if self.minVal.__len__() == 0:
+            self.minVal.append(val)
+        else:
+            self.minVal.append(min(val, self.minVal[-1]))       # 【维护最小值，巧妙！】
+
+    def pop(self) -> None:
+        _ = self.stack.pop()
+        _ = self.minVal.pop()
+
+    def top(self) -> int:
+        return self.stack[-1]
+
+    def getMin(self) -> int:
+        return self.minVal[-1]
+
+    # 自己写的这个，不太好，思路比较模糊，没创意
+    # def __init__(self):
+    #     self.stack = []
+    #     self.minVal = float('inf')
+    #
+    # def push(self, val: int) -> None:
+    #     # 插入时维护最小值
+    #     self.stack.append(val)
+    #     self.minVal = min(self.stack)
+    #
+    # def pop(self) -> None:
+    #     # 弹出时要维护最小值
+    #     self.stack.pop()
+    #     if self.stack.__len__():
+    #         self.minVal = min(self.stack)
+    #
+    # def top(self) -> int:
+    #     return self.stack[-1]
+    #
+    # def getMin(self) -> int:
+    #     return self.minVal
+
 class LRUCache:
     """
     146.LRU缓存
@@ -1136,13 +1187,210 @@ class Solution:
             head = head.next
         return False
 
+    """ LRU缓存在文件最上面 """
 
+    def sortList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        """
+        148.排序链表
+        2023.06.11 中等
+        题解：首先自己想的复杂度较高
+            答案 归并排序 自顶向下，并非最优----时间复杂度O(nlogn) 空间复杂度O(logn)递归占用栈空间
+            答案 归并排序 自底向上 代码太长了，但空间复杂度为O(1)，下次吧...
+        """
+        # 答案 归排 自顶向下
+        # def mergeSort(head, tail):
+        #     """
+        #     为什么要两个参数嘞，因为要递归，递归的终止条件需要用头尾判断
+        #     """
+        #     if not head:    # 空
+        #         return head
+        #     if head.next == tail:   # 仅1个节点
+        #         head.next = None
+        #         return head
+        #     # 使用快慢指针寻找链表的中间节点
+        #     slow, fast = head, head
+        #     while fast != tail:
+        #         slow = slow.next
+        #         fast = fast.next
+        #         if fast != tail:
+        #             fast = fast.next
+        #     mid = slow      # 这里mid取slow或fast似乎都可以？？？不行，只能取slow，fast肯定到结尾了都，甚至可能是None
+        #     head1 = mergeSort(head, mid)
+        #     head2 = mergeSort(mid, tail)
+        #     return merge(head1, head2)
+        #
+        # def merge(head1, head2):
+        #     """ 将head1、head2视为两个独立的链表 """
+        #     res = tmp = ListNode()
+        #     while head1 and head2:
+        #         if head1.val < head2.val:
+        #             tmp.next = head1
+        #             head1 = head1.next
+        #         else:
+        #             tmp.next = head2
+        #             head2 = head2.next
+        #         tmp = tmp.next
+        #     if head1:
+        #         tmp.next = head1
+        #     if head2:
+        #         tmp.next = head2
+        #     return res.next
+        #
+        # return mergeSort(head, None)
+
+        # 自己想的 复杂度较高
+        # if not head:
+        #     return None
+        # mydict = {}
+        # while head:
+        #     mydict[head] = head.val
+        #     head = head.next
+        # mydict = sorted(mydict, key=lambda x: x.val)
+        #
+        # tmp = res = ListNode()
+        # for node in mydict:
+        #     tmp.next = ListNode(node.val)
+        #     tmp = tmp.next
+        # return res.next
+
+        # 再写一遍，自顶向下 时间O(nlogn)、空间O(logn)递归
+        def mergeSort(head, tail):
+            """ head、tail参数，为什么比普通的归并排序多了tail参数，可能为了处理只有0或1个节点的特殊情况？
+                                我想是的，因为普通的归并排序开始也判断了参数元素数量并特殊处理 """
+            if not head:    # 无节点
+                return head
+            elif head.next == tail:     # 仅1个节点
+                head.next = None
+                return head
+            # 使用快慢指针定位 中间节点
+            slow = fast = head
+            while fast != tail:     # 只要快指针没到结尾就继续遍历
+                slow = slow.next
+                fast = fast.next
+                if fast != tail:
+                    fast = fast.next
+            mid = slow      # mid绝不可以等于fast，因为fast已经到链表尾了
+            # 归并排序的经典递归写法
+            head_1 = mergeSort(head, mid)
+            head_2 = mergeSort(mid, tail)
+            return merge(head_1, head_2)
+
+        def merge(head_1, head_2):
+            """
+            合并两个链表：思路和普通的归并排序相同，将head_1、head_2视为两个独立的链表处理即可
+            """
+            resHead = tmp = ListNode()      # 头结点
+            while head_1 and head_2:
+                if head_1.val < head_2.val:
+                    tmp.next = ListNode(head_1.val)
+                    head_1 = head_1.next
+                else:
+                    tmp.next = ListNode(head_2.val)
+                    head_2 = head_2.next
+                tmp = tmp.next
+            if head_1:
+                tmp.next = head_1
+            elif head_2:
+                tmp.next = head_2
+            return resHead.next
+
+        return mergeSort(head, None)
+
+    def maxProduct(self, nums: List[int]) -> int:
+        """
+        152.乘积最大子数组
+        2023.06.11 中等
+        题解：起码能一下想到-->动态规划
+            答案，遍历 维护最大值、最小值(遇到负数，则最小值变最大值、最大值变最小值)
+        """
+        imin = imax = 1
+        res = float('-inf')
+        for n in nums:
+            if n < 0:
+                imin, imax = imax, imin
+            imin = min(n, imin * n)     # 这是关键呀
+            imax = max(n, imax * n)
+            res = max(res, imax)
+        return res
+
+    """ 155.最小栈 写在最上面"""
+
+    def getIntersectionNode(self, headA: ListNode, headB: ListNode) -> Optional[ListNode]:
+        """
+        160.相交链表
+        2023.06.12 简单
+        题解：那就按简单的思路来--效率极低
+            答案 双指针
+        """
+        # 答案，双指针：二者相同的部分c个节点，不同的部分分别为a、b个节点，当二者遍历a + c + b次、b + c + a次时就能得出结果
+        pA, pB = headA, headB
+        while pA != pB:     # 自己画图看一下，相等的时候要么是相交节点要么是空
+            pA = headB if pA is None else pA.next
+            pB = headA if pB is None else pB.next
+        return pA
+
+
+        # 想法简单，遍历，效率极低，险过
+        # lsA = []
+        # while headA:
+        #     lsA.append(headA)
+        #     headA = headA.next
+        # while headB:
+        #     if headB in lsA:
+        #         return headB
+        #     headB = headB.next
+        # return None
+
+    def majorityElement(self, nums: List[int]) -> int:
+        """
+        169.多数元素
+        2023.06.12 中等
+        题解：堆排，时间复杂度：O(nlogn)，建堆O(n)  空间复杂度O(1)，哨兵
+        """
+        def HeapSort(nums):
+            BuildHeap(nums)
+            for i in range(len(nums) - 1, 0, -1):
+                # print(nums[1], end=' ')
+                nums[i], nums[1] = nums[1], nums[i]     # 由此可知，堆排序是可以直接返回排序后的结果的，不必一个一个的输出
+                AdjustDown(nums, 1, i - 1)
+
+        def BuildHeap(nums):
+            i = len(nums) // 2
+            while i > 0:
+                AdjustDown(nums, i, len(nums) - 1)      # 建堆，有效的堆范围均为len(nums) - 1
+                i -= 1
+
+        def AdjustDown(nums, k, length):
+            nums[0] = nums[k]
+            i = 2 * k
+            while i <= length:
+                if i < length and nums[i] > nums[i + 1]:    # 我们从小到大输出
+                    i = i + 1
+                if nums[i] < nums[0]:       # 因为是待调整节点nums[k]本身不断往下调整，调整的目的是nums[k]而不是整个子树
+                    nums[k] = nums[i]
+                    k = i       # k的作用是记录最后nums[0]该放到哪里
+                i *= 2      # nums[i]无论与其根节点换不换，索引i都得往下走
+            nums[k] = nums[0]
+
+        nums.insert(0, -1)      # 因为堆排序需要一个“哨兵”，因此添加一个哨兵
+        HeapSort(nums)
+        nums.pop(0)
+        return nums[len(nums) // 2]
 
 if __name__ == '__main__':
     sl = Solution()
 
-    prices = [7, 6, 4, 3, 1]
-    print(sl.maxProfit(prices))
+    from random import randint
+    nums = [randint(0, 20) for _ in range(10)]
+    print(nums)
+    sl.majorityElement(nums)
+    print(nums)
+
+    # nums = [2,3,-2,4]
+    # print(sl.maxProduct(nums))
+
+    # prices = [7, 6, 4, 3, 1]
+    # print(sl.maxProfit(prices))
 
     # n = 1
     # print(sl.numTrees(n))
