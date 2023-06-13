@@ -1377,14 +1377,67 @@ class Solution:
         nums.pop(0)
         return nums[len(nums) // 2]
 
+    def rob(self, nums: List[int]) -> int:
+        """
+        198.打家劫舍
+        2023.06.13 中等
+        题解：首先想到动态规划
+        """
+        dp = [-1] * (len(nums) + 1)
+        dp[0] = 0
+        dp[1] = nums[0]
+        for i in range(2, len(nums) + 1):
+            dp[i] = max(nums[i - 1] + dp[i - 2], dp[i - 1])
+        return dp[-1]
+
+    def numIslands(self, grid: List[List[str]]) -> int:
+        """
+        200.岛屿数量
+        2023.06.13 中等
+        题解：答案 深度遍历，见1就认为是岛屿并且深度遍历并将其置0
+        """
+        def dfs(x, y):
+            grid[x][y] = "0"      # 见1置零
+            for x, y in [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]:
+                if 0 <= x < nr and 0 <= y < nc and grid[x][y] == "1":
+                    dfs(x, y)       # 递归，深度遍历
+
+        nr = len(grid)      # 题目已说明行列>=1，所以不用判断==0
+        nc = len(grid[0])
+        islandNum = 0
+        for x in range(nr):
+            for y in range(nc):
+                if grid[x][y] == "1":
+                    islandNum += 1
+                    dfs(x, y)
+        return islandNum
+
+    def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        """
+        206.反转链表
+        2023.06.13 中等
+        题解：首先拒绝遍历
+            答案 迭代
+        """
+        prev, curr = None, head
+        while curr:
+            next = curr.next
+            curr.next = prev
+            prev = curr
+            curr = next
+        return prev
+
 if __name__ == '__main__':
     sl = Solution()
 
-    from random import randint
-    nums = [randint(0, 20) for _ in range(10)]
-    print(nums)
-    sl.majorityElement(nums)
-    print(nums)
+    nums = [2, 7, 9, 3, 1]
+    print(sl.rob(nums))
+
+    # from random import randint
+    # nums = [randint(0, 20) for _ in range(10)]
+    # print(nums)
+    # sl.majorityElement(nums)
+    # print(nums)
 
     # nums = [2,3,-2,4]
     # print(sl.maxProduct(nums))
