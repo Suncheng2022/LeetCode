@@ -166,7 +166,7 @@ def AdjustDown(nums, k, length):
             i += 1
         if nums[i] < nums[0]:   # 为什么？？？——自己在脑子想象一下向下调整的动态图，是把索引k节点往下不断地比较移动
             nums[k] = nums[i]
-            k = i
+            k = i       # 为什么交换后更新k值
         i *= 2
     nums[k] = nums[0]
 

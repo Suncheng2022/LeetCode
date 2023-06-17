@@ -17,6 +17,58 @@ class TreeNode:
         self.right = right
 
 
+class Node:
+    """ 208.实现Trie前缀树
+        tip: 方法是在操作字 """
+    def __init__(self):
+        self.children = [None for _ in range(26)]   # 字符串由26个字母组成
+        self.isEnd = False      # 用于区分 search or startwith方法
+
+    def put(self, ch):
+        self.children[ord(ch) - ord('a')] = Node()
+
+    def get(self, ch):
+        return self.children[ord(ch) - ord('a')]
+
+    def is_contain(self, ch):
+        return self.children[ord(ch) - ord('a')]
+
+
+class Trie:
+    """
+    208.实现Trie(前缀树)  使用了上面的数据结构 Node
+    2023.06.17 中等
+    题解: 自己想的太简单了，数据结构没见过该直接看答案
+        答案，参考评论区Python版 https://leetcode.cn/problems/implement-trie-prefix-tree/solution/trie-tree-de-shi-xian-gua-he-chu-xue-zhe-by-huwt/
+    """
+    def __init__(self):
+        self.root = Node()
+
+    def insert(self, word) -> None:
+        p = self.root
+        for ch in word:
+            if not p.is_contain(ch):
+                p.put(ch)
+            p = p.get(ch)
+        p.isEnd = True
+
+    def search(self, word) -> bool:
+        p = self.root
+        for ch in word:
+            if not p.is_contain(ch):
+                return False
+            p = p.get(ch)
+        return p.isEnd
+
+    def startswith(self, prefix) -> bool:
+        p = self.root
+        for ch in prefix:
+            if not p.is_contain(ch):
+                return False
+            p = p.get(ch)
+        return True
+
+
 class MinStack:
     """
     155.最小栈
@@ -1427,11 +1479,157 @@ class Solution:
             curr = next
         return prev
 
+# ******************************** 2023.06.17 后50道题 **************************************
+    def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:
+        """
+        207.课程表
+        2023.06.17
+        题解：好复杂呀 https://leetcode.cn/problems/course-schedule/solution/bao-mu-shi-ti-jie-shou-ba-shou-da-tong-tuo-bu-pai-/
+        """
+        # course2preNum = [0 for _ in range(numCourses)]      # 每门课程的 入度; 每门课程所需前置课程数 索引即课程索引
+        # pre2courseLs = {}       # key 前置课程: [学完key才能学的val]
+        # for i, ls in enumerate(prerequisites):
+        #     course2preNum[ls[0]] += 1
+        #     if ls[1] in pre2courseLs:
+        #         pre2courseLs[ls[1]].append(ls[0])
+        #     else:
+        #         pre2courseLs[ls[1]] = [ls[0]]
+        #
+        # queue = [i for i, preNum in enumerate(course2preNum) if preNum == 0]        # 取所有 入度 为0的课；先学不需要前置课程的课
+        # counts = 0      # 统计学习完的课程数量
+        # for courseInd in queue:
+        #     counts += 1
+        #     postCourses = pre2courseLs.get(courseInd, 0)      # 取出courseInd的后续课程，他们的前置课程少了一门
+        #     if not postCourses:
+        #         continue
+        #     for k in postCourses:
+        #         course2preNum[k] -= 1
+        #         if course2preNum[k] == 0:
+        #             queue.append(k)
+        #
+        # return counts == numCourses
+
+        # 重写一遍
+        course2preNum = [0 for _ in range(numCourses)]        # 初始化 入度，course课程有几门前置课程
+        pre2courses = {}        # 初始化 key 前置课程: [val 课程索引]
+        for ls in prerequisites:
+            course2preNum[ls[0]] += 1
+            if ls[1] in pre2courses:
+                pre2courses[ls[1]].append(ls[0])
+            else:
+                pre2courses[ls[1]] = [ls[0]]
+
+        queue = [i for i, preNum in enumerate(course2preNum) if preNum == 0]    # 先学 入度为0 的
+        counts = 0      # 学过的课程数量
+        while queue:
+            courseId = queue.pop(0)                 # 学courseId课程
+            counts += 1
+            coursePost = pre2courses.get(courseId, [])    # 学完courseId课程, 则coursePost课程们都少了一门前置课程；使用get,防止键值不存在
+            if not coursePost:      # 处理键值不存在(会返回空列表)
+                continue
+            for course in coursePost:
+                course2preNum[course] -= 1
+                if course2preNum[course] == 0:      # 没有前置课程了，即入度为0，就可以学习了
+                    queue.append(course)
+        return counts == numCourses
+
+    def findKthLargest(self, nums: List[int], k: int) -> int:
+        """
+        215.数组中的第k个最大元素
+        2023.06.17 中等
+        题解：首先想到 堆排
+        """
+        def HeapSort(nums):
+            BuildHeap(nums)
+            res = []
+            for i in range(len(nums) - 1, 0, -1):
+                res.append(nums[1])
+                nums[1], nums[i] = nums[i], nums[1]
+                AdjustDown(nums, 1, i - 1)
+            # print(res)
+            return res
+
+        def BuildHeap(nums):
+            k = len(nums) // 2
+            for i in range(k, 0, -1):
+                AdjustDown(nums, i, len(nums) - 1)
+
+        def AdjustDown(nums, k, length):
+            nums[0] = nums[k]
+            i = 2 * k
+            while i <= length:
+                if i < length and nums[i] < nums[i + 1]:
+                    i = i + 1
+                if nums[i] > nums[0]:
+                    nums[k] = nums[i]
+                    k = i
+                i *= 2
+            nums[k] = nums[0]
+
+        nums.insert(0, -1)
+        res = HeapSort(nums)
+        return res[k - 1]
+
+    def maximalSquare(self, matrix: List[List[str]]) -> int:
+        """
+        221.最大正方形
+        2023.06.17 中等
+        题解：答案 https://leetcode.cn/problems/maximal-square/solutions/44586/li-jie-san-zhe-qu-zui-xiao-1-by-lzhlyle/
+        """
+        # 题目已说明行列均不为0，故不需要判空
+        height, width = len(matrix), len(matrix[0])
+        dp = [[0] * (width + 1) for _ in range(height + 1)]     # 初始化dp为0矩阵，dp[i][j]表示以matrix[i-1][j-1]为右下角的正方形边长
+        maxSide = 0     # 记录最大变长
+        for i in range(height):
+            for j in range(width):
+                if matrix[i][j] == '1':     # matrix[i][j]等于'1'，则计算以其为右下角的正方形的边长
+                    dp[i + 1][j + 1] = min(dp[i + 1][j], dp[i][j + 1], dp[i][j]) + 1
+                    maxSide = max(maxSide, dp[i + 1][j + 1])
+        return maxSide ** 2
+
+    def invertTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+        """
+        226.翻转二叉树
+        2023.06.17 简单
+        题解：首先想到 层序遍历
+        """
+        if not root:
+            return root
+        one_layer = [root]
+        while one_layer:
+            tmp = []    # 临时存储某一层的节点
+            while one_layer:
+                node = one_layer.pop(0)
+                node.left, node.right = node.right, node.left   # 解本题的核心
+                if node.left:
+                    tmp.append(node.left)
+                if node.right:
+                    tmp.append(node.right)
+            one_layer = tmp
+        return root
+
+
 if __name__ == '__main__':
     sl = Solution()
 
-    nums = [2, 7, 9, 3, 1]
-    print(sl.rob(nums))
+    # matrix = [["1","0","1","0","0"],["1","0","1","1","1"],["1","1","1","1","1"],["1","0","0","1","0"]]
+    # print(sl.maximalSquare(matrix))
+
+    # nums = [3,2,3,1,2,4,5,5,6]
+    # print(nums)
+    # k = 4
+    # print(sl.findKthLargest(nums, k))
+
+    # numCourses = 5
+    # prerequisites = [[1,4],[2,4],[3,1],[3,2]]
+    # print(sl.canFinish(numCourses, prerequisites))
+
+    # dic = {}
+    # dic['a'] = 'ok'
+    # print(dic['b'])
+
+    # nums = [2, 7, 9, 3, 1]
+    # print(sl.rob(nums))
 
     # from random import randint
     # nums = [randint(0, 20) for _ in range(10)]
