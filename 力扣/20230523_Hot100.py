@@ -1608,9 +1608,177 @@ class Solution:
             one_layer = tmp
         return root
 
+    def isPalindrome(self, head: Optional[ListNode]) -> bool:
+        """
+        234.回文链表
+        2023.06.18 简单
+        题解：取到所有节点值，判断是否回文
+        """
+        nodes = []
+        while head:
+            nodes.append(head.val)
+            head = head.next
+        l, r = 0, len(nodes) - 1
+        while l <= r:
+            if nodes[l] != nodes[r]:
+                return False
+            l += 1
+            r -= 1
+        return True
+
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        """
+        236.二叉树的最近公共祖先
+        2023.06.18 中等
+        题解：答案 不是太懂 https://leetcode.cn/problems/lowest-common-ancestor-of-a-binary-tree/solutions/240096/236-er-cha-shu-de-zui-jin-gong-gong-zu-xian-hou-xu/
+        """
+        if not root or p == root or q == root:      # 这种情况直接返回结果
+            return root
+        left = self.lowestCommonAncestor(root.left, p, q)
+        right = self.lowestCommonAncestor(root.right, p, q)
+        # if not (left or right):     # root的左右子树均没找到p或q；这条可以合并到；情况a--可由情况c/d处理
+        #     return None
+        # if left and right:          # root的左右子树均有结果，说明p、q分布在root的左右两侧，root即最近公共祖先；情况b--可由最后的return root处理
+        #     return root
+        if not left: return right   # 情况c
+        if not right: return left   # 情况d
+        return root
+
+    def productExceptSelf(self, nums: List[int]) -> List[int]:
+        """
+        238.除自身以外数组的乘积
+        2023.06.18 中等
+        题解：遍历超时
+            答案，可以说极简 https://leetcode.cn/problems/product-of-array-except-self/solutions/5736/cheng-ji-dang-qian-shu-zuo-bian-de-cheng-ji-dang-q/
+        """
+        # 答案
+        res = [0] * len(nums)
+        tmp = 1
+        for i in range(len(nums)):
+            res[i] = tmp        # 当前元素左边元素的累积
+            tmp *= nums[i]
+        tmp = 1
+        for i in range(len(nums) - 1, -1, -1):
+            res[i] *= tmp       # 乘以 当前元素右边元素的累积；左边元素累积 * 右边元素累积，即为所求
+            tmp *= nums[i]
+        return res
+
+        # 遍历，超时！
+        # from copy import deepcopy
+        #
+        # res = []
+        # for i in range(len(nums)):
+        #     tmp_nums = deepcopy(nums)
+        #     _ = tmp_nums.pop(i)
+        #     tmp_res = 1
+        #     for n in tmp_nums:
+        #         tmp_res *= n
+        #     res.append(tmp_res)
+        # return res
+
+    def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+        """
+        240.搜索二维矩阵II
+        2023.06.18 中等
+        题解：答案-有序&查找-二分查找 https://leetcode.cn/problems/search-a-2d-matrix-ii/solutions/118335/xiang-xi-tong-su-de-si-lu-fen-xi-duo-jie-fa-by-5-4/
+        """
+        def binarySearch(nums):
+            l, r = 0, len(nums) - 1
+            while l <= r:
+                m = (l + r) // 2
+                if nums[m] == target:
+                    return m
+                elif nums[m] > target:
+                    r = m - 1
+                else:
+                    l = m + 1
+            # return l
+            return None     # 本次二分查找没有找到target值
+
+        for nums in matrix:
+            # 进行一些优化，有的行是不需要进行二分查找的
+            if nums[0] > target:
+                return False
+            elif nums[-1] < target:
+                continue
+            res = binarySearch(nums)
+            if res is not None:     # 返回索引0也是合法的
+                return True
+        return False
+
+    def numSquares(self, n: int) -> int:
+        """
+        279.完全平方数
+        2023.06.18 中等
+        题解：答案讲的太粗糙了，不过能大致看懂 https://leetcode.cn/problems/perfect-squares/solutions/17639/hua-jie-suan-fa-279-wan-quan-ping-fang-shu-by-guan/
+        """
+        dp = [0] * (n + 1)      # dp[i]：和为i 所需完全平方数的最少数量
+        for i in range(1, n + 1):
+            dp[i] = i           # dp[i]初始化为 最多数量，即几个i*i相加 i = i*i + i*i + ... + i*i
+            # i依次减完全平方数
+            j = 1
+            while i - j * j >= 0:   # 更新dp[i]
+                dp[i] = min(dp[i], dp[i - j * j] + 1)       # +1是因为j*j是一个完全平方数
+                j += 1
+        return dp[-1]   # dp[n]也可以
+
+    def moveZeroes(self, nums: List[int]) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        283.移动零
+        2023.06.18 简单
+        题解：并不简单
+        """
+        # 答案 双指针
+        a = 0
+        for i in range(len(nums)):
+            if nums[i] != 0:
+                nums[a] = nums[i]
+                a += 1
+        for i in range(a, len(nums)):
+            nums[i] = 0
+
+    def findDuplicate(self, nums: List[int]) -> int:
+        """
+        287.寻找重复数
+        2023.06.18 中等
+        题解：答案 二分查找 https://leetcode.cn/problems/find-the-duplicate-number/solutions/7038/er-fen-fa-si-lu-ji-dai-ma-python-by-liweiwei1419/
+        """
+        left, right = 1, len(nums) - 1      # left起始必须是1，因为nums元素范围是[1,n]，right起始必须是n，因为有n+1个元素，所以初始化为len - 1
+        while left < right:     # 没有严格按照二分，这是为了退出循环的时候left等于right
+            mid = (left + right) // 2
+            count = 0
+            for n in nums:
+                if n <= mid:
+                    count += 1
+            if count > mid:
+                right = mid
+            else:
+                left = mid + 1
+        return left
+        # 再看看其他解法
+
 
 if __name__ == '__main__':
     sl = Solution()
+
+    nums = [3,1,3,4,2]
+    print(sl.findDuplicate(nums))
+
+    # nums = [0, 0,1]
+    # sl.moveZeroes(nums)
+    # print(nums)
+
+    # n = 13
+    # print(sl.numSquares(n))
+
+    # matrix = [[-5]]
+    # print(sl.searchMatrix(matrix, -5))
+
+    # nums = [-1,1,0,-3,3]
+    # print(sl.productExceptSelf(nums))
+
+    # print(sl.isPalindrome(None))
 
     # matrix = [["1","0","1","0","0"],["1","0","1","1","1"],["1","1","1","1","1"],["1","0","0","1","0"]]
     # print(sl.maximalSquare(matrix))
