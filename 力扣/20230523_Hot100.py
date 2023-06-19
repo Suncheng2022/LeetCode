@@ -1758,12 +1758,173 @@ class Solution:
         return left
         # 再看看其他解法
 
+    def lengthOfLIS(self, nums: List[int]) -> int:
+        """
+        300.最长递增子序列
+        2023.06.19 中等
+        题解：能想到动态规划了 还是看了答案 https://leetcode.cn/problems/longest-increasing-subsequence/solutions/24173/zui-chang-shang-sheng-zi-xu-lie-dong-tai-gui-hua-2/
+        """
+        dp = [1] * len(nums)
+        for i in range(len(nums)):
+            for j in range(i):      # 通过此遍历计算dp[i]
+                if nums[j] < nums[i]:   # num[i]严格大于nums[j]，说明可以接在nums[j]后面
+                    dp[i] = max(dp[i], dp[j] + 1)
+        return max(dp)
+
+    def maxProfit(self, prices: List[int]) -> int:
+        """
+        309.最佳买卖股票时机含冷冻期
+        2023.06.19 中等
+        题解：答案 确是动态规划 https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-with-cooldown/solutions/181734/fei-zhuang-tai-ji-de-dpjiang-jie-chao-ji-tong-su-y/
+        """
+        # 初始化截止到索引i天的最大收益dp，初始化只考虑“今天”
+        # dp[i][0] 不持有，啥也没干 初始化：今天没有买卖        0
+        # dp[i][1] 持有           初始化：今天买入才能持有 -prices[i]
+        # dp[i][2] 不持有，卖出    初始化：今天买入卖出        0
+        dp = [[0, -price, 0] for price in prices]
+        for i in range(1, len(prices)):
+            # 更新今天不持有的状态：昨天本来不持有；昨天卖出不持有
+            dp[i][0] = max(dp[i - 1][0], dp[i - 1][2])
+            # 更新今天持有的状态：昨天就持有；昨天不持有(非卖出)，今天买入
+            dp[i][1] = max(dp[i - 1][1], dp[i - 1][0] - prices[i])
+            # 更新今天卖出不持有的状态：昨天必须持有今天才能卖出
+            dp[i][2] = dp[i - 1][1] + prices[i]
+        return max(dp[-1])
+
+    def coinChange(self, coins: List[int], amount: int) -> int:
+        """
+        322.零钱兑换
+        2023.06.19 中等
+        题解：答案 动态规划 https://leetcode.cn/problems/coin-change/solutions/6568/dong-tai-gui-hua-tao-lu-xiang-jie-by-wei-lai-bu-ke/
+        """
+        memo = {}       # "备忘录"，记录计算结果，避免重复计算
+        def dp(amount):
+            if amount in memo:
+                return memo[amount]
+            if amount == 0:     # 金额0需要0个硬币
+                return 0
+            elif amount < 0:    # 负数金额无法组成，返回-1
+                return -1
+
+            res = float('inf')  # 求最小值，则初始化一个最大值
+            for coin in coins:
+                subProblem = dp(amount - coin)
+                if subProblem < 0:      # 无解，进行下一次循环；dp()的返回值小于0，其实就是-1
+                    continue
+                res = min(res, subProblem + 1)      # + 1是因为上面调用dp(amount-coin)时 的 coin
+            memo[amount] = res if res != float('inf') else -1
+            return memo[amount]
+
+        return dp(amount)
+
+    def rob3(self, root: Optional[TreeNode]) -> int:
+        """
+        337.打家劫舍III
+        2023.06.19 中等
+        题解：答案 解法一、二Python无法通过，解法三才行
+            https://leetcode.cn/problems/house-robber-iii/solutions/47828/san-chong-fang-fa-jie-jue-shu-xing-dong-tai-gui-hu/
+        """
+        # 答案 动态规划+优化 Python可通过
+        def robInternal(node):
+            # 返回值：[0, 0] 分别代表 不偷当前节点、偷当前节点 所获得的最大值
+            if not node:
+                return [0, 0]
+            leftLs = robInternal(node.left)     # 返回的是[不偷当前节点, 偷当前节点]
+            rightLs = robInternal(node.right)
+            return [max(leftLs) + max(rightLs),     # 不偷当前节点
+                    node.val + leftLs[0] + rightLs[0]]      # 偷当前节点
+        return max(max(robInternal(root.left)) + max(robInternal(root.right)),
+                   root.val + robInternal(root.left)[0] + robInternal(root.right)[0])
+
+        # Python超时
+        # memo = dict()   # 避免重复计算
+        #
+        # def robInternal(root):
+        #     if root in memo:
+        #         return memo[root]
+        #     if not root:
+        #         return 0
+        #     money = root.val
+        #     if root.left:
+        #         money += (self.rob3(root.left.left) + self.rob3(root.left.right))
+        #     if root.right:
+        #         money += (self.rob3(root.right.left) + self.rob3(root.right.right))
+        #     memo[root] = max(money, self.rob3(root.left) + self.rob3(root.right))
+        #     return memo[root]
+        #
+        # return robInternal(root)
+
+    def countBits(self, n: int) -> List[int]:
+        """
+        338.比特位计数
+        2023.06.19 简单
+        题解：二进制除以2相当于右移一位
+            或答案，奇偶数的性质 https://leetcode.cn/problems/counting-bits/solutions/7882/hen-qing-xi-de-si-lu-by-duadua/
+        """
+        # 自己写的，可通过
+        # res = []
+        # for i in range(n + 1):
+        #     counts = 0
+        #     while i:
+        #         if i & 1:
+        #             counts += 1
+        #         i //= 2
+        #     res.append(counts)
+        # return res
+
+        # 答案 根据奇偶数性质
+        res = [0] * (n + 1)
+        for i in range(1, n + 1):
+            if i % 2 == 1:      # 奇数，一定比前面偶数的二进制多一个 '1'
+                res[i] = res[i - 1] + 1
+            else:   # 偶数，与整除2之后的偶数的'1'的个数相同，因为二者最低均为'0'
+                res[i] = res[i // 2]
+        return res
+
+    def topKFrequent(self, nums: List[int], k: int) -> List[int]:
+        """
+        347.前k个高频元素
+        2023.06.19 中等
+        """
+        pass
+
+
+        # 使用了内置库
+        # from collections import Counter
+        #
+        # resDict = Counter(nums)
+        # resDict = sorted(resDict.items(), key=lambda x: x[1], reverse=True)
+        # # print(resDict)
+        # return [resDict.pop(0)[0] for i in range(k)]
+
+
+
 
 if __name__ == '__main__':
     sl = Solution()
 
-    nums = [3,1,3,4,2]
-    print(sl.findDuplicate(nums))
+    nums = [1]
+    k = 1
+    print(sl.topKFrequent(nums, k))
+
+    # print(sl.countBits(5))
+
+    # conins = [1, 2, 5]
+    # amount = 11
+    # print(sl.coinChange(conins, amount))
+
+    # coins = [2]
+    # amount = 11
+    # print(sl.coinChange(coins, amount))
+
+    # prices = [1]
+    # print(sl.maxProfit(prices))
+
+    # nums = [0,1,0,3,2,3]
+    # print(sl.lengthOfLIS(nums))
+
+    # nums = [3,1,3,4,2]
+    # print(sl.findDuplicate(nums))
 
     # nums = [0, 0,1]
     # sl.moveZeroes(nums)
