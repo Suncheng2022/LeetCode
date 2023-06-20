@@ -1885,9 +1885,26 @@ class Solution:
         """
         347.前k个高频元素
         2023.06.19 中等
+        题解：答案 https://leetcode.cn/problems/top-k-frequent-elements/solutions/404339/4-chong-fang-fa-miao-sha-topkji-shu-pai-xu-kuai-pa/
         """
-        pass
-
+        # 答案 桶排序最好理解了；这道题花了太多时间
+        # 统计元素出现频率
+        num2count = {}
+        for num in nums:
+            num2count[num] = num2count.get(num, 0) + 1
+        print(f'$$$$$$ num2count:{num2count}')
+        # 数组长度为len(nums)，元素出现频率为0~len(nums)
+        count2num = [[] for _ in range(len(nums) + 1)]      # 索引代表出现频率，元素代表出现频率的元素
+        for n, c in num2count.items():
+            count2num[c].append(n)
+        print(f'$$$$$$ count2num:{count2num}')
+        # 按照出现频率，从大到小遍历
+        res = []
+        for i in range(len(nums), -1, -1):
+            for n in count2num[i]:
+                res.append(n)
+                if len(res) == k:
+                    return res
 
         # 使用了内置库
         # from collections import Counter
@@ -1897,15 +1914,37 @@ class Solution:
         # # print(resDict)
         # return [resDict.pop(0)[0] for i in range(k)]
 
+    def decodeString(self, s: str) -> str:
+        """
+        394.字符串编码
+        2023.06.20 中等
+        题解：直接看答案吧 https://leetcode.cn/problems/decode-string/solutions/19447/decode-string-fu-zhu-zhan-fa-di-gui-fa-by-jyd/
+        """
+        stack, res, multi = [], "", 0
+        for c in s:
+            if c == '[':
+                stack.append([multi, res])
+                multi, res = 0, ""
+            elif c == ']':
+                cur_multi, last_res = stack.pop()
+                res = last_res + res * cur_multi
+            elif '0' <= c <= '9':
+                multi = multi * 10 + int(c)
+            else:
+                res += c
+        return res
 
 
 
 if __name__ == '__main__':
     sl = Solution()
 
-    nums = [1]
-    k = 1
-    print(sl.topKFrequent(nums, k))
+    s = "3[a2[c]]"
+    print(sl.decodeString(s))
+
+    # nums = [1,1,1,2,2,3]
+    # k = 2
+    # print(sl.topKFrequent(nums, k))
 
     # print(sl.countBits(5))
 
