@@ -1934,6 +1934,99 @@ class Solution:
                 res += c
         return res
 
+    def calcEquation(self, equations: List[List[str]], values: List[float], queries: List[List[str]]) -> List[float]:
+        """
+        399.除法求值
+        2023.06.20 中等
+        题解：有向图，直接看答案吧 https://leetcode.cn/problems/evaluate-division/solutions/6384/xian-gou-zao-tu-zai-dfsde-pythonshi-xian-by-mai-ma/
+        """
+        # 重写一遍
+        graph = {}      # {x:{y,v}, y:{x,1/v}, ...}
+        for (x, y), v in zip(equations, values):
+            if x in graph:
+                graph[x][y] = v
+            elif x not in graph:
+                graph[x] = {y: v}
+            if y in graph:
+                graph[y][x] = 1 / v
+            elif y not in graph:
+                graph[y] = {x: 1 / v}
+
+        def dfs(s, t):
+            if s not in graph:
+                return -1
+            elif s == t:
+                return 1
+            for node in graph[s].keys():   # 从s的子节点找，尝试慢慢接近t
+                if node == t:
+                    return graph[s][node]
+                elif node not in visited:
+                    visited.add(node)    # 本次dfs不再重复遍历此节点
+                    v = dfs(node, t)
+                    if v != -1:
+                        return v * graph[s][node]   # 因为v是从node开始找t的
+            return -1
+
+        res = []
+        for x, y in queries:
+            visited = set()    # 计算每个问题的时候各自使用visited
+            res.append(dfs(x, y))
+        return res
+
+    def reconstructQueue(self, people: List[List[int]]) -> List[List[int]]:
+        """
+        406.根据身高重建队列
+        2023.06.20 中等
+        题解：https://leetcode.cn/problems/queue-reconstruction-by-height/?envType=featured-list&envId=2cktkvj
+        """
+        # 对h降序排序，这样，对每个元素来说，前面的都是大于等于它的
+        # 对k升序排序，这样，让k大的尽量在后面
+        people = sorted(people, key=lambda x: (-x[0], x[1]))
+        res = []
+        for p in people:
+            if len(res) <= p[1]:    # res的元素数量<=k，那只能直接放到res里了
+                res.append(p)
+            else:
+                res.insert(p[1], p)
+        return res
+
+
+
+
+        # # 构建图
+        # graph = {}      # graph结构{x:{y:v}, y:{x:1/v}, ...}
+        # for (x, y), v in zip(equations, values):
+        #     if x in graph:
+        #         graph[x][y] = v
+        #     elif x not in graph:
+        #         graph[x] = {y: v}
+        #     if y in graph:
+        #         graph[y][x] = 1 / v
+        #     elif y not in graph:
+        #         graph[y] = {x: 1 / v}
+        # # dfs
+        # def dfs(s, t):
+        #     """ 通过深度遍历计算s到t节点的边权重的乘积 """
+        #     if s not in graph:
+        #         return -1
+        #     elif s == t:
+        #         return 1
+        #     for node in graph[s].keys():
+        #         if node == t:
+        #             return graph[s][node]
+        #         elif node not in visited:
+        #             visited.add(node)
+        #             v = dfs(node, t)    # 计算node到t的边权重乘积
+        #             if v != -1:
+        #                 return v * graph[s][node]   # 最终计算的是s到t的边权重乘积，还要乘上
+        #     return -1
+        #
+        # res = []
+        # for qs, qt in queries:
+        #     visited = set()
+        #     res.append(dfs(qs, qt))
+        # return res
+
 
 
 if __name__ == '__main__':
