@@ -1990,9 +1990,6 @@ class Solution:
                 res.insert(p[1], p)
         return res
 
-
-
-
         # # 构建图
         # graph = {}      # graph结构{x:{y:v}, y:{x:1/v}, ...}
         # for (x, y), v in zip(equations, values):
@@ -2027,13 +2024,48 @@ class Solution:
         #     res.append(dfs(qs, qt))
         # return res
 
+    def canPartition(self, nums: List[int]) -> bool:
+        """
+        416.分割等和子集
+        2023.06.20 中等
+        题解：答案 动态规划 https://leetcode.cn/problems/partition-equal-subset-sum/solutions/442320/fen-ge-deng-he-zi-ji-by-leetcode-solution/
+        """
+        n = len(nums)
+        if n < 2:
+            return False
+        maxNum = max(nums)
+        total = sum(nums)
+        if total % 2 == 1:
+            return False
+        target = total // 2
+        if maxNum > target:
+            return False
+
+        dp = [[True] + [False] * target for _ in range(n)]     # n行 max(sum)/2 + 1列
+        dp[0][nums[0]] = True
+        for i in range(1, len(dp)):
+            for j in range(1, len(dp[0])):
+                # nums[i]可选可不选：
+                # 不选的话就是从索引[0,i-1]选出和为j的，范围根本没有nums[i]嘛；
+                # 选的话就是从索引范围[0,i-1]选出和为j-nums[i]的，意思就是已经选了nums[i]，从[0,i-1]再选和为j-nums[i]的
+                if nums[i] <= j:
+                    dp[i][j] = dp[i - 1][j] or dp[i - 1][j - nums[i]]
+                else:
+                    dp[i][j] = dp[i - 1][j]
+        return dp[-1][-1]
+
+
+
 
 
 if __name__ == '__main__':
     sl = Solution()
 
-    s = "3[a2[c]]"
-    print(sl.decodeString(s))
+    nums = [3,3,3,4,5]
+    print(sl.canPartition(nums))
+
+    # s = "3[a2[c]]"
+    # print(sl.decodeString(s))
 
     # nums = [1,1,1,2,2,3]
     # k = 2
