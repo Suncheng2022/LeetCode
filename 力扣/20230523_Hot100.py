@@ -2116,141 +2116,99 @@ class Solution:
                 res.append(i - m + 1)
         return res
 
+    def findDisappearedNumbers(self, nums: List[int]) -> List[int]:
+        """
+        448.找到所有数组中消失的数字
+        2023.06.21 简单
+        题解：遍历必死
+            答案：数组的原地操作 https://leetcode.cn/problems/find-all-numbers-disappeared-in-an-array/solutions/602212/yi-zhang-dong-tu-bang-zhu-li-jie-yuan-di-uign/
+                长度为N的数组，索引范围[0,N-1]刚好能表示1~N是否出现过，注意索引就好
+        """
+        # 重写一遍
+        for n in nums:
+            if nums[abs(n) - 1] > 0:    # 这里之所以使用abs，可能遍历的时候把后面的数修改了
+                nums[abs(n) - 1] *= -1
+        res = []
+        for i in range(len(nums)):
+            if nums[i] > 0:     # nums[i]>0，没有变负，代表i+1没有在nums出现过--数映射为索引时是 减 1 的，所以这里要 加 1
+                res.append(i + 1)
+        return res
 
+        # # 遍历数组，出现过则将其相应索引位置变为负的；将1~N映射到索引
+        # for _, n in enumerate(nums):    # 数字n 对应索引abs(n)-1
+        #     if nums[abs(n) - 1] > 0:
+        #         nums[abs(n) - 1] *= -1
+        # # 再次遍历，正的则是没有出现过的
+        # res = []
+        # for i, n in enumerate(nums):
+        #     if n > 0:
+        #         res.append(i + 1)       # 注意结果是保存的索引，上面已经将1~N映射到索引
+        # return res
+
+    def hammingDistance(self, x: int, y: int) -> int:
+        """
+        461.汉明距离
+        2023.06.21 简单
+        题解：
+        """
+        res = x ^ y
+        counts = 0
+        while res:
+            if res & 1:
+                counts += 1
+            res >>= 1
+        return counts
+
+    def findTargetSumWays(self, nums: List[int], target: int) -> int:
+        """
+        494.目标和
+        2023.06.21 中等
+        题解：答案 方法二 动态规划 https://leetcode.cn/problems/target-sum/solutions/816361/mu-biao-he-by-leetcode-solution-o0cp/
+        """
+        # 重写一遍
+        # 求和，若小于target则找不到方案；若组不成偶数也找不到方案(偶数的原因看解析)
+        sum_nums = sum(nums)
+        if sum_nums < target or (sum_nums - target) % 2:
+            return 0
+        # 初始化dp：第一维--0代表没有待选元素，1~n表示可以从前 i 个元素选取多个；第二维--选取的元素和为 j
+        neg = (sum_nums - target) // 2
+        n = len(nums)
+        dp = [[0] * (neg + 1) for _ in range(n + 1)]    # n行neg+1列；同时完成初始化--dp[0][0]=1，不选和还为0有一种方案；dp[0][j]=0，只要j不为0，那么没方案能符合
+        dp[0][0] = 1    # 第一维代表没有候选元素，且和为0，只有什么都不选这一种方案
+        # 遍历 动态规划
+        for i in range(1, n + 1):       # 从nums前i个元素选多个元素
+            for j in range(neg + 1):    # 所选元素和范围在[0,neg+1]
+                # 考虑选不选nums[i]元素
+                if nums[i - 1] > j:     # nums[i]比 组成的和j 都大，不能选呀；注意nums索引，第一层for循环的i表示选取范围是nums前i个元素，而这里取的是nums的第几个元素，要分清
+                    dp[i][j] = dp[i - 1][j]
+                else:               # nums[i]可选、可不选
+                    # dp[i-1][j-nums[i-1]]是选nums[i-1]，你看，前i-1个元素中选取和为j-nums[i-1]的，默认就是已经选了nums[i-1]
+                    # dp[i - 1][j]，第一维范围没有i，即nums[i-1]根本不在选取范围，即不选
+                    dp[i][j] = dp[i - 1][j - nums[i - 1]] + dp[i - 1][j]
+        return dp[-1][-1]       # 即dp[n][neg]从 前n个即nums所有元素中 选取 和为neg的若干元素
+
+
+
+        # sum_nums = sum(nums)
+        # if target > sum_nums or (sum_nums - target) % 2:
+        #     return 0
+        # n = len(nums)
+        # neg = (sum_nums - target) // 2
+        # dp = [[0] * (neg + 1) for _ in range(n + 1)]       # dp[n][neg]
+        # dp[0][0] = 1
+        # for i in range(1, n + 1):
+        #     for j in range(neg + 1):
+        #         if j >= nums[i - 1]:    # 可选                可不选
+        #             dp[i][j] = dp[i - 1][j - nums[i - 1]] + dp[i - 1][j]
+        #         elif j < nums[i - 1]:   # 不能选
+        #             dp[i][j] = dp[i - 1][j]
+        # return dp[-1][-1]
 
 
 
 if __name__ == '__main__':
     sl = Solution()
 
-    s = "cbaebabacd"
-    p = "abc"
-    print(sl.findAnagrams(s, p))
-
-    # nums = [3,3,3,4,5]
-    # print(sl.canPartition(nums))
-
-    # s = "3[a2[c]]"
-    # print(sl.decodeString(s))
-
-    # nums = [1,1,1,2,2,3]
-    # k = 2
-    # print(sl.topKFrequent(nums, k))
-
-    # print(sl.countBits(5))
-
-    # conins = [1, 2, 5]
-    # amount = 11
-    # print(sl.coinChange(conins, amount))
-
-    # coins = [2]
-    # amount = 11
-    # print(sl.coinChange(coins, amount))
-
-    # prices = [1]
-    # print(sl.maxProfit(prices))
-
-    # nums = [0,1,0,3,2,3]
-    # print(sl.lengthOfLIS(nums))
-
-    # nums = [3,1,3,4,2]
-    # print(sl.findDuplicate(nums))
-
-    # nums = [0, 0,1]
-    # sl.moveZeroes(nums)
-    # print(nums)
-
-    # n = 13
-    # print(sl.numSquares(n))
-
-    # matrix = [[-5]]
-    # print(sl.searchMatrix(matrix, -5))
-
-    # nums = [-1,1,0,-3,3]
-    # print(sl.productExceptSelf(nums))
-
-    # print(sl.isPalindrome(None))
-
-    # matrix = [["1","0","1","0","0"],["1","0","1","1","1"],["1","1","1","1","1"],["1","0","0","1","0"]]
-    # print(sl.maximalSquare(matrix))
-
-    # nums = [3,2,3,1,2,4,5,5,6]
-    # print(nums)
-    # k = 4
-    # print(sl.findKthLargest(nums, k))
-
-    # numCourses = 5
-    # prerequisites = [[1,4],[2,4],[3,1],[3,2]]
-    # print(sl.canFinish(numCourses, prerequisites))
-
-    # dic = {}
-    # dic['a'] = 'ok'
-    # print(dic['b'])
-
-    # nums = [2, 7, 9, 3, 1]
-    # print(sl.rob(nums))
-
-    # from random import randint
-    # nums = [randint(0, 20) for _ in range(10)]
-    # print(nums)
-    # sl.majorityElement(nums)
-    # print(nums)
-
-    # nums = [2,3,-2,4]
-    # print(sl.maxProduct(nums))
-
-    # prices = [7, 6, 4, 3, 1]
-    # print(sl.maxProfit(prices))
-
-    # n = 1
-    # print(sl.numTrees(n))
-
-    # board = [["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]]
-    # word = "ABCCED"
-    # print(sl.exist(board, word))
-
-    # nums = [0]
-    # print(sl.subsets(nums))
-
-    # nums = [random.randint(0, 3) for _ in range(10)]
-    # print(nums)
-    # print(sl.sortColors(nums))
-    # print(nums)
-
-    # print(sl.climbStairs(3))
-
-    # grid = [[1,2,3],[4,5,6]]
-    # print(sl.minPathSum(grid))
-
-    # print(sl.uniquePaths(3, 3))
-
-    # intervals = [[1,4],[4,5]]
-    # print(sl.merge(intervals))
-
-    # nums = [-2, 1, -3, 4, -1, 2, 1, -5, 4]
-    # print(sl.maxSubArray(nums))
-
-    # strs = ["eat", "tea", "tan", "ate", "nat", "bat"]
-    # print(sl.groupAnagrams(strs))
-    # matrix = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-    # sl.rotate(matrix)
-    # print(matrix)
-
-    # nums = [1]
-    # target = 0
-    # print(sl.search(nums, target))
-
-    # nums = [1, 3, 2]
-    # sl.nextPermutation(nums)
-    # print(nums)
-
-    # print(sl.generateParenthesis(3))
-    # s = "(){}}{"
-    # print(sl.isValid(s))
-
-    # digits = "23"
-    # print(sl.letterCombinations(digits))
-
-    # l1 = [2, 4, 3]
-    # l2 = [5, 6, 4]
-    # print(sl.addTwoNumbers(l1, l2))
+    nums = [1, 1, 1, 1, 1]
+    target = 3
+    print(sl.findTargetSumWays(nums, target))
