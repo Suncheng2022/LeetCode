@@ -2054,6 +2054,68 @@ class Solution:
                     dp[i][j] = dp[i - 1][j]
         return dp[-1][-1]
 
+    def pathSum(self, root: Optional[TreeNode], targetSum: int) -> int:
+        """
+        437.路径总和III
+        2023.06.21 中等
+        题解：答案 回溯 https://leetcode.cn/problems/path-sum-iii/solutions/100992/qian-zhui-he-di-gui-hui-su-by-shi-huo-de-xia-tian/
+        """
+        # 用到了前缀和的概念
+        def recursionPathSum(node, prefixSumMap, currSum, target):
+            """
+            :node: 当前节点
+            :prefixSumMap: 字典 key-前缀和 val-前缀和出现的次数
+            :currSum: 当前节点的前缀和
+            :target: 就是目标值，但不能和主函数的targetSum混
+            """
+            if not node:
+                return 0
+            # 到达当前节点，更新当前前缀和currSum；以当前节点为终点，然后寻找前面有没有前缀和等于currSum-target的起点
+            # 有的话就是一对起终点(这时不能更新字典，若更新了会把当前节点也计为起点了)
+            res = 0     # 本次回溯找到的路径和符合条件的数量
+            currSum += node.val  # 到达当前节点时的前缀和
+            res += prefixSumMap.get(currSum - target, 0)     # 前缀和为currSum-targetSum的节点均符合题意
+
+            # 更新字典，遍历左右子树
+            prefixSumMap[currSum] = prefixSumMap.get(currSum, 0) + 1  # + 1因为当前节点前缀和是currSum
+            res += recursionPathSum(node.left, prefixSumMap, currSum, target)
+            res += recursionPathSum(node.right, prefixSumMap, currSum, target)
+
+            # 回溯，都要把刚才进去的点拿出来
+            prefixSumMap[currSum] = prefixSumMap.get(currSum) - 1
+            return res
+
+        prefixSumMap = {0: 1}       # 初始化，前缀和为0的有1个，root到root
+        return recursionPathSum(root, prefixSumMap, 0, targetSum)
+
+    def findAnagrams(self, s: str, p: str) -> List[int]:
+        """
+        438.找到字符串中所有字母异位词
+        2023.06.21 中等
+        题解：答案 记录字母出现频次 https://leetcode.cn/problems/find-all-anagrams-in-a-string/solutions/645290/438-zhao-dao-zi-fu-chuan-zhong-suo-you-z-nx6b/
+        """
+        n, m = len(s), len(p)
+        res = []
+        if n < m:
+            return res
+        # 统计s、p中前m个字符的的出现频次
+        s_cnt = [0] * 26
+        p_cnt = [0] * 26
+        for i in range(m):
+            s_cnt[ord(s[i]) - ord('a')] += 1
+            p_cnt[ord(p[i]) - ord('a')] += 1
+        # step1.检查前m个字符是否有异位词
+        if s_cnt == p_cnt:
+            res.append(0)
+        # step2.遍历s的索引[m, n-1]
+        # 其实是比较s[i-m+1:i+1]是否与p相同，细细思考下，即当前索引i结尾的前m个字符
+        for i in range(m, n):
+            s_cnt[ord(s[i - m]) - ord('a')] -= 1    # 索引范围外的，删掉
+            s_cnt[ord(s[i]) - ord('a')] += 1
+            if s_cnt == p_cnt:      # 以索引i-m+1起始的m个字符是否与p相同
+                res.append(i - m + 1)
+        return res
+
 
 
 
@@ -2061,8 +2123,12 @@ class Solution:
 if __name__ == '__main__':
     sl = Solution()
 
-    nums = [3,3,3,4,5]
-    print(sl.canPartition(nums))
+    s = "cbaebabacd"
+    p = "abc"
+    print(sl.findAnagrams(s, p))
+
+    # nums = [3,3,3,4,5]
+    # print(sl.canPartition(nums))
 
     # s = "3[a2[c]]"
     # print(sl.decodeString(s))
