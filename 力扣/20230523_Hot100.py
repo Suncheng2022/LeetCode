@@ -1,3 +1,4 @@
+import collections
 import copy
 import random
 from typing import List, Optional
@@ -2204,11 +2205,72 @@ class Solution:
         #             dp[i][j] = dp[i - 1][j]
         # return dp[-1][-1]
 
+    def convertBST(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+        """
+        538.把二叉搜索树转换为累加树
+        2023.06.25 中等
+        题解：答案 反中序遍历 https://leetcode.cn/problems/convert-bst-to-greater-tree/solutions/421616/ba-er-cha-sou-suo-shu-zhuan-huan-wei-lei-jia-sh-14/
+        """
+        def dfs(node):
+            if not node:
+                return 0
+            nonlocal total      # Python用法
+            dfs(node.right)
+            total += node.val
+            node.val = total
+            dfs(node.left)
+
+        total = 0
+        dfs(root)
+        return root
+
+    def diameterOfBinaryTree(self, root: Optional[TreeNode]) -> int:
+        """
+        543.二叉树的直径
+        2023.06.25 简单
+        题解：递归求二叉树高度 max(l, r) + 1
+            答案 https://leetcode.cn/problems/diameter-of-binary-tree/solutions/37205/hot-100-9er-cha-shu-de-zhi-jing-python3-di-gui-ye-/
+        """
+        def depth(node):
+            if not node:
+                return 0
+            l = depth(node.left)
+            r = depth(node.right)
+            # res记录不同node作根时，最大直径
+            nonlocal res
+            res = max(res, l + r)
+            # 返回以node为根节点的二叉树的高度
+            return max(l, r) + 1
+
+        res = 0
+        depth(root)
+        return res
+
+    def subarraySum(self, nums: List[int], k: int) -> int:
+        """
+        560.和为k的子数组
+        2023.06.25 中等
+        题解：答案 边遍历、边计算出现次数
+            https://leetcode.cn/problems/subarray-sum-equals-k/solutions/1447027/python3-by-wu-qiong-sheng-gao-de-qia-non-w6jw/
+        """
+        n = len(nums)
+        preSums = collections.defaultdict(int)      # 前缀和: 出现次数
+        preSums[0] = 1
+
+        presum = 0
+        counts = 0
+        for i in range(n):
+            # 当前前缀和为presum，查看前缀和presum-k出现次数，并累加计数
+            presum += nums[i]
+            counts += preSums[presum - k]
+            # 前缀和presum出现次数+1
+            preSums[presum] += 1
+        return counts
 
 
 if __name__ == '__main__':
     sl = Solution()
 
-    nums = [1, 1, 1, 1, 1]
-    target = 3
-    print(sl.findTargetSumWays(nums, target))
+    nums = [1, 2, 3]
+    k = 3
+    print(sl.subarraySum(nums, k))
