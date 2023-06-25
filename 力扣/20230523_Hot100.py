@@ -2267,10 +2267,72 @@ class Solution:
             preSums[presum] += 1
         return counts
 
+    def findUnsortedSubarray(self, nums: List[int]) -> int:
+        """
+        581.最短无序连续子数组
+        2023.06.25 中等
+        题解：假设将整个数组分为三段，其中一段升序后则整个数组升序，这一段即所求
+            https://leetcode.cn/problems/shortest-unsorted-continuous-subarray/solutions/911677/zui-duan-wu-xu-lian-xu-zi-shu-zu-by-leet-yhlf/
+        """
+        # 一次遍历：从左往右找max_num，从右往左找min_num
+        max_num, right = float('-inf'), -1
+        min_num, left = float('inf'), -1
+        n = len(nums)
+        for i in range(n):
+            if nums[i] < max_num:
+                right = i       # 从左往右，right最终指向 那一段非升序 的最后一个元素
+            else:
+                max_num = nums[i]
+
+            if nums[n - 1 - i] > min_num:      # 因为题目求最短的连续子数组，所以两处不等 取 绝对不等！！！
+                left = n - 1 - i        # 从右往左，left最终指向 那一段非升序 的第一个元素
+            else:
+                min_num = nums[n - 1 - i]
+        return right - left + 1 if left != right else 0
+
+    def mergeTrees(self, root1: Optional[TreeNode], root2: Optional[TreeNode]) -> Optional[TreeNode]:
+        """
+        617.合并二叉树
+        2023.06.25 中等
+        题解：先序遍历，终止条件需要思考下
+            https://leetcode.cn/problems/merge-two-binary-trees/solutions/82841/dong-hua-yan-shi-di-gui-die-dai-617he-bing-er-cha-/
+        """
+        # 递归
+        # def dfs(node1, node2):
+        #     if not (node1 and node2):   # 只要有1个空；递归终止条件
+        #         return node1 if node1 else node2
+        #     node1.val += node2.val
+        #     node1.left = dfs(node1.left, node2.left)
+        #     node1.right = dfs(node1.right, node2.right)
+        #     return node1
+        #
+        # return dfs(root1, root2)
+
+        # 迭代
+        if not (root1 and root2):
+            return root1 if root1 else root2
+        queue = [[root1, root2]]
+        while queue:
+            node1, node2 = queue.pop(0)
+            node1.val += node2.val
+            if node1.left and node2.left:
+                queue.append([node1.left, node2.left])
+            elif not node1.left:    # 若node1没有左节点、node2有左节点，则把node2的左节点直接给node1
+                node1.left = node2.left
+            # 为什么不考虑node1.left不空、node2.left空的情况？
+            # 这种情况只保留node1.left即可，也就是什么都不用做，因为要往node1上合并嘛
+            if node1.right and node2.right:
+                queue.append([node1.right, node2.right])
+            elif not node1.right:
+                node1.right = node2.right
+        return root1
+
+
+
+
 
 if __name__ == '__main__':
     sl = Solution()
 
-    nums = [1, 2, 3]
-    k = 3
-    print(sl.subarraySum(nums, k))
+    nums = [1, 2, 3, 4]
+    print(sl.findUnsortedSubarray(nums))
