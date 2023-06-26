@@ -2327,6 +2327,68 @@ class Solution:
                 node1.right = node2.right
         return root1
 
+    def leastInterval(self, tasks: List[str], n: int) -> int:
+        """
+        621.任务调度器
+        2023.06.26 中等
+        题解：答案 https://leetcode.cn/problems/task-scheduler/solutions/10379/python-xiang-jie-by-jalan/
+        """
+        # 统计任务出现次数
+        from collections import Counter
+        task2counts = Counter(tasks)
+        task2counts = sorted(task2counts.items(), key=lambda x: x[1], reverse=True)
+        # 任务出现最多的次数
+        max_counts = task2counts[0][1]
+        # 计算公式 res = (出现最多的次数-1) * (n+1) + 出现相同次数的任务数
+        # 先安排出现任务数最多的，前max_counts - 1个，每一个后面肯定跟着n个其他任务/等待，算上自己就是(n+1)；最后1个后面跟随多少任务，取决于与自己出现次数一样的任务数
+        res = (max_counts - 1) * (n + 1) + sum([True for _, v in task2counts if v == max_counts])
+        return res if res >= len(tasks) else len(tasks)     # 这个公式不能保证万无一失，若计算结果<=len(tasks)
+
+    def countSubstrings(self, s: str) -> int:
+        """
+        647.回文子串
+        2023.06.26 中等
+        题解：遍历，向两端探测
+        """
+        # 因为要计算所有回文子串
+        res = set()     # 使用set，去重
+        for i in range(len(s)):
+            res.add((i))                # 本身是回文子串
+            l, r = i - 1, i + 1
+            while l >= 0 and s[l] == s[i]:
+                res.add((l, i))         # 向左探测的回文子串
+                l -= 1
+            while r < len(s) and s[r] == s[i]:
+                res.add((i, r))         # 向右探测的回文子串
+                r += 1
+            while l >= 0 and r < len(s):
+                if s[l] == s[r]:
+                    res.add((l, r))     # 向两端探测的回文子串
+                    l -= 1
+                    r += 1
+                else:
+                    break
+
+        return len(res)
+
+    def dailyTemperatures(self, temperatures: List[int]) -> List[int]:
+        """
+        739.每日温度
+        2023.06.26 中等
+        题解：答案 递减栈 https://leetcode.cn/problems/daily-temperatures/solutions/71433/leetcode-tu-jie-739mei-ri-wen-du-by-misterbooo/
+        """
+        n = len(temperatures)
+        res = [0] * n
+        stack = []      # 维护递减栈
+        for i in range(n):
+            if not stack or temperatures[i] <= stack[-1][-1]:
+                stack.append([i, temperatures[i]])
+            # 遇到较大元素不断出栈，直到较大元素入栈
+            while stack and temperatures[i] > stack[-1][-1]:
+                ind, _ = stack.pop()
+                res[ind] = i - ind      # stack的顶元素经过多少天第一次升温--当前天i就是第一次升温，ind与i间隔多少天  i - ind
+            stack.append([i, temperatures[i]])
+        return res
 
 
 
@@ -2334,5 +2396,5 @@ class Solution:
 if __name__ == '__main__':
     sl = Solution()
 
-    nums = [1, 2, 3, 4]
-    print(sl.findUnsortedSubarray(nums))
+    temperatures = [30,40,50, 60]
+    print(sl.dailyTemperatures(temperatures))
