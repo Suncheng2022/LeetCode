@@ -1,4 +1,12 @@
-from typing import List
+from typing import List, Optional
+
+
+# Definition for a binary tree node.
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
 
 
 class Solution:
@@ -61,7 +69,101 @@ class Solution:
         res = (max_freq - 1) * (n + 1) + num_max_freq
         return res if res >= len(tasks) else len(tasks)
 
+    def mergeTrees(self, root1: Optional[TreeNode], root2: Optional[TreeNode]) -> Optional[TreeNode]:
+        """
+        617.合并二叉树
+        2023.06.27 简单
+        题解：回忆答案 递归
+        """
+        # 递归 前序遍历
+        # def dfs(root1, root2):
+        #     if not (root1 and root2):       # 至少1个空
+        #         return root1 if root1 else root2
+        #     root1.val += root2.val
+        #     root1.left = dfs(root1.left, root2.left)
+        #     root1.right = dfs(root1.right, root2.right)
+        #     return root1
+        #
+        # return dfs(root1, root2)
 
+        # 迭代 广度优先遍历
+        # 广度优先需要辅助存储了
+        if not (root1 and root2):   # 只要有1个空
+            return root1 if root1 else root2
+        queue = [[root1, root2]]
+        while queue:
+            node1, node2 = queue.pop(0)
+            node1.val += node2.val
+            if node1.left and node2.left:   # node1.left、node2.left都不空直接入队
+                queue.append([node1.left, node2.left])
+            elif not node1.left:            # node1.left空、node2.left不空，拷贝过去；node1.left不空、node2.left空，不用处理，反正最后返回root1
+                node1.left = node2.left
+            if node1.right and node2.right:     # node1.right、node2.right同理
+                queue.append([node1.right, node2.right])
+            elif not node1.right:
+                node1.right = node2.right
+        return root1        # 最终返回root1
+
+    def findUnsortedSubarray(self, nums: List[int]) -> int:
+        """
+        581.最短无序连续子数组
+        2023.06.27 中等
+        题解：从左往右找 非升序 最大值，从右往左找 非升序 最小值
+        """
+        max_num, right = float('-inf'), -1
+        min_num, left = float('inf'), -1
+        n = len(nums)
+        for i in range(n):
+            if nums[i] < max_num:
+                right = i       # 从左往右，遇到那段 非升序 就更新right；最终指向 非升序 的最右边元素
+            else:
+                max_num = nums[i]
+            if nums[n - 1 - i] > min_num:
+                left = n - 1 - i    # 从右往左，遇到那段 非升序 就更新right；最终指向 非升序 的最左边元素
+            else:
+                min_num = nums[n - 1 - i]
+        return right - left + 1 if right != left else 0     # 可能不需要调整；注意返回的是 长度
+
+    def subarraySum(self, nums: List[int], k: int) -> int:
+        """
+        560.和为K的子数组
+        2023.06.27 中等
+        题解：前缀和。当前的前缀和presum，前缀和presum-k出现的次数
+        """
+        from collections import defaultdict
+
+        # 前缀和及其出现次数
+        preSums = defaultdict(int)
+        preSums[0] = 1
+        res = 0
+        presum = 0      # 当前的前缀和
+        for i in range(len(nums)):
+            presum += nums[i]       # 遍历，当前的前缀和
+            # 是否有前缀和为presum-k的，并累加出现次数；
+            # 【当前的前缀和presum是从头一个元素一个元素遍历累加得来的，肯定会在某个时刻超过k；我们不断寻找前面是否出现过大小为presum-k的前缀和，二者的距离就是k】
+            res += preSums[presum - k]
+            preSums[presum] += 1    # 当前的前缀和出现次数+1
+        return res
+
+    def diameterOfBinaryTree(self, root: Optional[TreeNode]) -> int:
+        """
+        543.二叉树的直径
+        2023.06.27 中等
+        题解：递归，求树的高度；递归过程不断更新 路径
+        """
+        def depth(node):
+            """ 计算根节点为node时数的高度 """
+            if not node:
+                return 0
+            l = depth(node.left)
+            r = depth(node.right)
+            nonlocal res
+            res = max(res, l + r)       # 更新 路径，不是计算树的高度，所以不用 +1
+            return max(l, r) + 1       # 树的高度要加根节点自己，即+1
+
+        res = 0
+        depth(root)
+        return res
 
 
 
