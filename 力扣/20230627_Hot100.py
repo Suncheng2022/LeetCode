@@ -165,9 +165,64 @@ class Solution:
         depth(root)
         return res
 
+    def convertBST(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+        """
+        538.把二叉搜索树转换为累加树
+        2023.06.28 中等
+        题解：能想到 右根左 的递归遍历顺序
+        """
+
+        # *序遍历似乎都是：开始判断一下--递归终止条件；在遍历根节点时操作
+        def dfs(node):
+            if not node:
+                return 0
+            dfs(node.right)
+            nonlocal total
+            total += node.val
+            node.val = total
+            dfs(node.left)
+
+        total = 0
+        dfs(root)
+        return root
+
+    def findTargetSumWays(self, nums: List[int], target: int) -> int:
+        """
+        494.目标和
+        2023.06.28 中等
+        题解：数组元素均非负，数组和sum，带负号元素和绝对值neg，正号元素和绝对值sum-neg，因此有sum-neg-neg=target-->(sum-target)//2=neg，求能组成neg的方案数
+        """
+        sum_nums = sum(nums)
+        if sum_nums < target or (sum_nums - target) % 2:    # 如果数组和小于target、数组和-target不是偶数，那么没有方案
+            return 0
+        neg = (sum_nums - target) // 2
+        n = len(nums)
+        dp = [[0] * (neg + 1) for _ in range(n + 1)]    # dp[i][j]: nums前i个数能选出和为j的方案数
+        dp[0][0] = 1    # dp[0][0]=1, dp[0][>=1]均为0
+        for i in range(1, n + 1):       # 【0行已初始化，这里不再计算】！！！
+            for j in range(neg + 1):
+                if nums[i - 1] > j:    # 不能选nums[i]
+                    dp[i][j] = dp[i - 1][j]     # i-1表达了不选nums[i]
+                else:
+                    dp[i][j] = dp[i - 1][j] + dp[i - 1][j - nums[i - 1]]    # j-nums[i]表达了必选nums[i]
+        return dp[-1][-1]
+
+    def hammingDistance(self, x: int, y: int) -> int:
+        """
+        461.汉明距离
+        2023.06.28 简单
+        """
+        tmp = x ^ y
+        res = 0
+        while tmp:
+            if tmp & 1:
+                res += 1
+            tmp >>= 1
+        return res
 
 
 if __name__ == '__main__':
     sl = Solution()
-    s = 'aaa'
-    print(sl.countSubstrings(s))
+    nums = [1, 1, 1, 1, 1]
+    target = 3
+    print(sl.findTargetSumWays(nums, target))
