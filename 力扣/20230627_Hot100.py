@@ -220,9 +220,59 @@ class Solution:
             tmp >>= 1
         return res
 
+    def findDisappearedNumbers(self, nums: List[int]) -> List[int]:
+        """
+        448.找到所有数组中消失的数字
+        2023.06.29 简单
+        题解：自己想的可能简单了
+        """
+        # 答案 重写 元素值映射到索引
+        for v in nums:      # 元素v对应的索引处的值，代表v是否出现过
+            if nums[abs(v) - 1] > 0:
+                nums[abs(v) - 1] *= -1
+        return [i + 1 for i, v in enumerate(nums) if v > 0]     # 最终，v>0代表v所在索引位置没有置负，即索引位置代表的元素没有出现过；注意+1
+
+        # # 答案 直接使用原数组标记是否出现过
+        # for n in nums:
+        #     if nums[abs(n) - 1] > 0:
+        #         nums[abs(n) - 1] *= -1       # 元素值映射到索引，要-1，置负；nums[abs[n]-1] 数组索引范围[0,n-1]，元素介于1~n
+        # return [i + 1 for i, n in enumerate(nums) if n > 0]
+
+
+        # n = len(nums)
+        # res = [False] * (n + 1)
+        # for k in nums:
+        #     res[k] = True
+        # return [i for i in range(1, n + 1) if not res[i]]
+
+    def findAnagrams(self, s: str, p: str) -> List[int]:
+        """
+        438.找到字符串中所有字母异位词
+        2023.06.29 中等
+        题解：从s上滑窗连续m个元素，统计出现次数是否等于p的元素出现次数；s滑动时，每滑动一位要删除一位旧元素
+        """
+        n = len(s)
+        m = len(p)
+        if n < m:
+            return []
+        res = []
+        # 统计s、p字符串连续m个位置字母出现次数
+        s_cnt = [0] * 26
+        p_cnt = [0] * 26
+        for i in range(m):      # 统计第1个连续m个元素出现次数
+            s_cnt[ord(s[i]) - ord('a')] += 1
+            p_cnt[ord(p[i]) - ord('a')] += 1
+        if s_cnt == p_cnt:
+            res.append(0)       # 以索引0起始的m位元素与p是异位词
+        # 滑动窗口遍历剩下的元素，出一个旧元素、进一个新元素
+        for i in range(m, n):
+            s_cnt[ord(s[i - m]) - ord('a')] -= 1    # 这不好懂，滑动窗口一共m个位置，此时遍历到索引i，那索引i-m就出去了--即索引i-m所指元素出现次数减1
+            s_cnt[ord(s[i]) - ord('a')] += 1        # 滑动窗口遍历到索引i，即索引i所指元素出现次数加1
+            if s_cnt == p_cnt:      # 每向右滑一次都要检查是否与p异位词
+                res.append(i - m + 1)       # 遍历到索引i时，索引i-m刚好出去，所以起始元素是i-m+1
+        return res
 
 if __name__ == '__main__':
     sl = Solution()
-    nums = [1, 1, 1, 1, 1]
-    target = 3
-    print(sl.findTargetSumWays(nums, target))
+    nums = [4,3,2,7,8,2,3,1]
+    print(sl.findDisappearedNumbers(nums))
