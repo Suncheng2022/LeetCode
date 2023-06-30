@@ -1978,7 +1978,7 @@ class Solution:
         """
         406.根据身高重建队列
         2023.06.20 中等
-        题解：https://leetcode.cn/problems/queue-reconstruction-by-height/?envType=featured-list&envId=2cktkvj
+        题解：https://leetcode.cn/problems/queue-reconstruction-by-height/solutions/486493/xian-pai-xu-zai-cha-dui-dong-hua-yan-shi-suan-fa-g/
         """
         # 对h降序排序，这样，对每个元素来说，前面的都是大于等于它的
         # 对k升序排序，这样，让k大的尽量在后面

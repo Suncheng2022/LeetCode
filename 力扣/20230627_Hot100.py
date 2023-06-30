@@ -295,8 +295,93 @@ class Solution:
         prefixSumMap = {0: 1}
         return recursionPathSum(root, prefixSumMap, 0, targetSum)
 
+    def canPartition(self, nums: List[int]) -> bool:
+        """
+        416.分割等和子集
+        2023.06.30 中等
+        题解：动态规划 dp[i][j]：从nums索引0~i选取和为j的元素
+        """
+        n = len(nums)
+        if n < 2:
+            return False
+        maxNum = max(nums)
+        total = sum(nums)
+        if total % 2:
+            return False
+        target = total // 2     # 选取元素和为target，数组元素和的一半
+        if maxNum > target:
+            return False
+        # 进入正题，动态规划
+        # 构造dp数组，dp[0][j>0]均为False，dp[i][0]=True
+        dp = [[True] + [False] * target for _ in range(n)]     # n行 target+1列
+        for i in range(1, n):               # 因为dp[0][j>0]均为False，所以遍历从索引1开始
+            for j in range(1, target + 1):  # 因为dp[i][0]均为True，所以遍历从索引1开始
+                if nums[i] > j:     # 当前遍历元素nums[i]>j，选了就大于j，所以不选
+                    dp[i][j] = dp[i - 1][j]
+                else:               # 当前遍历元素nums[i]<=j，可选可不选
+                    dp[i][j] = dp[i - 1][j] or dp[i - 1][j - nums[i]]
+        return dp[-1][-1]
+
+    def reconstructQueue(self, people: List[List[int]]) -> List[List[int]]:
+        """
+        406.根据身高重建队列
+        2023.06.30 中等
+        题解：对一个属性升序、另一个降序，基本放在了对的位置，然后遍历微调
+        """
+        people = sorted(people, key=lambda x: (-x[0], x[1]))
+        res = []
+        for p in people:
+            if len(res) <= p[1]:
+                res.append(p)
+            else:
+                res.insert(p[1], p)
+        return res
+
+    def calcEquation(self, equations: List[List[str]], values: List[float], queries: List[List[str]]) -> List[float]:
+        """
+        399.除法求值
+        2023.06.30 中等
+        题解：
+        """
+        # 用已知构造 图，表达两两之间的乘除
+        graph = {}
+        for (x, y), v in zip(equations, values):
+            if x in graph:
+                graph[x][y] = v
+            else:
+                graph[x] = {y: v}
+            if y in graph:
+                graph[y][x] = 1 / v
+            else:
+                graph[y] = {x: 1 / v}
+
+        def dfs(s, t):
+            """ 计算s到t的路径并计算 叠乘 """
+            if s not in graph:
+                return -1.
+            elif s == t:
+                return 1.
+            for node in graph[s].keys():
+                if node == t:
+                    return graph[s][node]
+                elif node not in visited:
+                    visited.add(node)
+                    v = dfs(node, t)        # 直接算s/t不行，那先计算node/t，一步一步最终会计算处s/t
+                    if v != -1:
+                        return v * graph[s][node]
+            return -1
+
+        res = []
+        for s, t in queries:
+            visited = set()
+            v = dfs(s, t)
+            res.append(v)
+        return res
+
 
 if __name__ == '__main__':
     sl = Solution()
-    nums = [4,3,2,7,8,2,3,1]
-    print(sl.findDisappearedNumbers(nums))
+    equations = [["a", "b"], ["b", "c"]]
+    values = [2.0, 3.0]
+    queries = [["a", "c"], ["b", "a"], ["a", "e"], ["a", "a"], ["x", "x"]]
+    print(sl.calcEquation(equations, values, queries))
