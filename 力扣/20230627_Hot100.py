@@ -272,6 +272,30 @@ class Solution:
                 res.append(i - m + 1)       # 遍历到索引i时，索引i-m刚好出去，所以起始元素是i-m+1
         return res
 
+    def pathSum(self, root: Optional[TreeNode], targetSum: int) -> int:
+        """
+        437.路径总和III
+        2023.06.30 中等
+        题解：前缀和 回溯 递归
+        """
+        def recursionPathSum(node, prefixSumMap, currSum, target):
+            if not node:
+                return 0
+            res = 0
+            currSum += node.val
+            res += prefixSumMap.get(currSum - target, 0)
+            prefixSumMap[currSum] = prefixSumMap.get(currSum, 0) + 1
+
+            res += recursionPathSum(node.left, prefixSumMap, currSum, target)
+            res += recursionPathSum(node.right, prefixSumMap, currSum, target)
+            # 回溯就要去掉进来的
+            prefixSumMap[currSum] -= 1
+            return res
+
+        prefixSumMap = {0: 1}
+        return recursionPathSum(root, prefixSumMap, 0, targetSum)
+
+
 if __name__ == '__main__':
     sl = Solution()
     nums = [4,3,2,7,8,2,3,1]
