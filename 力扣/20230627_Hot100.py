@@ -378,10 +378,78 @@ class Solution:
             res.append(v)
         return res
 
+    def decodeString(self, s: str) -> str:
+        """
+        394.字符串解码
+        2023.07.01 中等
+        题解：肯定是要用到栈，重点明白栈内元素的意义
+        """
+        res, stack, multi = "", [], 0   # res:最终结果 stack:[[multi 数字, res遇到此左括号前的内容], [], ...]
+        for c in s:
+            if c == '[':    # 遇到'['，记录[multi, res]，并重置这两个变量
+                stack.append([multi, res])      # multi重复次数不是指的stack内res，而是当前在拼接的res重复次数
+                multi, res = 0, ""
+            elif '0' <= c <= '9':       # 字符串s数字可能是多位的，但一个完整的数字的多位肯定是一起出现，这里是处理完整的一个数字；包含'0'，因为有的数字是有0的，和题目并不冲突
+                multi = 10 * multi + int(c)
+            elif c == ']':  # 遇到']'，开始拼接结果
+                cur_multi, last_res = stack.pop()
+                res = last_res + res * cur_multi    # 这句可以看出来，stack内的multi指的是当前正在拼接的res重复次数、last_res指的是当前拼接res前面的那部分
+            else:
+                res += c
+        return res
+
+    def topKFrequent(self, nums: List[int], k: int) -> List[int]:
+        """
+        347.前K个高频元素
+        2023.07.01 中等
+        题解：
+        """
+        # 所谓桶排序，是什么？https://www.runoob.com/w3cnote/bucket-sort.html
+        num2counts = {}
+        for n in nums:
+            num2counts[n] = num2counts.get(n, 0) + 1
+        # counts2num = [[]] * (len(nums) + 1)   # 这是导致结果错误，元素之间会共享内存，修改一个其余都变
+        counts2num = [[] for _ in range(len(nums) + 1)]    # 索引代表出现次数，出现次数介于[0,len(nums)]，所以数组长度为len(nums)+1
+        for n, counts in num2counts.items():
+            counts2num[counts].append(n)
+        res = []
+        for same_counts_ls in counts2num[::-1]:
+            for num in same_counts_ls:
+                if len(res) < k:
+                    res.append(num)
+                else:
+                    break
+                # 这样代码更简洁
+                # res.append(num)
+                # if len(res) == k:
+                #     return res
+        return res
+
+        # 使用内置库
+        # from collections import Counter
+        #
+        # num2counts = sorted(Counter(nums).items(), key=lambda x: x[1], reverse=True)
+        # res = []
+        # for _ in range(k):
+        #     res.append(num2counts.pop(0)[0])
+        # return res
+
+    def countBits(self, n: int) -> List[int]:
+        """
+        338.比特位计数
+        2023.07.01 中等
+        题解：答案思路妙呀！只需一次简单的遍历
+        """
+        res = [0] * (n + 1)
+        for i in range(1, n + 1):
+            if i % 2:
+                res[i] = res[i - 1] + 1
+            else:
+                res[i] = res[i // 2]
+        return res
 
 if __name__ == '__main__':
     sl = Solution()
-    equations = [["a", "b"], ["b", "c"]]
-    values = [2.0, 3.0]
-    queries = [["a", "c"], ["b", "a"], ["a", "e"], ["a", "a"], ["x", "x"]]
-    print(sl.calcEquation(equations, values, queries))
+
+    n = 5
+    print(sl.countBits(n))
