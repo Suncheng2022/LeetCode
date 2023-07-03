@@ -448,8 +448,91 @@ class Solution:
                 res[i] = res[i // 2]
         return res
 
+    def rob(self, root: Optional[TreeNode]) -> int:
+        """
+        337.打家劫舍III
+        2023.07.03 中等
+        题解：偷or不偷当前节点
+        """
+        def robInternal(node):
+            if not node:
+                return [0, 0]
+            leftLs = robInternal(node.left)
+            rightLs = robInternal(node.right)
+            return [max(leftLs) + max(rightLs),     # 不偷当前节点
+                    node.val + leftLs[0] + rightLs[0]]      # 偷当前节点；leftLs[0]指的上一层返回的“不偷当前节点”...
+        return max(max(robInternal(root.left)) + max(robInternal(root.right)),          # 不偷root
+                   root.val + robInternal(root.left)[0] + robInternal(root.right)[0])   # 偷root
+
+    def coinChange(self, coins: List[int], amount: int) -> int:
+        """
+        322.零钱兑换
+        2023.07.03 中等
+        题解：动态规划 dp[n]为最少硬币数  n为目标金额
+        """
+        # 备忘录memo，消除重复计算
+        memo = {}
+        def dp(amount):
+            if amount in memo:
+                return memo[amount]
+            if amount == 0:
+                return 0
+            elif amount < 0:
+                return -1
+            res = float('inf')
+            for coin in coins:
+                subproblem = dp(amount - coin)
+                if subproblem < 0:
+                    continue
+                res = min(res, 1 + subproblem)
+            memo[amount] = res if res != float('inf') else -1
+            return memo[amount]
+
+        return dp(amount)
+
+    def maxProfit(self, prices: List[int]) -> int:
+        """
+        309.最佳买卖股票时机含冷冻期
+        2023.07.03
+        题解：dp[i][1、2、3] 每天都有3种状态，不持有：今天啥也没干、持有：今天买入、不持有：今天买入卖出
+        """
+        # 初始化：只考虑“今天”当天
+        # dp[i][0] 不持有，啥都没干的不持有
+        # dp[i][1] 持有，今天买入
+        # dp[i][2] 不持有，今天买入卖出
+        dp = [[0, -price, 0] for price in prices]
+        # 用昨天的状态 来更新 今天的状态
+        for i in range(1, len(prices)):
+            # 今天不持有，有2种可能：1.昨天本就不持有 2.昨天卖出
+            dp[i][0] = max(dp[i - 1][0], dp[i - 1][2])
+            # 今天持有，有2种可能：1.昨天本就持有 2.昨天没有(非卖出)，今天买入
+            dp[i][1] = max(dp[i - 1][1], dp[i - 1][0] - prices[i])
+            # 今天不持有，是因为卖出，所以昨天必须持有今天才有的卖
+            dp[i][2] = dp[i - 1][1] + prices[i]
+        return max(dp[-1])      # 其实是max(dp[-1][0], dp[-1][2])，仅在 不持有 状态下计算
+
+
+    # 超时
+        # def dp(amount):
+        #     # 递归终止条件
+        #     if amount == 0:
+        #         return 0
+        #     elif amount < 0:
+        #         return -1
+        #     res = float('inf')
+        #     for coin in coins:
+        #         subprolem = dp(amount - coin)
+        #         if subprolem < 0:   # 无解，继续下一个尝试
+        #             continue
+        #         res = min(res, 1 + subprolem)
+        #     return res if res != float('inf') else -1
+        #
+        # return dp(amount)
+
+
+
 if __name__ == '__main__':
     sl = Solution()
 
-    n = 5
-    print(sl.countBits(n))
+    prices = [1]
+    print(sl.maxProfit(prices))
