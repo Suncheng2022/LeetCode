@@ -135,8 +135,75 @@ def SelectSort(nums):
     return nums
 
 
+def HeapSort(nums):
+    """
+    堆排序 索引0作哨兵
+    时间复杂度：O(nlogn)  建堆需要O(n)
+    空间复杂度：O(1)
+    稳定性：不稳定。建堆的过程就可能不稳定，在比较nums[i]与nums[i+1]时
+    """
+    BuildHeap(nums)
+    for i in range(len(nums) - 1, 0, -1):   # i指示有效堆的最后一个元素
+        print(nums[1], end=', ')
+        nums[1], nums[i] = nums[i], nums[1]
+        AdjustDown(nums, 1, i - 1)
+    # return nums   # 最终的返回结果是依次取nums[1]，似乎不能直接返回nums; 可以直接返回！！！
+
+def BuildHeap(nums):
+    i = len(nums) // 2
+    while i >= 1:   # 索引0是哨兵
+        AdjustDown(nums, i, len(nums) - 1)
+        i -= 1
+
+def AdjustDown(nums, k, length):
+    """ 向下调整/自上而下调整, 控制从小到大排序还是从大到小排序
+        :param k: 待向下调整的节点索引
+        :param length: 有效堆的长度 """
+    nums[0] = nums[k]
+    i = 2 * k
+    while i <= length:
+        if i < length and nums[i] > nums[i + 1]:
+            i += 1
+        if nums[i] < nums[0]:   # 为什么？？？——自己在脑子想象一下向下调整的动态图，是把索引k节点往下不断地比较移动
+            nums[k] = nums[i]
+            k = i       # 为什么交换后更新k值
+        i *= 2
+    nums[k] = nums[0]
+
+
+def MergeSort(nums):
+    """
+    归并排序 我这应该是自底向上的归排吧，我觉得是...
+    时间复杂度：O(nlogn)
+    空间复杂度：O(n)  递归占用的栈、进行merge时使用的临时数组
+    稳定性：不稳定，设想一个示例，两个相等且挨着的数被分到挨着的两组中，极有可能排序后调换了位置
+    """
+    if len(nums) == 1:
+        return nums
+    mid = len(nums) // 2
+    nums1 = MergeSort(nums[:mid])
+    nums2 = MergeSort(nums[mid:])
+    return merge(nums1, nums2)
+
+def merge(nums1, nums2):
+    i, j = 0, 0
+    res = []
+    while i < len(nums1) and j < len(nums2):
+        if nums1[i] <= nums2[j]:
+            res.append(nums1[i])
+            i += 1
+        else:
+            res.append(nums2[j])
+            j += 1
+    if i < len(nums1):
+        res.extend(nums1[i:])
+    if j < len(nums2):
+        res.extend(nums2[j:])
+    return res
+
 
 if __name__ == "__main__":
+    # random.seed(1)    # 随机种子，固定每次运行产生的随机数
     nums = [random.randint(0, 20) for _ in range(10)]
     print(nums)
     print(InsertSort(copy.deepcopy(nums)), 'InsertSort')
@@ -145,3 +212,5 @@ if __name__ == "__main__":
     print(BubbleSort(copy.deepcopy(nums)), 'BubbleSort')
     print(QuickSort(copy.deepcopy(nums), 0, len(nums) - 1), 'QuickSort')
     print(SelectSort(copy.deepcopy(nums)), 'SelectSort')
+    print(HeapSort(copy.deepcopy(nums)), 'HeapSort')
+    print(MergeSort(copy.deepcopy(nums)), 'MergeSort')
