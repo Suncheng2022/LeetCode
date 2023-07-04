@@ -512,7 +512,7 @@ class Solution:
         return max(dp[-1])      # 其实是max(dp[-1][0], dp[-1][2])，仅在 不持有 状态下计算
 
 
-    # 超时
+        # 超时
         # def dp(amount):
         #     # 递归终止条件
         #     if amount == 0:
@@ -529,10 +529,57 @@ class Solution:
         #
         # return dp(amount)
 
+    def lengthOfLIS(self, nums: List[int]) -> int:
+        """
+        300.最长递增子序列
+        2023.07.04 中等
+        题解：动态规划 dp[i] 截止到索引i元素的最长递增子序列
+        """
+        dp = [1] * len(nums)
+        for i in range(len(nums)):      # 遍历计算dp[i]
+            for j in range(i):      # 截止到索引i嘛
+                if nums[j] < nums[i]:   # nums[i]可以接到nums[j]后面
+                    dp[i] = max(dp[i], dp[j] + 1)
+        return max(dp)
+
+    def findDuplicate(self, nums: List[int]) -> int:
+        """
+        287.寻找重复数
+        2023.07.04 中等
+        题解：比较绕，要仔细理解
+        """
+        left, right = 1, len(nums) - 1      # 在1~n中查找那个重复元素；你都知道mid是可以在范围1~n随机选了，那么left right的初始化也应该符合要求
+        while left < right:
+            mid = (left + right) // 2       # 随便选个数，恰好数值范围1~n，所以可以利用索引随便选数
+            counts = 0      # 计算<=mid的数有多少，(因为数值范围、数值个数的关系，题目已说明只有1个重复数字)
+            for n in nums:
+                if n <= mid:
+                    counts += 1
+            if counts > mid:    # counts若大于mid，就是说数值范围1~mid肯定有重复
+                right = mid     # 数值mid也可能是重复的怀疑对象
+            else:               # 那数值范围1~mid肯定没有重复
+                left = mid + 1  # mid也不是怀疑对象
+        return right        # 注意这里的返回值；或返回left
+
+    def moveZeroes(self, nums: List[int]) -> None:
+        """
+        283.移动零
+        2023.07.04 简单
+        题解：自己想遍历似乎走不通；答案双指针，一次遍历就ok
+        """
+        ind = 0     # 非零元素该放到的索引位置
+        for i in range(len(nums)):
+            if nums[i] != 0:
+                nums[ind] = nums[i]     # 若nums[ind]是0，覆盖就覆盖了，最后的步骤会把0变成该有的数量
+                ind += 1
+        for i in range(ind, len(nums)):
+            nums[i] = 0
+
+
 
 
 if __name__ == '__main__':
     sl = Solution()
 
-    prices = [1]
-    print(sl.maxProfit(prices))
+    nums = [1,3,4,2,2]
+    print(sl.findDuplicate(nums))
