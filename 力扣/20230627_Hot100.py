@@ -9,6 +9,13 @@ class TreeNode:
         self.right = right
 
 
+# Definition for singly-linked list.
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+
 class Solution:
     def dailyTemperatures(self, temperatures: List[int]) -> List[int]:
         """
@@ -575,11 +582,132 @@ class Solution:
         for i in range(ind, len(nums)):
             nums[i] = 0
 
+    def numSquares(self, n: int) -> int:
+        """
+        279.完全平方数
+        2023.07.05 中等
+        题解：因为使用了j ** 2而不是j * j超时！
+        """
+        dp = [0] * (n + 1)      # dp[i]表示和为i时所需最少的完全平方数
+        for i in range(1, n + 1):   # dp[0]=0嘛
+            dp[i] = i       # 先初始化为最大数量，即需要几个1*1相加
+            j = 1
+            while i - j ** 2 >= 0:
+                dp[i] = min(dp[i], 1 + dp[i - j ** 2])
+                j += 1
+        return dp[n]
 
+    def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+        """
+        240.搜索二维矩阵II
+        2023.07.05 中等
+        题解：升序、查找--二分查找
+        """
+        for nums in matrix:
+            if target > nums[-1]:
+                continue
+            elif target < nums[0]:
+                return False
+            left, right = 0, len(nums) - 1
+            while left <= right:
+                mid = (left + right) // 2
+                if target == nums[mid]:
+                    return True
+                elif target < nums[mid]:
+                    right = mid - 1
+                else:
+                    left = mid + 1
+        return False
 
+    def productExceptSelf(self, nums: List[int]) -> List[int]:
+        """
+        238.除自身以外数组的乘积
+        2023.07.05 中等
+        题解：先计算当前元素左边所有元素累乘，再计算右边所有元素累乘
+        """
+        res = [1 for _ in range(len(nums))]
+        tmp = 1
+        for i in range(len(nums)):
+            res[i] = tmp
+            tmp *= nums[i]
+        tmp = 1
+        for i in range(len(nums) - 1, -1, -1):
+            res[i] *= tmp
+            tmp *= nums[i]
+        return res
+
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        """
+        236.二叉树的最近公共祖先
+        2023.07.05 中等
+        题解：递归 先序遍历
+        """
+        if not root or p == root or q == root:
+            return root
+        left = self.lowestCommonAncestor(root.left, p, q)
+        right = self.lowestCommonAncestor(root.right, p, q)
+        # 简化一下答案的判断
+        if not left: return right
+        elif not right: return left
+        return root
+
+    def isPalindrome(self, head: Optional[ListNode]) -> bool:
+        """
+        234.回文链表
+        2023.07.05 中等
+        题解：
+        """
+        # 题目要求空间复杂度O(1)
+        nums = 0
+        tmp = head
+        while tmp:
+            nums += 1
+            tmp = tmp.next
+        slow, fast = head, head     # 快慢指针
+        for _ in range(nums):
+            pre_slow = slow
+            slow = slow.next
+            fast = fast.next
+            if fast:
+                fast = fast.next
+            else:
+                break
+        if nums % 2:    # 如果有奇数个节点，中间节点算前半部分
+            pre_slow = slow
+            slow = slow.next    # slow指向后半部分第一个节点
+        next_slow = slow.next
+        while next_slow:
+            slow.next = pre_slow
+            pre_slow = slow
+            slow = next_slow
+            next_slow = next_slow.next
+        # 跳出循环时slow指向最后一个节点
+        slow.next = pre_slow
+        while head != slow:
+            if head == slow or head.next == slow:   # 欠考虑
+                break
+            if head.val != slow.val:
+                return False
+            head = head.next
+            slow = slow.next
+        return True
+
+        # nodes = []
+        # while head:
+        #     nodes.append(head.val)
+        #     head = head.next
+        # left, right = 0, len(nodes) - 1
+        # while left < right:
+        #     if nodes[left] != nodes[right]:
+        #         return False
+        #     left += 1
+        #     right -= 1
+        # return True
+
+        # 继续此题！https://leetcode.cn/problems/palindrome-linked-list/solutions/457059/hui-wen-lian-biao-by-leetcode-solution/
 
 if __name__ == '__main__':
     sl = Solution()
 
-    nums = [1,3,4,2,2]
-    print(sl.findDuplicate(nums))
+    nums = [-1,1,0,-3,3]
+    print(sl.productExceptSelf(nums))
