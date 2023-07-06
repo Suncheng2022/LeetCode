@@ -657,40 +657,49 @@ class Solution:
         2023.07.05 中等
         题解：
         """
-        # 题目要求空间复杂度O(1)
-        nums = 0
-        tmp = head
-        while tmp:
-            nums += 1
-            tmp = tmp.next
-        slow, fast = head, head     # 快慢指针
-        for _ in range(nums):
-            pre_slow = slow
-            slow = slow.next
-            fast = fast.next
-            if fast:
-                fast = fast.next
-            else:
-                break
-        if nums % 2:    # 如果有奇数个节点，中间节点算前半部分
-            pre_slow = slow
-            slow = slow.next    # slow指向后半部分第一个节点
-        next_slow = slow.next
-        while next_slow:
-            slow.next = pre_slow
-            pre_slow = slow
-            slow = next_slow
-            next_slow = next_slow.next
-        # 跳出循环时slow指向最后一个节点
-        slow.next = pre_slow
-        while head != slow:
-            if head == slow or head.next == slow:   # 欠考虑
-                break
-            if head.val != slow.val:
-                return False
-            head = head.next
-            slow = slow.next
-        return True
+        # 答案解法
+        def end_of_first_half(head):
+            """ 返回前半部分最后一个节点 """
+            # 无论奇数、偶数个，均能返回前半部分最后一个节点
+            slow = fast = head
+            while fast.next and fast.next.next:
+                slow = slow.next
+                fast = fast.next.next
+            return slow
+
+            # 偶数个不对
+            # slow = fast = head
+            # while fast is not None:
+            #     slow = slow.next
+            #     fast = fast.next
+            #     if fast is not None:
+            #         fast = fast.next
+            # return slow
+
+
+        def reverse_list(node):
+            pre_node = None
+            curr_node = node
+            while curr_node:
+                next_node = curr_node.next
+                curr_node.next = pre_node
+                pre_node = curr_node
+                curr_node = next_node
+            return pre_node
+
+        first_end_node = end_of_first_half(head)    # 返回前半部分链表的尾结点
+        second_end_node = reverse_list(first_end_node.next)     # 逆转后半部分
+
+        result = True
+        first_pos = head
+        second_pos = second_end_node
+        while result and second_pos is not None:
+            if first_pos.val != second_pos.val:
+                result = False
+            first_pos = first_pos.next
+            second_pos = second_pos.next
+        first_end_node.next = reverse_list(second_end_node)
+        return result
 
         # nodes = []
         # while head:
@@ -704,10 +713,18 @@ class Solution:
         #     right -= 1
         # return True
 
-        # 继续此题！https://leetcode.cn/problems/palindrome-linked-list/solutions/457059/hui-wen-lian-biao-by-leetcode-solution/
 
 if __name__ == '__main__':
     sl = Solution()
 
-    nums = [-1,1,0,-3,3]
-    print(sl.productExceptSelf(nums))
+    nums = [1]
+    res = head = ListNode()
+    while nums:
+        head.next = ListNode(nums.pop(0))
+        head = head.next
+
+    head = res.next
+    # while head:
+    #     print(head.val)
+    #     head = head.next
+    print(sl.isPalindrome(head))
