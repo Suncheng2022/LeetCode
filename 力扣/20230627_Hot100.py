@@ -654,53 +654,95 @@ class Solution:
     def isPalindrome(self, head: Optional[ListNode]) -> bool:
         """
         234.回文链表
-        2023.07.05 中等
-        题解：
+        2023.07.05 简单
+        题解：step1.找到中间节点
+            step2.反转后半部分节点
+            step3.计算是否回文
         """
-        # 答案解法
+        # 再写一遍
         def end_of_first_half(head):
-            """ 返回前半部分最后一个节点 """
-            # 无论奇数、偶数个，均能返回前半部分最后一个节点
+            # 参数是首节点
             slow = fast = head
+            # 如果fast能往后移动2个节点就移动2个节点，否则不移动。
+            # 这样无论总节点数为奇数偶数个，slow都会指向前半部分最后一个节点
             while fast.next and fast.next.next:
                 slow = slow.next
                 fast = fast.next.next
             return slow
 
-            # 偶数个不对
-            # slow = fast = head
-            # while fast is not None:
-            #     slow = slow.next
-            #     fast = fast.next
-            #     if fast is not None:
-            #         fast = fast.next
-            # return slow
-
-
         def reverse_list(node):
-            pre_node = None
+            # 参数是尚未反转的后半部分第一个节点
+            pre_ndoe = None     # 后半部分第一个，反转后成为最后一个，其next是None
             curr_node = node
             while curr_node:
-                next_node = curr_node.next
-                curr_node.next = pre_node
-                pre_node = curr_node
+                # 这样理解while，当curr_node是最后一个节点时，过一遍while就明了了，pre_node会指向最后一个节点，curr_node会指向空
+                next_node = curr_node.next      # 先记录后一个节点
+                curr_node.next = pre_ndoe       # 改变当前节点指向
+                pre_ndoe = curr_node
                 curr_node = next_node
-            return pre_node
+            return pre_ndoe
 
-        first_end_node = end_of_first_half(head)    # 返回前半部分链表的尾结点
-        second_end_node = reverse_list(first_end_node.next)     # 逆转后半部分
+        first_half_node = end_of_first_half(head)
+        second_half_node = reverse_list(first_half_node.next)   # 后半部分反转后的“首节点”
 
         result = True
-        first_pos = head
-        second_pos = second_end_node
-        while result and second_pos is not None:
+        first_pos = head        # 注意这里初始指向
+        second_pos = second_half_node
+        # 为什么判断条件包括second_pos，偶数节点两部分长度相同，奇数节点前部分长1个，后半部分先遍历完毕
+        while result and second_pos:
             if first_pos.val != second_pos.val:
                 result = False
             first_pos = first_pos.next
             second_pos = second_pos.next
-        first_end_node.next = reverse_list(second_end_node)
+        # 后半部分再给人家反转回去，当然不影响通过测试用例
+        first_half_node.next = reverse_list(second_half_node)
         return result
 
+        # 答案解法
+        # def end_of_first_half(head):
+        #     """ 返回前半部分最后一个节点 """
+        #     # 无论奇数、偶数个，均能返回前半部分最后一个节点
+        #     slow = fast = head
+        #     while fast.next and fast.next.next:
+        #         slow = slow.next
+        #         fast = fast.next.next
+        #     return slow
+        #
+        #     # 偶数个不对
+        #     # slow = fast = head
+        #     # while fast is not None:
+        #     #     slow = slow.next
+        #     #     fast = fast.next
+        #     #     if fast is not None:
+        #     #         fast = fast.next
+        #     # return slow
+        #
+        #
+        # def reverse_list(node):
+        #     pre_node = None
+        #     curr_node = node
+        #     while curr_node:
+        #         next_node = curr_node.next
+        #         curr_node.next = pre_node
+        #         pre_node = curr_node
+        #         curr_node = next_node
+        #     return pre_node
+        #
+        # first_end_node = end_of_first_half(head)    # 返回前半部分链表的尾结点
+        # second_end_node = reverse_list(first_end_node.next)     # 逆转后半部分
+        #
+        # result = True
+        # first_pos = head
+        # second_pos = second_end_node
+        # while result and second_pos is not None:
+        #     if first_pos.val != second_pos.val:
+        #         result = False
+        #     first_pos = first_pos.next
+        #     second_pos = second_pos.next
+        # first_end_node.next = reverse_list(second_end_node)
+        # return result
+
+        # 空间复杂度O(n)
         # nodes = []
         # while head:
         #     nodes.append(head.val)
@@ -713,11 +755,51 @@ class Solution:
         #     right -= 1
         # return True
 
+    def invertTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+        """
+        226.翻转二叉树
+        2023.07.07 简单
+        题解：
+        """
+        # 层序遍历是可以的
+        if not root:
+            return root
+        one_layer_nodes = [root]
+        while one_layer_nodes:
+            tmp = []
+            while one_layer_nodes:
+                node = one_layer_nodes.pop(0)
+                node.left, node.right = node.right, node.left
+                if node.left:
+                    tmp.append(node.left)
+                if node.right:
+                    tmp.append(node.right)
+            one_layer_nodes = tmp
+        return root
+
+    def maximalSquare(self, matrix: List[List[str]]) -> int:
+        """
+        221.最大正方形
+        2023.07.07 中等
+        题解：dp[i+1][j+1]表示以matrix[i][j]为右下角的最大面积
+        """
+        m, n = len(matrix), len(matrix[0])
+        dp = [[0] * (n + 1) for _ in range(m + 1)]      # 多添加了一行0、一列0，为了方便处理matrix的首行、首列
+        maxside = 0
+        for i in range(m):
+            for j in range(n):
+                if matrix[i][j] == '1':
+                    # dp的索引0行、0列不用处理，默认是0；主要作用就是为了少判断遇到matrix索引0行、0列的1时
+                    dp[i + 1][j + 1] = min(dp[i][j + 1], dp[i + 1][j], dp[i][j]) + 1    # +1的意思，我能利用左、上、左上哪一边的 1
+                    maxside = max(maxside, dp[i + 1][j + 1])
+        return maxside ** 2
+
+
 
 if __name__ == '__main__':
     sl = Solution()
 
-    nums = [1]
+    nums = [1, 2, 2, 1]
     res = head = ListNode()
     while nums:
         head.next = ListNode(nums.pop(0))
