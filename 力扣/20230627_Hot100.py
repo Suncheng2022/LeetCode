@@ -1,3 +1,4 @@
+import collections
 from typing import List, Optional
 
 
@@ -15,6 +16,44 @@ class ListNode:
         self.val = val
         self.next = next
 
+
+from collections import defaultdict
+class Node:
+    """ 208.实现Trie(前缀树)，所需数据结构 """
+    def __init__(self):
+        self.children = defaultdict(Node)   # 每个节点有多个叉，相当于多叉树；本题处理单词，每个节点有26个可能的叉，即26叉树
+        self.isword = False
+class Trie:
+    """
+    208.实现Trie(前缀树)
+    2023.07.08 中等
+    题解：还不错的解析，耐心看一遍吧
+        https://leetcode.cn/problems/implement-trie-prefix-tree/solutions/721050/fu-xue-ming-zhu-cong-er-cha-shu-shuo-qi-628gs/
+    """
+    def __init__(self):
+        self.root = Node()      # Trie前缀树根节点不保存信息
+
+    def insert(self, word: str) -> None:
+        curr_node = self.root
+        for c in word:
+            curr_node = curr_node.children[c]       # curr_node最终会指向单词最后一个字母；因为children使用的是defaultdict，因此insert时没有子节点会新建
+        curr_node.isword = True
+
+    def search(self, word: str) -> bool:
+        curr_node = self.root
+        for c in word:
+            curr_node = curr_node.children.get(c, None)
+            if curr_node is None:
+                return False
+        return curr_node.isword     # curr_ndoe最终会指向单词的最后一个字母，虽然word所有字母都能依次找到，但trie不一定存储了word这个词
+
+    def startsWith(self, prefix: str) -> bool:
+        curr_node = self.root
+        for c in prefix:
+            curr_node = curr_node.children.get(c, None)
+            if curr_node is None:
+                return False
+        return True             # 只要前缀存在即可，在前缀树中prefix不一定非得是词
 
 class Solution:
     def dailyTemperatures(self, temperatures: List[int]) -> List[int]:
@@ -455,7 +494,7 @@ class Solution:
                 res[i] = res[i // 2]
         return res
 
-    def rob(self, root: Optional[TreeNode]) -> int:
+    def rob3(self, root: Optional[TreeNode]) -> int:
         """
         337.打家劫舍III
         2023.07.03 中等
@@ -794,19 +833,146 @@ class Solution:
                     maxside = max(maxside, dp[i + 1][j + 1])
         return maxside ** 2
 
+    def findKthLargest(self, nums: List[int], k: int) -> int:
+        """
+        215.数组中的第k个最大元素
+        2023.07.07 中等
+        题解：完美通过，当然要细心啦
+        """
+        # 答案 评论区 提交和测试结果不同，不知道为什么
+        # https://leetcode.cn/problems/kth-largest-element-in-an-array/solutions/307351/shu-zu-zhong-de-di-kge-zui-da-yuan-su-by-leetcode-/
+        from random import randint
+
+        def quicksort(nums, start, end, target):
+            rand = randint(start, end)
+            base = nums[rand]
+            nums[rand], nums[start] = nums[start], nums[rand]
+            index = start
+            for i in range(start + 1, end + 1):
+                if nums[i] >= base:
+                    nums[i], nums[index + 1] = nums[index + 1], nums[i]
+                    index += 1      # index最终指向最后一个大于等于base的值
+            nums[index], nums[start] = nums[start], nums[index]     # 此时，base左边都是大于等于base的，右边都是小于的
+            if index < target:      # base元素的索引index小了，继续递归
+                quicksort(nums, index + 1, end, target)
+            elif index > target:    # base元素的索引index大了，继续递归
+                quicksort(nums, start, index - 1, target)
+            # 等于时即找到了，算法停止
+
+        quicksort(nums, 0, len(nums) - 1, k - 1)    # 题目求第k大元素，降序排序后索引为k-1即为所求
+        return nums[k - 1]
+
+        # 试一下堆排 但时间复杂度不符合题目要求
+        # def HeapSort(nums):
+        #     BuildHeap(nums)
+        #     res = []
+        #     for i in range(len(nums) - 1, 0, -1):
+        #         res.append(nums[1])
+        #         nums[1], nums[i] = nums[i], nums[1]
+        #         AdjustDown(nums, 1, i - 1)
+        #     return res
+        # def BuildHeap(nums):
+        #     k = len(nums) // 2
+        #     for i in range(k, 0, -1):
+        #         AdjustDown(nums, i, len(nums) - 1)
+        #
+        # def AdjustDown(nums, k, length):
+        #     nums[0] = nums[k]
+        #     i = 2 * k
+        #     while i <= length:
+        #         if i < length and nums[i] > nums[i + 1]:
+        #             i = i + 1
+        #         if nums[i] < nums[0]:
+        #             nums[k] = nums[i]
+        #             k = i
+        #         i *= 2
+        #     nums[k] = nums[0]
+        #
+        # nums.insert(0, 0)
+        # res = HeapSort(nums)
+        # print(res)
+        # return res[-k]
+
+    def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:
+        """
+        207.课程表
+        2023.07.08 中等
+        题解：统计每门课程的入度，字典 前置课程：[课程]
+        """
+        ind2preNum = [0 for _ in range(numCourses)]     # 初始化每门课程的入度，即所需前置课程的数量
+        pre2course = defaultdict(list)      # 前置课程:[课程们]
+        for cour, pre in prerequisites:     # 遍历，填充pre2course、ind2preNum
+            pre2course[pre].append(cour)
+            ind2preNum[cour] += 1
+        queue = [i for i, counts in enumerate(ind2preNum) if counts == 0]       # 先学那些不需要前置课程的
+        counts = 0      # 已学习的课程数量
+        while queue:
+            ind = queue.pop()
+            counts += 1
+            for id in pre2course[ind]:
+                if ind2preNum[id] > 0:
+                    ind2preNum[id] -= 1
+                if ind2preNum[id] == 0:
+                    queue.append(id)
+
+            pre2course.pop(ind)
+        return counts == numCourses
+
+    def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        """
+        206.反转链表
+        2023.07.08 简单
+        题解：还记得 回文链表 吗，用过此题解法
+        """
+        pre_node = None
+        curr_node = head    # 这句似乎多余
+        while curr_node:
+            next_node = curr_node.next      # 先保留下一个节点
+            curr_node.next = pre_node
+            pre_node = curr_node
+            curr_node = next_node
+        return pre_node
+
+    def numIslands(self, grid: List[List[str]]) -> int:
+        """
+        200.岛屿数量
+        2023.07.05 中等
+        题解：就记为dfs吧 还算比较好理解
+        """
+        def dfs(x, y):
+            grid[x][y] = 0      # dfs深度优先遍历，只要一调用dfs，就能把所有连着的'1'全都找到并置0，所以题目说主函数中dfs调用次数即岛屿数量
+            nr, nc = len(grid), len(grid[0])
+            for i, j in [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]:
+                if 0 <= i < nr and 0 <= j < nc and grid[i][j] == '1':
+                    dfs(i, j)
+
+        nr = len(grid)
+        if nr == 0:
+            return 0
+        nc = len(grid[0])
+        numIsland = 0
+        for i in range(nr):
+            for j in range(nc):
+                if grid[i][j] == '1':
+                    numIsland += 1
+                    dfs(i, j)
+        return numIsland
+
+    def rob(self, nums: List[int]) -> int:
+        """
+        198.打家劫舍
+        2023.07.08 中等
+        题解：能想到动态规划
+        """
+        dp = [0 for _ in range(len(nums))]
+        dp[0] = nums[0]
+        for i in range(1, len(nums)):
+            dp[i] = max(dp[i - 1], nums[i] + dp[i - 2])
+        return max(dp)
 
 
 if __name__ == '__main__':
     sl = Solution()
 
-    nums = [1, 2, 2, 1]
-    res = head = ListNode()
-    while nums:
-        head.next = ListNode(nums.pop(0))
-        head = head.next
-
-    head = res.next
-    # while head:
-    #     print(head.val)
-    #     head = head.next
-    print(sl.isPalindrome(head))
+    nums = [2]
+    print(sl.rob(nums))
