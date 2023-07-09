@@ -55,6 +55,34 @@ class Trie:
                 return False
         return True             # 只要前缀存在即可，在前缀树中prefix不一定非得是词
 
+class MinStack:
+    """
+    155.最小栈 中等
+    2023.07.09
+    题解：答案 巧妙的维护最小值
+    """
+    def __init__(self):
+        self.stack = []
+        self.mini_stack = []    # 栈底至当前元素区间的最小值元素
+
+    def push(self, val: int) -> None:
+        # 主要是如何维护最小值
+        self.stack.append(val)
+        if len(self.mini_stack) == 0:
+            self.mini_stack.append(val)
+        else:
+            self.mini_stack.append(min(val, self.mini_stack[-1]))
+
+    def pop(self) -> None:
+        _ = self.stack.pop()
+        _ = self.mini_stack.pop()
+
+    def top(self) -> int:
+        return self.stack[-1]
+
+    def getMin(self) -> int:
+        return self.mini_stack[-1]
+
 class Solution:
     def dailyTemperatures(self, temperatures: List[int]) -> List[int]:
         """
@@ -970,9 +998,116 @@ class Solution:
             dp[i] = max(dp[i - 1], nums[i] + dp[i - 2])
         return max(dp)
 
+    def majorityElement(self, nums: List[int]) -> int:
+        """
+        169.多数元素
+        2023.07.09 简单
+        题解：将众数视为正1，负数视为负1，计数器在遍历过程中加减1，计数器等于0时更换候选众数，最终指向就是 众数
+            题目要求已说明，出现次数 大于 ⌊ n/2 ⌋，是严格的大于，counts将始终非负
+            最后一个方法 https://leetcode.cn/problems/majority-element/solutions/146074/duo-shu-yuan-su-by-leetcode-solution/
+        """
+        counts = 0
+        candidate = 0
+        for n in nums:
+            if counts == 0:
+                candidate = n
+            counts += (1 if n == candidate else -1)
+        return candidate
+
+    def getIntersectionNode(self, headA: ListNode, headB: ListNode) -> Optional[ListNode]:
+        """
+        160.相交链表
+        2023.07.09 简单
+        题解：链表A长度a+c, 链表B长度b+c
+        """
+        PA, PB = headA, headB
+        while PA != PB:
+            PA = PA.next if PA else headB
+            PB = PB.next if PB else headA
+        return PA   # or PB
+
+    def maxProduct(self, nums: List[int]) -> int:
+        """
+        152.乘积最大子数组
+        2023.07.09 中等
+        题解：能想到动态规划
+        """
+        # 答案，维护imax imin
+        # imax = imin = 1
+        # res = float('-inf')     # 记录最大值，初始化为最小
+        # for n in nums:
+        #     if n < 0:
+        #         imax, imin = imin, imax
+        #     imax = max(n, imax * n)
+        #     imin = min(n, imin * n)
+        #     res = max(res, imax)        # 时刻记录imax最大状态，这样就不怕imax在计算过程中被覆盖了
+        # return res
+
+        # 答案 使用dp，因为要同时记录遍历过程中最大值和最小值，所以dp是二维
+        dp = [[0, 0] for _ in range(len(nums))]     # 同时记录imin、imax
+        dp[0] = [nums[0], nums[0]]
+        for i in range(1, len(nums)):
+            if nums[i] >= 0:
+                dp[i][0] = min(nums[i], nums[i] * dp[i - 1][0])     # 求连续累乘子序列明了很多
+                dp[i][1] = max(nums[i], nums[i] * dp[i - 1][1])
+            else:
+                dp[i][0] = min(nums[i], nums[i] * dp[i - 1][1])
+                dp[i][1] = max(nums[i], nums[i] * dp[i - 1][0])
+        return max([ls[1] for ls in dp])
+
+    def sortList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        """
+        148.排序链表
+        2023.07.09 中等
+        题解：归排吧
+        """
+        def mergesort(head, tail):
+            if not head:
+                return head
+            elif head.next == tail:
+                head.next = None
+                return head
+
+            slow = fast = head
+            while fast != tail:
+                slow = slow.next
+                fast = fast.next
+                if fast != tail:
+                    fast = fast.next
+            mid = slow
+            head1 = mergesort(head, mid)
+            head2 = mergesort(mid, tail)
+            return merge(head1, head2)
+
+        def merge(head1, head2):
+            tmp = resHead = ListNode()
+            while head1 and head2:
+                if head1.val < head2.val:
+                    tmp.next = ListNode(head1.val)
+                    tmp = tmp.next
+                    head1 = head1.next
+                else:
+                    tmp.next = ListNode(head2.val)
+                    tmp = tmp.next
+                    head2 = head2.next
+
+            if head1:
+                while head1:
+                    tmp.next = ListNode(head1.val)
+                    tmp = tmp.next
+                    head1 = head1.next
+            else:
+                while head2:
+                    tmp.next = ListNode(head2.val)
+                    tmp = tmp.next
+                    head2 = head2.next
+            return resHead.next
+
+        return mergesort(head, None)
+
 
 if __name__ == '__main__':
     sl = Solution()
 
-    nums = [2]
-    print(sl.rob(nums))
+    nums = [2,3,-2,4]
+    print(sl.maxProduct(nums))
