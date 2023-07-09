@@ -248,38 +248,60 @@ def AdjustDown(nums, k, length):
 
 
 # 归并排序
+# def MergeSort(nums):
+#     """
+#     思路：分治法、递归
+#     时间复杂度：O(nlogn) 合并算法O(n) 递归O(logn)
+#     空间复杂度：O(n) 不只要递归栈深度，还有合并算法的临时数组，所以是O(n)
+#     稳定性：稳定
+#     :param nums:
+#     :return:
+#     """
+#     if len(nums) <= 1:
+#         return nums
+#     n = len(nums) // 2
+#     nums1 = MergeSort(nums[:n])
+#     nums2 = MergeSort(nums[n:])
+#     return merge(nums1, nums2)
+#
+# def merge(nums_1, nums_2):
+#     i = j = 0
+#     res = []
+#     while i < len(nums_1) and j < len(nums_2):
+#         if nums_1[i] <= nums_2[j]:
+#             res.append(nums_1[i])
+#             i += 1
+#         else:
+#             res.append(nums_2[j])
+#             j += 1
+#     if i >= len(nums_1):
+#         res += nums_2[j:]
+#     elif j >= len(nums_2):
+#         res += nums_1[i:]
+#     return res
+
 def MergeSort(nums):
-    """
-    思路：分治法、递归
-    时间复杂度：O(nlogn) 合并算法O(n) 递归O(logn)
-    空间复杂度：O(n) 不只要递归栈深度，还有合并算法的临时数组，所以是O(n)
-    稳定性：稳定
-    :param nums:
-    :return:
-    """
+    """ 重新写了一个归排 """
     if len(nums) <= 1:
         return nums
-    n = len(nums) // 2
-    nums1 = MergeSort(nums[:n])
-    nums2 = MergeSort(nums[n:])
-    return merge(nums1, nums2)
+    mid = len(nums) // 2
+    nums1 = MergeSort(nums[:mid])
+    nums2 = MergeSort(nums[mid:])
+    return Merge(nums1, nums2)
 
-def merge(nums_1, nums_2):
-    i = j = 0
+
+def Merge(nums1, nums2):
     res = []
-    while i < len(nums_1) and j < len(nums_2):
-        if nums_1[i] <= nums_2[j]:
-            res.append(nums_1[i])
-            i += 1
+    while nums1 and nums2:
+        if nums1[0] > nums2[0]:
+            res.append(nums2.pop(0))
         else:
-            res.append(nums_2[j])
-            j += 1
-    if i >= len(nums_1):
-        res += nums_2[j:]
-    elif j >= len(nums_2):
-        res += nums_1[i:]
+            res.append(nums1.pop(0))
+    if nums1:
+        res += nums1
+    elif nums2:
+        res += nums2
     return res
-
 
 if __name__ == "__main__":
     # random.seed(123)
@@ -296,6 +318,8 @@ if __name__ == "__main__":
     print(f'{QuickSort(nums, 0, len(nums) - 1)} -- QuickSort')
     # print(f'{SelectSort(nums)} -- SelectSort')
     # print(f'{HeapSort(nums)} -- HeapSort')
-    # print(f'------------ 归并排序 --------------')      # 中间进行排序，会修改nums，所以一个一个排序运行吧
-    # print(f'{MergeSort(nums)} -- MergeSort')
+    print(f'------------ 归并排序 --------------')      # 中间进行排序，会修改nums，所以一个一个排序运行吧
+    nums = [random.randint(1, 100) for _ in range(10)]
+    print(nums)
+    print(f'{MergeSort(nums)} -- MergeSort')
 
