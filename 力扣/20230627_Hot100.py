@@ -83,6 +83,62 @@ class MinStack:
     def getMin(self) -> int:
         return self.mini_stack[-1]
 
+
+from collections import OrderedDict
+
+class LRUCache:
+    """
+    146.LRU缓存
+    2023.07.09 中等
+    题解：OrderedDict 有move_to_end()方法
+        使用自己方法试试
+    """
+    # 自己的方法 有点绕哦
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.recent_lru = []        # set()虽然不包含重复元素，但失去了顺序的特性，因此还是使用列表
+        self.lru = {}
+
+    def get(self, key):
+        if key in self.lru:
+            self.recent_lru.remove(key)
+            self.recent_lru.insert(-1, key)
+            return self.lru[key]
+        return -1
+
+    def put(self, key, value):
+        if key in self.lru:
+            self.lru[key] = value
+            self.recent_lru.remove(key)
+            self.recent_lru.insert(-1, key)
+        else:
+            self.lru[key] = value
+            self.recent_lru.append(key)
+
+        if len(self.lru) > self.capacity:
+            self.lru.pop(self.recent_lru[0])
+            self.recent_lru.pop()
+
+
+
+    # 答案 使用OrderedDict相当于自动维护
+    # def __init__(self, capacity: int):
+    #     self.capacity = capacity
+    #     self.ord_cache = OrderedDict()
+    #
+    # def get(self, key: int) -> int:
+    #     if key in self.ord_cache:
+    #         self.ord_cache.move_to_end(key)        # 最近访问的放后面
+    #         return self.ord_cache[key]
+    #     return -1
+    #
+    # def put(self, key: int, value: int) -> None:
+    #     self.ord_cache[key] = value
+    #     self.ord_cache.move_to_end(key)
+    #     if len(self.ord_cache) > self.capacity:
+    #         self.ord_cache.popitem(last=False)
+
+
 class Solution:
     def dailyTemperatures(self, temperatures: List[int]) -> List[int]:
         """
@@ -1105,9 +1161,80 @@ class Solution:
 
         return mergesort(head, None)
 
+    def detectCycle(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        """
+        142.环形链表ii
+        2023.07.09 中等
+        题解：保存节点地址，检查是否有重复
+            仔细看下答案 双指针 https://leetcode.cn/problems/linked-list-cycle-ii/solutions/12616/linked-list-cycle-ii-kuai-man-zhi-zhen-shuang-zhi-/
+        """
+        # 答案 双指针
+        # 再写一次
+        slow = fast = head
+        # 索性，while里面不检查是否能走到空，结束判断是否空
+        while fast:     # 链表如果空，循环不执行；fast走得快，所以用fast判断
+            slow = slow.next
+            fast = fast.next
+            if fast:
+                fast = fast.next
+
+            if fast == slow:    # slow、fast第一次遇到
+                break
+        if not fast:    # while是因为fast走到空结束，无环
+            return None
+        # slow、fast已经第一次遇到，slow还需要a步就能到达入口
+        fast = head
+        while fast != slow:
+            slow = slow.next
+            fast = fast.next
+        return fast
+
+        # 答案 双指针
+        # 自己看了遍代码写的，不太健壮
+        # slow = fast = head
+        # while True:
+        #     if not fast:    # fast能遍历至空，说明无环
+        #         return
+        #     slow = slow.next
+        #     fast = fast.next
+        #     if fast:
+        #         fast = fast.next
+        #
+        #     if fast == slow:    # 第一次相遇
+        #         break
+        # # 这是根据测试用例写出来的，不太健壮
+        # if fast is None: return None    # 或 slow is None
+        #
+        # fast = head
+        # while fast != slow:
+        #     fast = fast.next
+        #     slow = slow.next
+        # return fast     # or slow
+
+        # 自己写的
+        # if not head:    # 题目说明节点可能是0个
+        #     return None
+        # address_of_node = set()
+        # while head:
+        #     if head in address_of_node:
+        #         return head
+        #     address_of_node.add(head)
+        #     head = head.next
+        # return None
 
 if __name__ == '__main__':
     sl = Solution()
 
-    nums = [2,3,-2,4]
-    print(sl.maxProduct(nums))
+
+
+    nums = [3,2,0,-4]
+    head = tmp = ListNode()
+    while nums:
+        tmp.next = ListNode(nums.pop(0))
+        tmp = tmp.next
+    head = head.next
+    # 测试打印
+    # while head:
+    #     print(head.val)
+    #     head = head.next
+
