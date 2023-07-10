@@ -630,17 +630,25 @@ class Solution:
         # dp[i][0] 不持有，啥都没干的不持有
         # dp[i][1] 持有，今天买入
         # dp[i][2] 不持有，今天买入卖出
-        dp = [[0, -price, 0] for price in prices]
-        # 用昨天的状态 来更新 今天的状态
-        for i in range(1, len(prices)):
-            # 今天不持有，有2种可能：1.昨天本就不持有 2.昨天卖出
-            dp[i][0] = max(dp[i - 1][0], dp[i - 1][2])
-            # 今天持有，有2种可能：1.昨天本就持有 2.昨天没有(非卖出)，今天买入
-            dp[i][1] = max(dp[i - 1][1], dp[i - 1][0] - prices[i])
-            # 今天不持有，是因为卖出，所以昨天必须持有今天才有的卖
-            dp[i][2] = dp[i - 1][1] + prices[i]
-        return max(dp[-1])      # 其实是max(dp[-1][0], dp[-1][2])，仅在 不持有 状态下计算
+        # dp = [[0, -price, 0] for price in prices]
+        # # 用昨天的状态 来更新 今天的状态
+        # for i in range(1, len(prices)):
+        #     # 今天不持有，有2种可能：1.昨天本就不持有 2.昨天卖出
+        #     dp[i][0] = max(dp[i - 1][0], dp[i - 1][2])
+        #     # 今天持有，有2种可能：1.昨天本就持有 2.昨天没有(非卖出)，今天买入
+        #     dp[i][1] = max(dp[i - 1][1], dp[i - 1][0] - prices[i])
+        #     # 今天不持有，是因为卖出，所以昨天必须持有今天才有的卖
+        #     dp[i][2] = dp[i - 1][1] + prices[i]
+        # return max(dp[-1])      # 其实是max(dp[-1][0], dp[-1][2])，仅在 不持有 状态下计算
 
+        # 2023.07.10 复习一下
+        dp = [[0, 0, 0] for _ in range(len(prices))]
+        dp[0] = [0, -prices[0], 0]
+        for i in range(1, len(prices)):
+            dp[i][0] = max(dp[i - 1][0], dp[i - 1][2])
+            dp[i][1] = max(dp[i - 1][1], dp[i - 1][0] - prices[i])
+            dp[i][2] = dp[i - 1][1] + prices[i]
+        return max(dp[-1])      # 实际是返回最后一天不持有状态的最大值
 
         # 超时
         # def dp(amount):
@@ -1222,19 +1230,100 @@ class Solution:
         #     head = head.next
         # return None
 
+    def hasCycle(self, head: Optional[ListNode]) -> bool:
+        """
+        141.环形链表
+        2023.07.10
+        题解：自己那种保存节点内存地址肯定可以
+            试试昨天142.答案的双/快慢指针
+        """
+        slow = fast = head
+        while fast:     # while没有检查二者同时为空的情况
+            slow = slow.next
+            fast = fast.next
+            if fast:
+                fast = fast.next
+
+            if fast == slow:    # 第一次相遇 或 都到了结尾
+                break
+
+        if not fast:    # slow、fast均为空
+            return False
+        return True
+
+    def wordBreak(self, s: str, wordDict: List[str]) -> bool:
+        """
+        139.单词拆分
+        2023.07.10 中等
+        题解：动态规划 dp[i]表示前i个字符能否被wordDict表示
+        """
+        n = len(s)
+        dp = [False for _ in range(n + 1)]
+        dp[0] = True
+        for i in range(n):      # 用来指示dp，前i个字符是否能被字典表示，若能，考虑i后面若干字符能否被字典表示，一点一点向后蚕食
+            for j in range(i + 1, n + 1):
+                # dp[i]表示前i个字符，s[i:j]的i表示起始索引，俩i刚好差1 s[i:j]刚好表示前i位之后的若干元素能否被表示
+                if dp[i] and s[i:j] in wordDict:     # 前i个字符能否表示已确定，看后面若干字符能否被表示
+                    dp[j] = True
+        return dp[-1]
+
+    def singleNumber(self, nums: List[int]) -> int:
+        """
+        136.只出现一次的数字
+        2023.07.10 中等
+        题解：异或能消掉相同的数
+        """
+        res = nums.pop(0)
+        while nums:
+            res ^= nums.pop(0)
+        return res
+
+    def longestConsecutive(self, nums: List[int]) -> int:
+        """
+        128.最长连续序列
+        2023.07.10 中等
+        题解：尝试从最小的数开始找 哈希加快查找
+        """
+        nums = set(nums)    # 哈希，加快查找，查一次O(1)
+        res = 0
+        for n in nums:
+            if n - 1 not in nums:   # 保证从最小的数开始找，这样才能找到最长的
+                curr_len = 1
+                while n + 1 in nums:
+                    curr_len += 1
+                    n += 1
+                res = max(res, curr_len)
+        return res
+
+    def maxProfit(self, prices: List[int]) -> int:
+        """
+        121.买卖股票的最佳时机
+        2023.07.10 简单
+        题解：一次遍历
+        """
+        minPrice = float('inf')     # 注意这个初始化，必要的时候初始化为最值
+        res = 0
+        for n in prices:
+            minPrice = min(minPrice, n)
+            res = max(res, n - minPrice)
+        return res
+
+
+
 if __name__ == '__main__':
     sl = Solution()
 
+    nums = [4,1,2,1,2]
+    print(sl.singleNumber(nums))
 
 
-    nums = [3,2,0,-4]
-    head = tmp = ListNode()
-    while nums:
-        tmp.next = ListNode(nums.pop(0))
-        tmp = tmp.next
-    head = head.next
-    # 测试打印
-    # while head:
-    #     print(head.val)
-    #     head = head.next
-
+    # nums = [3,2,0,-4]
+    # head = tmp = ListNode()
+    # while nums:
+    #     tmp.next = ListNode(nums.pop(0))
+    #     tmp = tmp.next
+    # head = head.next
+    # # 测试打印
+    # # while head:
+    # #     print(head.val)
+    # #     head = head.next
