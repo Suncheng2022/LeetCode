@@ -1308,6 +1308,49 @@ class Solution:
             res = max(res, n - minPrice)
         return res
 
+    def flatten(self, root: Optional[TreeNode]) -> None:
+        """
+        Do not return anything, modify root in-place instead.
+        114.二叉树展开为链表
+        2023.07.10 中等
+        题解：自己写的，牛逼呀！对每个节点，左子树挪到右子树、右子树放到新子树右子树上
+        """
+        if not root:
+            return
+        currNode = root
+        while currNode:
+            # 没有左节点
+            if not currNode.left:
+                currNode = currNode.right
+                continue
+            # 有左节点
+            rightNode = currNode.right
+            currNode.right = tmp = currNode.left
+            currNode.left = None        # 要注意把left置空
+            # 把rightNode放到正确的地
+            while tmp.right:
+                tmp = tmp.right
+            tmp.right = rightNode
+            currNode = currNode.right
+
+    def buildTree(self, preorder: List[int], inorder: List[int]) -> Optional[TreeNode]:
+        key2ind_inorder = {key: ind for ind, key in enumerate(inorder)}     # 哈希索引，加速查找，O(1)
+
+        def func(preorder_left, preorder_right, inorder_left, inorder_right):
+            if preorder_left > preorder_right:      # 相等应该是意味着有1个节点，是可以组成子树的，所以这里停止条件是没有节点
+                return None
+            rootInd_inorder = key2ind_inorder[preorder[preorder_left]]      # 根节点在中序遍历中的索引
+            leftSubTree_len = rootInd_inorder - inorder_left        # 左子树长度
+            root = TreeNode(preorder[preorder_left])
+            root.left = func(preorder_left + 1, preorder_left + leftSubTree_len,
+                             inorder_left, rootInd_inorder - 1)
+            root.right = func(preorder_left + leftSubTree_len + 1, preorder_right,
+                              rootInd_inorder + 1, inorder_right)
+            return root
+
+        n = len(preorder)   # 元素数量，也即节点数量
+        return func(0, n - 1, 0, n - 1)
+
 
 
 if __name__ == '__main__':
