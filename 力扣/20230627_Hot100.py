@@ -1334,6 +1334,11 @@ class Solution:
             currNode = currNode.right
 
     def buildTree(self, preorder: List[int], inorder: List[int]) -> Optional[TreeNode]:
+        """
+        105.从前序与中序遍历序列构造二叉树
+        2023.07.10 中等
+        题解：看了下答案，过~
+        """
         key2ind_inorder = {key: ind for ind, key in enumerate(inorder)}     # 哈希索引，加速查找，O(1)
 
         def func(preorder_left, preorder_right, inorder_left, inorder_right):
@@ -1351,6 +1356,113 @@ class Solution:
         n = len(preorder)   # 元素数量，也即节点数量
         return func(0, n - 1, 0, n - 1)
 
+    def maxDepth(self, root: Optional[TreeNode]) -> int:
+        """
+        104.二叉树的最大深度
+        2023.07.11 简单
+        题解：首先想到层序遍历
+        """
+        if not root:
+            return 0
+        queue = [root]
+        res = []
+        while queue:
+            tmp = []
+            n = len(queue)
+            for _ in range(n):
+                node = queue.pop(0)
+                tmp.append(node.val)
+                if node.left:
+                    queue.append(node.left)
+                if node.right:
+                    queue.append(node.right)
+            res.append(tmp)
+        return len(res)
+
+    def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:
+        """
+        102.二叉树的层序遍历
+        2023.07.11 中等
+        题解：
+        """
+        if not root:
+            return []
+        queue = [root]
+        res = []
+        while queue:
+            n = len(queue)
+            tmp = []
+            for _ in range(n):
+                node = queue.pop(0)
+                tmp.append(node.val)
+                if node.left:
+                    queue.append(node.left)
+                if node.right:
+                    queue.append(node.right)
+            res.append(tmp)
+        return res
+
+    def isSymmetric(self, root: Optional[TreeNode]) -> bool:
+        """
+        101.对称二叉树
+        2023.07.11 简单
+        题解：
+        """
+        # 答案 递归
+        # def func(left, right):
+        #     if not (left or right):     # 都空
+        #         return True
+        #     elif not (left and right):  # 有空(但不可能都空，因为上面判断了)
+        #         return False
+        #     elif left.val != right.val:     # 都不空，但值不等
+        #         return False
+        #     else:                           # 都不空，且值相等，那开始递归吧
+        #         return func(left.left, right.right) and func(left.right, right.left)
+        #
+        # if not root:
+        #     return True
+        #
+        # return func(root.left, root.right)
+
+        # 答案 迭代
+        if not root:
+            return True
+        queue = [[root.left, root.right]]
+        while queue:
+            left, right = queue.pop(0)
+            if not (left or right):         # 都空；注意，正确的结果需要继续迭代，而不是直接返回True
+                continue
+            elif not (left and right):      # 有空
+                return False
+            elif left.val != right.val:     # 均不空，但值不等
+                return False
+            else:                           # 均不空，且值相等，那就继续迭代。整体思路和递归很相似
+                queue.append([left.left, right.right])
+                queue.append([left.right, right.left])
+        return True
+
+    def isValidBST(self, root: Optional[TreeNode]) -> bool:
+        """
+        98.验证二叉搜索树
+        2023.07.11 中等
+        题解：迭代 中序遍历
+        """
+        # 标准的中序遍历迭代
+        stack = []
+        preVal = float('-inf')
+        while root or stack:
+            if root:
+                stack.append(root)
+                root = root.left
+            else:
+                node = stack.pop()      # 【注意】栈 LIFO
+                # 处理节点
+                if node.val <= preVal:
+                    return False
+                preVal = node.val
+                # 注意这里的赋值，因为判断条件是root
+                root = node.right
+        return True
 
 
 if __name__ == '__main__':
