@@ -965,7 +965,8 @@ class Solution:
         """
         96.不同的二叉搜索树
         2023.06.06 中等
-        题解：step1.若k为root，则1~k-1构建左子树、k+1~n构建右子树
+        题解：https://leetcode.cn/problems/unique-binary-search-trees/solutions/330990/shou-hua-tu-jie-san-chong-xie-fa-dp-di-gui-ji-yi-h/?envType=featured-list&envId=2cktkvj
+             step1.若k为root，则1~k-1构建左子树、k+1~n构建右子树
              step2.设有i个数构建子树，除去根节点还有i-1个节点，则有j个数构建左子树、i-1-j个数构建右子树；即i个数能构建BST共那么多个
         """
         dp = [0] * (n + 1)

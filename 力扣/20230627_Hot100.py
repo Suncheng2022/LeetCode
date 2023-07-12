@@ -1464,6 +1464,87 @@ class Solution:
                 root = node.right
         return True
 
+    def numTrees(self, n: int) -> int:
+        """
+        96.不同的二叉搜索树
+        2023.07.12 中等
+        题解：https://leetcode.cn/problems/unique-binary-search-trees/solutions/330990/shou-hua-tu-jie-san-chong-xie-fa-dp-di-gui-ji-yi-h/?envType=featured-list&envId=2cktkvj
+        """
+        dp = [0 for _ in range(n + 1)]      # dp[i]，用i个节点能构建出几种BST
+        dp[0] = 1
+        dp[1] = 1
+        for i in range(2, n + 1):       # 一共i个节点构建BST
+            for j in range(i):          # 一棵子树使用j个节点，则另一个子树使用i-1-j个节点
+                dp[i] += dp[j] * dp[i - 1 - j]
+        return dp[n]
+
+    def inorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
+        """
+        94.二叉树的中序遍历
+        2023.07.12 简单
+        题解：迭代 and 递归，都尝试一下
+        """
+        # 昨天写了一个 中序遍历的标准实现
+        # stack = []      # 注意，这用作 栈 LIFO
+        # res = []
+        # while root or stack:
+        #     if root:
+        #         stack.append(root)      # 收集左节点
+        #         root = root.left
+        #     else:
+        #         node = stack.pop()      # 注意，LIFO，也符合本题
+        #         res.append(node.val)
+        #         root = node.right
+        # return res
+
+        # 递归
+        res = []
+
+        def func(node):
+            if not node:
+                return
+            func(node.left)
+            res.append(node.val)
+            func(node.right)
+
+        func(root)
+        return res
+
+    def exist(self, board: List[List[str]], word: str) -> bool:
+        """
+        79.单词搜索
+        2023.07.12 中等
+        题解：dfs + 回溯；回溯完记得mark[i][j[]=0，下一次回溯可能还会到这个位置
+        """
+        def func(x, y, myword):
+            if len(myword) == 0:
+                return True
+            for ls in directions:
+                curX = x + ls[0]
+                curY = y + ls[1]
+                if 0 <= curX < m and 0 <= curY < n and board[curX][curY] == myword[0]:
+                    if marked[curX][curY]:
+                        continue
+                    marked[curX][curY] = True
+                    if func(curX, curY, myword[1:]):
+                        return True
+                    marked[curX][curY] = False
+            return False
+
+        m = len(board)
+        n = len(board[0])
+        marked = [[False for _ in range(n)] for _ in range(m)]
+        directions = [[1, 0], [-1, 0], [0, 1], [0, -1]]
+        for i in range(m):
+            for j in range(n):
+                if board[i][j] == word[0]:
+                    marked[i][j] = True
+                    if func(i, j, word[1:]):
+                        return True
+                    marked[i][j] = False
+        return False
+
+
 
 if __name__ == '__main__':
     sl = Solution()
