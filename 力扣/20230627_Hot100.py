@@ -1544,13 +1544,100 @@ class Solution:
                     marked[i][j] = False
         return False
 
+    def subsets(self, nums: List[int]) -> List[List[int]]:
+        """
+        78.子集
+        2023.07.13 中等
+        题解：暂时放弃递归吧
+            https://leetcode.cn/problems/subsets/solutions/6899/hui-su-suan-fa-by-powcai-5/
+        """
+        # 迭代
+        res = [[]]
+        for n in nums:
+            res += [[n] + ls for ls in res]
+        return res
+
+        # 库函数，仅了解，不推荐
+        # from itertools import combinations
+        #
+        # res = []
+        # for i in range(len(nums) + 1):
+        #     for item in combinations(nums, i):
+        #         res.append(item)
+        # return res
+
+    def sortColors(self, nums: List[int]) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        75.颜色分类
+        2023.07.13 中等
+        题解：冒泡呗
+            双指针 https://leetcode.cn/problems/sort-colors/solutions/437968/yan-se-fen-lei-by-leetcode-solution/
+        """
+        # 双指针
+        # p0、p1分别指向下一个要放0、1的索引
+        p0 = p1 = 0
+        for i in range(len(nums)):
+            if nums[i] == 0:
+                # 换完0，p0理应+1，但要检查一下是不是把1换走了
+                nums[i], nums[p0] = nums[p0], nums[i]
+                if p0 < p1:     # 换完0后，p0<p1，因为二者开始是指向相同位置的，p1跑得快肯定是已经换过1了，所以p0<p1时换0肯定把1换走了
+                    nums[i], nums[p1] = nums[p1], nums[i]
+                # 交换0之后都要移动。，对不；
+                p0 += 1     # 只要换0，就+1
+                p1 += 1     # 所以只要换0，无论如何p1都+1：仅换0，也要+1，因为已经放了0的地不能再放1啦；换0引起的换1，把1放到p1后也要+1
+            elif nums[i] == 1:
+                nums[i], nums[p1] = nums[p1], nums[i]
+                p1 += 1
+
+        # 冒泡可以，但这不符合题目一趟遍历的要求
+        # n = len(nums)
+        # for i in range(n - 1):
+        #     for j in range(1, n - i):
+        #         if nums[j - 1] > nums[j]:
+        #             nums[j - 1], nums[j] = nums[j], nums[j - 1]
+        # return nums
+
+    def climbStairs(self, n: int) -> int:
+        """
+        70.爬楼梯
+        2023.07.13 简单
+        题解：斐波那契数列
+        """
+        dp = [0 for _ in range(n + 1)]
+        dp[0] = 1
+        dp[1] = 1
+        for i in range(2, n + 1):
+            dp[i] = dp[i - 1] + dp[i - 2]
+        return dp[-1]
+
+    def minPathSum(self, grid: List[List[int]]) -> int:
+        """
+        64.最小路径和
+        2023.07.13 中等
+        题解：牛逼！
+        """
+        m = len(grid)
+        n = len(grid[0])
+        # dp = [[-1 for _ in range(n)] for _ in range(m)]   # 根本没用上
+        # dp[0][0] = grid[0][0]
+        for i in range(m):
+            for j in range(n):
+                if i == 0 and j - 1 >= 0:
+                    grid[i][j] += grid[i][j - 1]
+                elif j == 0 and i - 1 >= 0:
+                    grid[i][j] += grid[i - 1][j]
+                elif j - 1 >= 0 and i - 1 >= 0:
+                    grid[i][j] = min(grid[i - 1][j] + grid[i][j], grid[i][j - 1] + grid[i][j])
+        return grid[-1][-1]
+
 
 
 if __name__ == '__main__':
     sl = Solution()
 
-    nums = [4,1,2,1,2]
-    print(sl.singleNumber(nums))
+    grid = [[1,3,1],[1,5,1],[4,2,1]]
+    print(sl.minPathSum(grid))
 
 
     # nums = [3,2,0,-4]
