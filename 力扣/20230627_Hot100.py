@@ -1631,13 +1631,64 @@ class Solution:
                     grid[i][j] = min(grid[i - 1][j] + grid[i][j], grid[i][j - 1] + grid[i][j])
         return grid[-1][-1]
 
+    def uniquePaths(self, m: int, n: int) -> int:
+        """
+        62.不同路径
+        2023.07.14 中等
+        题解：很简单了
+        """
+        dp = [[1 for _ in range(n)]] + [[1] + [0 for _ in range(n - 1)] for _ in range(m - 1)]
+        dp[0][0] = 1
+        for i in range(1, m):
+            for j in range(1, n):
+                dp[i][j] = dp[i - 1][j] + dp[i][j - 1]
+        return dp[-1][-1]
 
+    def merge(self, intervals: List[List[int]]) -> List[List[int]]:
+        """
+        56.合并区间
+        2023.07.14 中等
+        题解：如此简单
+        """
+        intervals = sorted(intervals, key=lambda x: x[0])   # 先排序，没有说默认按首位有序
+        res = [intervals[0]]
+        for inter in intervals[1:]:
+            if res[-1][-1] >= inter[0]:
+                res[-1][-1] = max(max(res[-1][-1], inter[0]), max(res[-1][-1], inter[1]))
+            else:
+                res.append(inter)
+        return res
+
+    def canJump(self, nums: List[int]) -> bool:
+        """
+        55.跳跃游戏
+        2023.07.14 中等
+        题解：
+        """
+        # 答案，简洁！
+        can_reach = 0
+        for i, n in enumerate(nums):
+            if i <= can_reach < i + n:      # 能到当前位置，但到不了当前位置能到达的最远处，所以更新；如果小于i，即到达不了当前元素，最终会返回false
+                can_reach = i + n
+        return can_reach >= len(nums) - 1
+
+        # 自己写得有些复杂
+        # if len(nums) == 1:
+        #     return True
+        # can_reach = 0
+        # for i, n in enumerate(nums):
+        #     if i == 0:
+        #         can_reach = n
+        #         continue
+        #     if can_reach >= i:
+        #         can_reach = max(can_reach, i + n)
+        # return True if can_reach >= len(nums) - 1 else False
 
 if __name__ == '__main__':
     sl = Solution()
 
-    grid = [[1,3,1],[1,5,1],[4,2,1]]
-    print(sl.minPathSum(grid))
+    nums = [2, 0, 0]
+    print(sl.canJump(nums))
 
 
     # nums = [3,2,0,-4]
