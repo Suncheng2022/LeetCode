@@ -1773,12 +1773,136 @@ class Solution:
         #
         # return [item for item in permutations(nums, len(nums))]
 
+    def combinationSum(self, candidates: List[int], target: int) -> List[List[int]]:
+        """
+        39.组合总和
+        2023.07.16 中等
+        题解：自己能写出大半来了；结果去重还不太明白
+        """
+        # 答案 回溯
+        def func(res, path, startInd, mytarget):
+            # startInd为了去重
+            # mytarget作用，题目要求和为target的元素，通过回溯不断求和为target-某元素的元素
+            if mytarget == 0:   # 找到了和为mytarget的元素，保留结果，结束本次回溯
+                res.append(path)
+                return
+            elif mytarget < 0:  # 小于0说明查到了树底部，但没找到合适的元素组合，不需要再往后递归了，结束本次回溯
+                return
+            # for循环从索引startInd开始，是为了去重
+            # 例如，题目求和为7，我先找元素2，之后递归求和为7-2=5的，可以从3 6 7中继续找；
+            # 若先找的元素3，似乎可以从2 6 7中继续找，看一下题解中画的树结构，与先找2后找3、先找3后找2是重复的，这就与题意冲突了
+            for i in range(startInd, len(candidates)):
+                func(res, path + [candidates[i]], i, mytarget - candidates[i])      # 因为是可以重复选取的，所以递归startInd不加1
+
+        res = []
+        path = []
+        func(res, path, 0, target)
+        return res
+
+    def searchRange(self, nums: List[int], target: int) -> List[int]:
+        """
+        34.在排序数组中查找元素的第一个和最后一个位置
+        2023.07.16 中等
+        题解：二分+中心探测
+        """
+        if len(nums) == 0:
+            return [-1, -1]
+        l, r = 0, len(nums) - 1
+        while l <= r:
+            m = (l + r) // 2
+            if nums[m] == target:     # 还是需要判等的哈哈；我只定位target位置，不需要判断是否找到
+                break
+            if nums[m] < target:
+                l = m + 1
+            else:
+                r = m - 1
+        if nums[m] != target:
+            return [-1, -1]
+        l = r = m
+        while l - 1 >= 0 and nums[l - 1] == nums[m]:
+            l -= 1
+        while r + 1 <= len(nums) - 1 and nums[r + 1] == nums[m]:
+            r += 1
+        return [l, r]
+
+    def search(self, nums: List[int], target: int) -> int:
+        """
+        33.搜索旋转排序数组
+        2023.07.16 中等
+        题解：有序 很自然想到二分查找
+            https://leetcode.cn/problems/search-in-rotated-sorted-array/solutions/220083/sou-suo-xuan-zhuan-pai-xu-shu-zu-by-leetcode-solut/?envType=featured-list&envId=2cktkvj
+        """
+        l, r = 0, len(nums) - 1
+        while l <= r:
+            m = (l + r) // 2
+            if nums[m] == target:
+                return m
+            elif nums[m] < nums[r]:     # 索引m右边有序
+                if nums[m] < target <= nums[r]:     # 若target值在此区间
+                    l = m + 1
+                else:       # 虽然右边有序，但target不在这
+                    r = m - 1
+            else:                       # 索引m左边有序
+                if nums[l] <= target < nums[m]:
+                    r = m - 1
+                else:
+                    l = m + 1
+        return -1
+
+    def nextPermutation(self, nums: List[int]) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        31.下一个排列
+        2023.07.16 中等
+        题解：
+        """
+        if len(nums) == 1:
+            return
+        cur, r = len(nums) - 2, len(nums) - 1
+        while cur >= 0:
+            if nums[cur] < nums[r]:     # 从右往左找降序
+                break
+            cur -= 1
+            r -= 1
+        if cur < 0:
+            nums.sort()
+            return
+        # 找到第一个从右往左的降序，取nums[r:]第一个大于nums[cur]的数 与 nums[cur] 交换
+        for n in sorted(nums[r:]):
+            if n > nums[cur]:
+                break
+        r_min_ind = r + nums[r:].index(n)
+        nums[cur], nums[r_min_ind] = nums[r_min_ind], nums[cur]
+        nums[r:] = sorted(nums[r:])
+
+    def generateParenthesis(self, n: int) -> List[str]:
+        """
+        22.括号生成
+        2023.07.16 中等
+        题解：动态规划
+        """
+        total_l = [[None], ["()"]]      # total_l[i]表示i对括号的所有组合情况
+        for i in range(2, n + 1):   # 处理2对括号及以上的情况
+            i_l = []    # 存放i对括号的所有组合
+            for j in range(i):      # j取值范围[0, i - 1]，即体现p + q = i - 1
+                curr_l1 = total_l[j]
+                curr_l2 = total_l[i - 1 - j]
+                for k1 in curr_l1:
+                    for k2 in curr_l2:
+                        if k1 is None:      # is None，注意Python语法
+                            k1 = ""
+                        if k2 is None:
+                            k2 = ""
+                        i_l.append('(' + k1 + ')' + k2)     # i对括号所有组合
+            total_l.append(i_l)
+        return total_l[n]       # 返回题目所求n对括号时的组合情况
+
 if __name__ == '__main__':
     sl = Solution()
 
-    nums = [1, 2, 3]
-    print(sl.permute(nums))
-
+    nums = [2, 3, 1]
+    print(sl.nextPermutation(nums))
+    print(nums)
 
     # nums = [3,2,0,-4]
     # head = tmp = ListNode()
