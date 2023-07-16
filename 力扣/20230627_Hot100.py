@@ -1684,11 +1684,100 @@ class Solution:
         #         can_reach = max(can_reach, i + n)
         # return True if can_reach >= len(nums) - 1 else False
 
+    def maxSubArray(self, nums: List[int]) -> int:
+        """
+        53.最大子数组和
+        2023.07.15 中等
+        题解：似乎之前做到过，自己没做出来，看答案代码一下明白；都不知道看的哪个答案了，应该是动态规划
+        """
+        dp = [nums[0]]
+        for n in nums[1:]:
+            if dp[-1] <= 0:
+                dp.append(n)
+            else:
+                dp.append(n + dp[-1])
+        return max(dp)
+
+    def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
+        """
+        49.字母异位词分组
+        2023.07.15 中等
+        题解：字典试试，竟然不小心与答案相似
+        """
+        from collections import defaultdict
+
+        res = defaultdict(list)
+        for s in strs:
+            ks = sorted(s).__str__()
+            res[ks].append(s)
+        return list(res.values())
+
+    def rotate(self, matrix: List[List[int]]) -> None:
+        """
+        Do not return anything, modify matrix in-place instead.
+        48.旋转图像
+        2023.07.15 中等
+        题解：新旧矩阵索引的对应 旧列==新行，旧行+新列==n-1。但没有原地修改
+            答案 https://leetcode.cn/problems/rotate-image/solutions/274724/li-kou-48xiao-bai-du-neng-kan-dong-de-fang-fa-zhu-/
+        """
+        # 答案 很形象的旋转90°
+        pos1, pos2 = 0, len(matrix) - 1     # 因为长宽相等，可以理解为当前处理【行的起止索引】和【列的起止索引】，以行列索引控制当前处理的“圈”
+        while pos1 < pos2:      # 处理每一圈；起止索引，相等或差过去了就该停止了；
+            add = 0     # 偏移量
+            while add < pos2 - pos1:    # 处理具体的一圈，可移动的次数也就是起止索引的间隔，pos2-pos1就是间隔的元素数量，自己想一下
+                matrix[pos2 - add][pos1], matrix[pos1][pos1 + add], matrix[pos1 + add][pos2], matrix[pos2][pos2 - add] = \
+                    matrix[pos2][pos2 - add], matrix[pos2 - add][pos1], matrix[pos1][pos1 + add], matrix[pos1 + add][pos2]
+                add += 1
+
+            # 向内收缩一圈
+            pos1 += 1
+            pos2 -= 1
+
+        # 没有原地修改
+        # n = len(matrix)
+        # res = [[0 for _ in range(n)] for _ in range(n)]
+        # for i in range(n):
+        #     for j in range(n):
+        #         res[j][n - 1 - i] = matrix[i][j]
+        # return res
+
+    def permute(self, nums: List[int]) -> List[List[int]]:
+        """
+        46.全排列
+        2023.07.15 中等
+        题解：
+        """
+        # 答案 回溯
+        def dfs(res, path, index, used):
+            if index == len(nums):
+                res.append(path[:])
+                return
+            for i in range(len(nums)):
+                if not used[i]:
+                    used[i] = True
+                    path.append(nums[i])
+                    dfs(res, path, index + 1, used)     # 注意这里是index+1，要从索引index节点递归嘛
+                    path.pop()
+                    used[i] = False
+
+        if len(nums) == 0:
+            return []
+        res = []
+        path = []
+        used = [False for _ in range(len(nums))]
+        dfs(res, path, 0, used)
+        return res
+
+        # 内置库
+        # from itertools import permutations
+        #
+        # return [item for item in permutations(nums, len(nums))]
+
 if __name__ == '__main__':
     sl = Solution()
 
-    nums = [2, 0, 0]
-    print(sl.canJump(nums))
+    nums = [1, 2, 3]
+    print(sl.permute(nums))
 
 
     # nums = [3,2,0,-4]
