@@ -1897,20 +1897,96 @@ class Solution:
             total_l.append(i_l)
         return total_l[n]       # 返回题目所求n对括号时的组合情况
 
+    def mergeTwoLists(self, list1: Optional[ListNode], list2: Optional[ListNode]) -> Optional[ListNode]:
+        """
+        21.合并两个有序链表
+        2023.07.17 简单
+        """
+        resHead = tmp = ListNode()
+        while list1 and list2:
+            if list1.val < list2.val:
+                tmp.next = ListNode(list1.val)
+                list1 = list1.next
+            else:
+                tmp.next = ListNode(list2.val)
+                list2 = list2.next
+            tmp = tmp.next
+        tmp.next = list1 if list1 else list2
+        return resHead.next
+
+    def isValid(self, s: str) -> bool:
+        """
+        20.有效的括号
+        2023.07.17 简单
+        """
+        # 看了下答案代码
+        bracketDict = dict(zip("({[", ")}]"))
+        stack = []
+        for c in s:
+            if c in bracketDict:
+                stack.append(c)
+            elif stack and c == bracketDict[stack[-1]]:
+                stack.pop()
+            else:
+                return False
+        return True if not stack else False
+
+        # 感觉思路比较复杂呢
+        # bracketDict = dict(zip('({[]})', [-3, -2, -1, 1, 2, 3]))
+        # stack = []
+        # for c in s:
+        #     if not stack:
+        #         stack.append(bracketDict[c])
+        #     elif bracketDict[c] > 0 and bracketDict[c] + stack[-1] == 0:
+        #         stack.pop()
+        #     else:
+        #         stack.append(bracketDict[c])
+        # return True if not stack else False
+
+    def removeNthFromEnd(self, head: Optional[ListNode], n: int) -> Optional[ListNode]:
+        """
+        19.删除链表的倒数第N个节点
+        2023.07.17 中等
+        """
+        # 正数第几个节点
+        total = 0
+        tmp = head
+        while tmp:
+            total += 1
+            tmp = tmp.next
+        del_ind = total - n + 1     # 要删除的第几个节点；从1开始，意即第几个节点
+        if del_ind == 1:        # 很重要，若删除的是首节点，需要特殊判断；调错耗时...
+            return head.next
+        tmp = head
+        for i in range(1, del_ind - 1):     # 会定位到 前一个节点; 从1走因为我们认为头结点是第 1 个节点，也是为与参数n统一
+            tmp = tmp.next
+        tmp.next = tmp.next.next
+        return head
+
+        # stack = []
+        # curNode = head
+        # while curNode:
+        #     stack.append(curNode)
+        #     curNode = curNode.next
+        # if n == len(stack):
+        #     return head.next
+        # elif n < len(stack):
+        #     stack[-n - 1].next = stack[-n].next     # 这里若写为stack[-n+1]会报错
+        #     return head
+
+
 if __name__ == '__main__':
     sl = Solution()
 
-    nums = [2, 3, 1]
-    print(sl.nextPermutation(nums))
-    print(nums)
 
-    # nums = [3,2,0,-4]
-    # head = tmp = ListNode()
-    # while nums:
-    #     tmp.next = ListNode(nums.pop(0))
-    #     tmp = tmp.next
-    # head = head.next
-    # # 测试打印
-    # # while head:
-    # #     print(head.val)
-    # #     head = head.next
+    nums = [1]
+    head = tmp = ListNode()
+    while nums:
+        tmp.next = ListNode(nums.pop(0))
+        tmp = tmp.next
+    head = head.next
+    sl.removeNthFromEnd(head, 1)
+    # 测试打印
+    while head:
+        print(head.val)
+        head = head.next
