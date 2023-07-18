@@ -1974,19 +1974,107 @@ class Solution:
         #     stack[-n - 1].next = stack[-n].next     # 这里若写为stack[-n+1]会报错
         #     return head
 
+    def letterCombinations(self, digits: str) -> List[str]:
+        """
+        17.电话号码的字母组合
+        2023.07.18 中等
+        题解：
+        """
+        # 答案 回溯
+        if len(digits) == 0:
+            return []
+        num2let_dict = dict(zip(list("23456789"), ['abc', 'def', 'ghi', 'jkl', 'mno', 'qprs', 'tuv', 'wxyz']))
+        res = []
+
+        def func(tmp, ind):
+            if ind == len(digits):
+                res.append(tmp)
+                return
+            for c in num2let_dict[digits[ind]]:
+                func(tmp + c, ind + 1)
+
+        func("", 0)
+        return res
+
+        # 答案 暴力
+        # if len(digits) == 0:    # 输入为空要特别处理
+        #     return []
+        # num2let_dict = dict(zip(list("23456789"), ['abc', 'def', 'ghi', 'jkl', 'mno', 'qprs', 'tuv', 'wxyz']))
+        # res = ['']
+        # for d in digits:
+        #     tmp = []
+        #     for let in num2let_dict[d]:
+        #         tmp.extend([item + let for item in res])
+        #     res = tmp
+        # return res
+
+    def threeSum(self, nums: List[int]) -> List[List[int]]:
+        """
+        15.三数之和
+        2023.07.18 中等
+        题解：排序+双指针 https://leetcode.cn/problems/3sum/solutions/39722/pai-xu-shuang-zhi-zhen-zhu-xing-jie-shi-python3-by/
+        """
+        nums.sort()
+        res = []
+        for i in range(len(nums) - 2):      # 固定一个数，找另外两个数
+            l, r = i + 1, len(nums) - 1
+            while l < r:        # 【注意】对每个i都要尝试其后面所有元素
+                if nums[i] + nums[l] + nums[r] == 0:
+                    if [nums[i], nums[l], nums[r]] not in res:      # 为何能去重——已经升序排序，若索引移动元素值仍相同则为相同解，但元素先后顺序却一样，对不对
+                        res.append([nums[i], nums[l], nums[r]])
+                    r -= 1      # r -= 1 or l += 1均可，只要移动就行
+                elif nums[i] + nums[l] + nums[r] < 0:
+                    l += 1
+                else:
+                    r -= 1
+        return res
+
+    def maxArea(self, height: List[int]) -> int:
+        """
+        11.盛最多水的容器
+        2023.07.18 中等
+        题解：自己画示意图就明白了：移动长板(假设移动后的长板依然是 长板)，新的长板可能会变长--但以为短板制约没用、
+                                                                可能会变短--有可能比短板还 短
+                        移动短板(假设移动后的短板依然是 短板)，新的短板可能会变长--那么总体容量可能变大
+                                                                可能会变短--那么总体容量变少
+                        综上，只有移动短板的时候，容量才有可能变大，所以只能移动短板
+        https://leetcode.cn/problems/container-with-most-water/solutions/11491/container-with-most-water-shuang-zhi-zhen-fa-yi-do/
+        """
+        l, r = 0, len(height) - 1
+        maxArea = (r - l) * min(height[l], height[r])
+        while l < r:
+            if height[l] < height[r]:
+                l += 1
+            else:
+                r -= 1
+            curArea = (r - l) * min(height[l], height[r])
+            maxArea = max(maxArea, curArea)
+        return
+
+    def longestPalindrome(self, s: str) -> str:
+        """
+        5.最长回文子串
+        2023.07.18 中等
+        题解：想到中心探测
+        """
+        pass
+
+
 
 if __name__ == '__main__':
     sl = Solution()
 
+    s = "cbbd"
+    print(sl.longestPalindrome(s))
 
-    nums = [1]
-    head = tmp = ListNode()
-    while nums:
-        tmp.next = ListNode(nums.pop(0))
-        tmp = tmp.next
-    head = head.next
-    sl.removeNthFromEnd(head, 1)
-    # 测试打印
-    while head:
-        print(head.val)
-        head = head.next
+    # nums = [1]
+    # head = tmp = ListNode()
+    # while nums:
+    #     tmp.next = ListNode(nums.pop(0))
+    #     tmp = tmp.next
+    # head = head.next
+    # sl.removeNthFromEnd(head, 1)
+    # # 测试打印
+    # while head:
+    #     print(head.val)
+    #     head = head.next
