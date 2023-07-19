@@ -2054,18 +2054,89 @@ class Solution:
     def longestPalindrome(self, s: str) -> str:
         """
         5.最长回文子串
-        2023.07.18 中等
+        2023.07.19 中等
         题解：想到中心探测
         """
-        pass
+        resStr = ""
+        for i in range(len(s)):
+            l = r = i
+            while l >= 0 and s[l] == s[i]:
+                l -= 1
+            l += 1
+            while r < len(s) and s[r] == s[i]:
+                r += 1
+            r -= 1
+            while 0 <= l <= r < len(s) and s[l] == s[r]:
+                l -= 1
+                r += 1
+            l += 1
+            r -= 1
+            resStr = s[l:r+1] if r - l + 1 > len(resStr) else resStr
+        return resStr
 
+    def lengthOfLongestSubstring(self, s: str) -> int:
+        """
+        3.无重复字符的最长子串
+        2023.07.19 中等
+        题解：滑动窗口，不知自己滑的对不对
+        """
+        res = ""
+        tmp = ""
+        for c in s:
+            if c not in tmp:
+                tmp += c
+                if len(tmp) > len(res):
+                    res = tmp
+            else:
+                tmp = tmp[tmp.index(c) + 1:] + c
+        return len(res)
 
+    def addTwoNumbers(self, l1: Optional[ListNode], l2: Optional[ListNode]) -> Optional[ListNode]:
+        """
+        2.两数相加
+        2023.07.19 中等
+        题解：
+        """
+        num1, num2 = 0, 0
+        i1, i2 = 0, 0
+        while l1:
+            num1 += l1.val * 10 ** i1
+            i1 += 1
+            l1 = l1.next
+        while l2:
+            num2 += l2.val * 10 ** i2
+            i2 += 1
+            l2 = l2.next
+        res = num1 + num2
+        head = curNode = ListNode()
+        if res == 0:
+            return head
+        while res:
+            curNode.next = ListNode(res % 10)
+            curNode = curNode.next
+            res //= 10
+        return head.next
+
+    def twoSum(self, nums: List[int], target: int) -> List[int]:
+        """
+        1.两数之和
+        2023.07.19 简单
+        题解：回溯自己能写个大概，但没写出来
+
+        """
+        # 答案 一次遍历
+        for i in range(1, len(nums)):
+            prior = nums[:i]
+            if target - nums[i] in prior:
+                return [prior.index(target - nums[i]), i]
+        return []
 
 if __name__ == '__main__':
     sl = Solution()
 
-    s = "cbbd"
-    print(sl.longestPalindrome(s))
+    nums = [0, 4, 3, 0]
+    target = 0
+    print(sl.twoSum(nums, target))
 
     # nums = [1]
     # head = tmp = ListNode()
