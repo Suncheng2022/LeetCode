@@ -179,9 +179,94 @@ class Solution:
         #             dp[i][j] = dp[i - 1][0] + triangle[i][j]
         # return min(dp[-1])
 
+    def minFallingPathSum(self, matrix: List[List[int]]) -> int:
+        """
+        931.下降路径最小和
+        2023.07.21 中等
+        题解：思路很像 120.三角形最小路径和，从上往下走；这里需要注意的是 取 当前元素 的上一行的最小值有些绕
+        """
+        n = len(matrix)
+        dp = [[0] * n for _ in range(n)]
+        dp[0] = matrix[0][:]    # 注意此处深拷贝，否则会指向同一块内存
+        # 当前元素对应上一行的3个元素，取最小值；
+        # 如何取最小值需要考虑得尽量鲁棒，不要想得太复杂，自己下面写的思路就很好，不但正确取了最小值，还完美处理了边界问题
+        for i in range(1, n):
+            for j in range(n):
+                tmp_min = float('inf')
+                # 注意 取最小值
+                if j - 1 >= 0:      # 当前元素的列 往左边探一下是否超边界
+                    tmp_min = min(dp[i - 1][j - 1], dp[i - 1][j])
+                if j + 1 <= n - 1:  # 当前元素的列 往右边探一下是否超边界
+                    tmp_min = min(dp[i - 1][j], dp[i - 1][j + 1]) if min(dp[i - 1][j], dp[i - 1][j + 1]) < tmp_min else tmp_min
+                dp[i][j] = tmp_min + matrix[i][j]
+        return min(dp[-1])
+
+    def maximalSquare(self, matrix: List[List[str]]) -> int:
+        """
+        221.最大正方形
+        2023.07.21 中等
+        题解：还是参考答案解法--dp添加一行0、一列0，dp[i+1][j+1]表示matrix[i][j]为右下角时正方形最大边长，这样可以完整地遍历一遍matrix，最后不需要特殊处理了
+        """
+        # 答案解法
+        m = len(matrix)
+        n = len(matrix[0])
+        dp = [[0] * (n + 1) for _ in range(m + 1)]      # dp添加一行0、一列0，可以完整遍历matrix
+        # 开始遍历，索引表示matrix
+        maxSide = 0
+        for i in range(m):
+            for j in range(n):
+                if matrix[i][j] == '1':
+                    dp[i + 1][j + 1] = 1 + min(dp[i][j + 1], dp[i + 1][j], dp[i][j])
+                    maxSide = max(maxSide, dp[i + 1][j + 1])
+        return maxSide ** 2
+
+
+        # 自己重新实现一遍
+        # 相比答案还是比较复杂，以dp[i][j]表示matrix[i][j]作为右下角时最大正方形变成，最后需要判断首行首列等。还是参考答案的解法吧
+        # m = len(matrix)
+        # n = len(matrix[0])
+        # # 初始化dp 首行首列同matrix，dp[i][j]表示matrix[i][j]作为右下角时正方形最大边长
+        # dp = [[0] * n for _ in range(m)]
+        # dp[0] = [int(c) for c in matrix[0]]
+        # for i, row in enumerate(matrix[1:]):
+        #     dp[i + 1][0] = int(row[0])
+        # # 开始遍历
+        # maxSide = float('-inf')
+        # for i in range(1, m):
+        #     for j in range(1, n):
+        #         if matrix[i][j] == '1':
+        #             dp[i][j] = 1 + min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1])
+        #             maxSide = max(maxSide, dp[i][j])
+        # if maxSide == float('-inf'):    # 说明遍历元素都是0
+        #     tmp = dp[0] + [row[0] for row in dp[1:]]
+        #     return 1 ** 2 if sum(tmp) else 0
+        # return maxSide ** 2
+
+        # 自己算是写对了，感觉实现有点复杂
+        # m = len(matrix)
+        # n = len(matrix[0])
+        # dp = [[0] * n for _ in range(m)]
+        # dp[0] = [int(c) for c in matrix[0]]
+        # for i, row in enumerate(matrix[1:]):
+        #     dp[i + 1][0] = int(row[0])
+        # print(dp)
+        # res = float('-inf')
+        # for i in range(1, m):
+        #     for j in range(1, n):
+        #         if matrix[i][j] == '1':
+        #             dp[i][j] = 1 + min(dp[i][j - 1], dp[i - 1][j], dp[i - 1][j - 1])
+        #             res = max(res, dp[i][j])
+        # print(dp)
+        # if res == float('-inf'):
+        #     tmp = dp[0] + [row[0] for row in dp[1:]]
+        #     return 1 if sum(tmp) else 0
+        # else:
+        #     return res ** 2
+
+
 
 if __name__ == "__main__":
     sl = Solution()
 
-    triangle = [[2],[3,4],[6,5,7],[4,1,8,3]]
-    print(sl.minimumTotal(triangle))
+    matrix = [['0']]
+    print(sl.maximalSquare(matrix))
