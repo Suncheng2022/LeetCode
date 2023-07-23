@@ -1768,9 +1768,9 @@ class Solution:
         """
         dp = [1] * len(nums)
         for i in range(len(nums)):
-            for j in range(i):      # 通过此遍历计算dp[i]
-                if nums[j] < nums[i]:   # num[i]严格大于nums[j]，说明可以接在nums[j]后面
-                    dp[i] = max(dp[i], dp[j] + 1)
+            for j in range(i):
+                if nums[j] < nums[i]:       # num[i]严格大于nums[j]，说明可以接在nums[j]后面-->即计算的是dp[i]，因为dp[i]是最后一个元素，不是计算的dp[j]！！！
+                    dp[i] = max(dp[i], dp[j] + 1)       # 不是计算的dp[j]！你想一下，nums[i]能不能接到后面，nums[i]才是最后一个元素
         return max(dp)
 
     def maxProfit(self, prices: List[int]) -> int:

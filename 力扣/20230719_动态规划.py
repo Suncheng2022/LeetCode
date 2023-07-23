@@ -364,9 +364,71 @@ class Solution:
                                    dp[i][j - 1] + ord(s2[j - 1]))   # 同上
         return dp[-1][-1]
 
+    def lengthOfLIS(self, nums: List[int]) -> int:
+        """
+        300.最长递增子序列
+        2023.07.23 中等
+        题解：一看之前代码秒懂 自己能想到动态规划，但没想到结果怎么写 注意最内层计算的dp[i]而不是dp[j]
+            https://leetcode.cn/problems/longest-increasing-subsequence/solutions/24173/zui-chang-shang-sheng-zi-xu-lie-dong-tai-gui-hua-2/
+        """
+        n = len(nums)
+        dp = [1] * n    # dp[i]表示截止到nums[i]最长子序列的长度
+        # 遍历计算dp：对每个i，逐个计算是否能放到前面的dp后面
+        for i in range(n):
+            for j in range(i):
+                if nums[j] < nums[i]:   # nums[i]大，能放到递增子序列后面——即这里计算的是nums[i]，而不是nums[j]！
+                    dp[i] = max(dp[i], dp[j] + 1)       # 动态规划是用之前的状态更新现在的状态，这里dp[j]是之前的状态，现在nums[i]又可以放到nums[j]后面，所以+1
+        return max(dp)          # 最后返回最大的递增子序列
+
+        # 重写一遍
+        # n = len(nums)
+        # dp = [1] * n  # 数字不需深拷贝；截止到nums[i]的最长递增子序列；初始化为1，因为每个数也是递增子序列
+        # # 遍历计算 dp[i]
+        # for i in range(n):
+        #     for j in range(i):  # 能否把nums[i]放到每个nums[j]后面
+        #         if nums[j] < nums[i]:  # nums[i]能加到后面
+        #             dp[i] = max(dp[i], dp[
+        #                 j] + 1)  # dp[i]会不断更新，通过nums[i]能否放到每个nums[j]后面，通过dp[j]的长度更新dp[i]；dp[j]就是第一层for计算得到的dp[i]，领会意思
+        # return max(dp)
+
+    def findNumberOfLIS(self, nums: List[int]) -> int:
+        """
+        673.最长递增子序列的个数
+        2023.07.23 中等
+        题解：与 300.最长递增子序列 很像，看答案 https://leetcode.cn/problems/number-of-longest-increasing-subsequence/solutions/1007075/zui-chang-di-zeng-zi-xu-lie-de-ge-shu-by-w12f/?envType=study-plan-v2&envId=dynamic-programming
+        """
+        n = len(nums)
+        dp = [1] * n        # 截止到nums[i]的最长递增子序列 的长度
+        cnt = [1] * n       # 截止到nums[i]的最长递增子序列 的长度 的出现次数
+        for i in range(n):
+            for j in range(i):
+                if nums[j] < nums[i]:   # nums[i]可以放到nums[j]后面
+                    if dp[j] + 1 > dp[i]:       # 若大于，则需更新dp[i]，意味着之前dp[i]长度的组合方式丢弃，因为现在有更长的组合方式，所以要为cnt[i]重新赋值而不是累加
+                        dp[i] = dp[j] + 1
+                        cnt[i] = cnt[j]
+                    elif dp[j] + 1 == dp[i]:    # 若等于，不必更新dp[i]，意味着之前dp[i]长度的的组合方式、现在dp[j]+1的组合方式都有效，所以累加cnt[i] + cnt[j]
+                        cnt[i] += cnt[j]
+        maxLen = max(dp)
+        return sum([cnt[i] for i, length in enumerate(dp) if length == maxLen])     # 最大递增子序列长度是maxLen，所有能组合成这个长度的组合方式有多少种
+
+    def findLongestChain(self, pairs: List[List[int]]) -> int:
+        """
+        646.最长数对链
+        2023.07.23 中等
+        题解：没做出来可以先看下答案，并不难 https://leetcode.cn/problems/maximum-length-of-pair-chain/solutions/1793617/zui-chang-shu-dui-lian-by-leetcode-solut-ifpn/?envType=study-plan-v2&envId=dynamic-programming
+        """
+        pairs = sorted(pairs, key=lambda x: x[0])
+        n = len(pairs)
+        dp = [1] * n
+        for i in range(n):
+            for j in range(i):
+                if pairs[j][-1] < pairs[i][0]:      # pairs[i]可以放到后面
+                    dp[i] = max(dp[i], dp[j] + 1)
+        return max(dp)
+
+
 if __name__ == "__main__":
     sl = Solution()
 
-    s1 = "sea"
-    s2 = "eat"
-    print(sl.minimumDeleteSum(s1, s2))
+    pairs = [[-6,9],[1,6],[8,10],[-1,4],[-6,-2],[-9,8],[-5,3],[0,3]]
+    print(sl.findLongestChain(pairs))
