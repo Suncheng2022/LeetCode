@@ -263,10 +263,52 @@ class Solution:
         # else:
         #     return res ** 2
 
+    def longestPalindrome(self, s: str) -> str:
+        """
+        5.最长回文子串
+        2023.07.22 中等
+        题解：想到 中心探测，先往左边、再往右边、最后同时往两边，就不用考虑奇数个还是偶数个了
+        """
+        maxSub = ""
+        for i in range(len(s)):
+            # 往左探
+            l = i - 1
+            while l >= 0 and s[l] == s[i]:
+                l -= 1
+            l += 1
+            # 往右探
+            r = i + 1
+            while r <= len(s) - 1 and s[r] == s[i]:
+                r += 1
+            r -= 1
+            # 往两边探
+            while l >= 0 and r <= len(s) - 1 and s[l] == s[r]:
+                l -= 1
+                r += 1
+            l += 1
+            r -= 1
+            maxSub = s[l:r + 1] if len(s[l:r + 1]) > len(maxSub) else maxSub
+        return maxSub
+
+    def wordBreak(self, s: str, wordDict: List[str]) -> bool:
+        """
+        139.单词拆分
+        2023.07.22 中等
+        题解：看了答案，细想一下有动态规划的思想在里面，但这里不是诸位去比较，每次比较是若干个字符，看代码就明白啦
+        """
+        n = len(s)
+        dp = [False for _ in range(n + 1)]      # dp[i]表示前i位能否被字典表示，自然需要到 n
+        dp[0] = True        # 前0位肯定能表示，空嘛
+        for i in range(n + 1):      # 用来指示dp[i]
+            for j in range(i + 1, n + 1):       # 前i位的后若干位是否也能表示(不像之前的动态规划一位一位的去比较，这里用一个for循环)
+                if dp[i] and s[i:j] in wordDict:    # dp[i]的i与s[i:j]的i，意义上刚好差1位，你品品
+                    dp[j] = True
+        return dp[-1]
 
 
 if __name__ == "__main__":
     sl = Solution()
 
-    matrix = [['0']]
-    print(sl.maximalSquare(matrix))
+    s = "catsandog"
+    wordDict = ["cats", "dog", "sand", "and", "cat"]
+    print(sl.wordBreak(s, wordDict))
