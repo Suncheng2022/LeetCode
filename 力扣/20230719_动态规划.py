@@ -305,10 +305,68 @@ class Solution:
                     dp[j] = True
         return dp[-1]
 
+    def longestPalindromeSubseq(self, s: str) -> int:
+        """
+        516.最长回文子序列
+        2023.07.23 中等
+        题解：没做过 注意dp的构造 https://leetcode.cn/problems/longest-palindromic-subsequence/solutions/930442/zui-chang-hui-wen-zi-xu-lie-by-leetcode-hcjqp/?envType=study-plan-v2&envId=dynamic-programming
+        """
+        # n = len(s)
+        # dp = [[0] * n for _ in range(n)]    # dp[i][j]代表s下标[i,j]闭区间范围内最长回文子序列
+        # for i in range(n - 1, -1, -1):      # i往左移动，所以从右开始
+        #     dp[i][i] = 1    # 每个字符都是回文子序列
+        #     for j in range(i + 1, n):
+        #         if s[i] == s[j]:
+        #             dp[i][j] = dp[i + 1][j - 1] + 2     # 不用担心j跑到i左边去，因为i > j的dp均为0
+        #         else:
+        #             dp[i][j] = max(dp[i + 1][j], dp[i][j - 1])      # 如果不等，就看看附近刚刚扫描过的多长
+        # return dp[0][-1]
+
+        # 重写一遍
+        n = len(s)
+        dp = [[0] * n for _ in range(n)]
+        for i in range(n - 1, -1, -1):
+            dp[i][i] = 1
+            for j in range(i + 1, n):
+                if s[i] == s[j]:
+                    dp[i][j] = dp[i + 1][j - 1] + 2
+                else:
+                    dp[i][j] = max(dp[i + 1][j], dp[i][j - 1])
+        return dp[0][-1]
+
+    def minimumDeleteSum(self, s1: str, s2: str) -> int:
+        """
+        712.两个字符串的最小ASCII删除和
+        2023.07.23 中等
+        题解：同样是注意dp的构造 https://leetcode.cn/problems/minimum-ascii-delete-sum-for-two-strings/solutions/1712998/liang-ge-zi-fu-chuan-de-zui-xiao-asciish-xllf/?envType=study-plan-v2&envId=dynamic-programming
+        """
+        m = len(s1)
+        n = len(s2)
+        # 因为dp要表示2个字符串前几个的概念，当然包括 前0个 的概念
+        # dp[0][0]、dp[0][j]、dp[i][0]要分别初始化，切记不要出错
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        for j in range(1, n + 1):
+            dp[0][j] = dp[0][j - 1] + ord(s2[j - 1])
+        for i in range(1, m + 1):
+            dp[i][0] = dp[i - 1][0] + ord(s1[i - 1])
+        # 开始遍历
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                # 有1个字符串为空，另一个也只能为空二者才能相等；也算在初始化dp
+                if i == 0:
+                    dp[i][j] = dp[i][j - 1] + ord(s2[j - 1])     # 不为空的字符要添加一个新字符，那么dp结果是没加之前+添加这个字符的ACSII值
+                elif j == 0:
+                    dp[i][j] = dp[i - 1][j] + ord(s1[i - 1])
+                elif s1[i - 1] == s2[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1]
+                elif s1[i - 1] != s2[j - 1]:
+                    dp[i][j] = min(dp[i - 1][j] + ord(s1[i - 1]),   # dp[i - 1][j] s1的前i-1个字符、s2的前j个字符，是没包括s1[i - 1]的
+                                   dp[i][j - 1] + ord(s2[j - 1]))   # 同上
+        return dp[-1][-1]
 
 if __name__ == "__main__":
     sl = Solution()
 
-    s = "catsandog"
-    wordDict = ["cats", "dog", "sand", "and", "cat"]
-    print(sl.wordBreak(s, wordDict))
+    s1 = "sea"
+    s2 = "eat"
+    print(sl.minimumDeleteSum(s1, s2))
