@@ -426,9 +426,55 @@ class Solution:
                     dp[i] = max(dp[i], dp[j] + 1)
         return max(dp)
 
+    def longestSubsequence(self, arr: List[int], difference: int) -> int:
+        """
+        1218.最长定差子序列
+        2023.07.24 中等
+        题解：或直接看答案 尝试一下
+        """
+        from collections import defaultdict
+        # 看答案，代码特别简单
+        # 以元素值为key
+        dp = defaultdict(int)   # 工厂函数，可直接获取任意key而不担心报错，value默认为0
+        # 因为要计算等差子序列，我们总需要获取当前遍历v的 前一个等差值v-difference 的dp，而不是将每个arr[i]放到arr[j]后去比较(像 300.)，这样也减少了复杂度
+        for v in arr:
+            dp[v] = dp[v - difference] + 1
+        return max(dp.values())
+
+        # 思路同 300.等题 直接使用会超时
+        # n = len(arr)
+        # dp = [1] * n
+        # for i in range(n):
+        #     for j in range(i):
+        #         if arr[i] - arr[j] == difference:
+        #             dp[i] = max(dp[i], dp[j] + 1)
+        # return max(dp)
+
+    def longestArithSeqLength(self, nums: List[int]) -> int:
+        """
+        1027.最长等差数列
+        2023.07.24 中等
+        题解：https://leetcode.cn/problems/longest-arithmetic-subsequence/?envType=study-plan-v2&envId=dynamic-programming
+        """
+        # 代码从内层for开始看
+        minV, maxV = min(nums), max(nums)
+        difference = maxV - minV
+        res = 0
+        for d in range(-difference, difference + 1):
+            # 固定差值d后，进行动态规划遍历
+            f = dict()
+            for n in nums:
+                # 当前遍历值n的前一个数n-d是否存在f中，则有f(n)=f(n-d)+1，不存在则f(n)=1
+                if n - d in f:
+                    f[n] = max(0, f[n - d] + 1)
+                    res = max(res, f[n])
+                f[n] = max(f.get(n, 0), 1)      # 若当前遍历的值不存在于f中，置1
+        return res
+
+
 
 if __name__ == "__main__":
     sl = Solution()
 
-    pairs = [[-6,9],[1,6],[8,10],[-1,4],[-6,-2],[-9,8],[-5,3],[0,3]]
-    print(sl.findLongestChain(pairs))
+    nums = [20,1,15,3,10,5,8]
+    print(sl.longestArithSeqLength(nums))
