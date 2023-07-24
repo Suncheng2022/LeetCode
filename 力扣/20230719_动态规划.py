@@ -471,10 +471,71 @@ class Solution:
                 f[n] = max(f.get(n, 0), 1)      # 若当前遍历的值不存在于f中，置1
         return res
 
+    def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+        """
+        1143.最长公共子序列
+        2023.07.24 中等
+        题解：二维动态规划 https://leetcode.cn/problems/longest-common-subsequence/solutions/696763/zui-chang-gong-gong-zi-xu-lie-by-leetcod-y7u0/?envType=study-plan-v2&envId=dynamic-programming
+        """
+        m = len(text1)
+        n = len(text2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if text1[i - 1] == text2[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + 1
+                else:
+                    dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+        return dp[-1][-1]
+
+    def maxUncrossedLines(self, nums1: List[int], nums2: List[int]) -> int:
+        """
+        1035.不相交的线
+        2023.07.24 中等
+        题解：能想到与上题 1143.最长公共子序列 解题思路可能相同--事实证明，一模一样
+        """
+        m = len(nums1)
+        n = len(nums2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]      # nums1的前i个字符、nums2的前j个字符
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if nums1[i - 1] == nums2[j - 1]:        # 相等，就可以放到二者公共子序列后面
+                    dp[i][j] = dp[i - 1][j - 1] + 1
+                else:       # 不等，指定不能同时放了，则用 放i指向的元素、不放j指向的元素即dp[i][j-1] 和 放j指向的元素、不放i指向的元素即dp[i-1][j] 的较大者更新dp[i][j]
+                    dp[i][j] = max(dp[i][j - 1], dp[i - 1][j])      # 这里面包含着 都不放 的意思，若写成都不放就错了，有时候只放一个公共子序列可能会更长
+        return dp[-1][-1]
+
+    def maxProfit(self, prices: List[int]) -> int:
+        """
+        309.最佳买卖股票时机含冷冻期
+        2023.07.24 中等
+        题解：再看一遍官方解析吧；我没看过答案的代码，牛逼！
+            依旧是每天三个状态，官方答案的解析比以前更清楚 https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-with-cooldown/solutions/323509/zui-jia-mai-mai-gu-piao-shi-ji-han-leng-dong-qi-4/?envType=study-plan-v2&envId=dynamic-programming
+        """
+        # 每天的三种状态：
+        #   1.持有
+        #   2.不持有，处于冷冻期
+        #   3.不持有，不处于冷冻期
+        # dp = [[0, 0, 0] for _ in range(len(prices))]
+        # dp[0] = [-prices[0], 0, 0]      # 初始化第一天：若持有只能是第一天买入的嘛；不持有也不用区分是否在冷冻期，因为第一天嘛
+        # for i in range(1, len(prices)):
+        #     dp[i][0] = max(dp[i - 1][0], dp[i - 1][2] - prices[i])
+        #     dp[i][1] = dp[i - 1][0] + prices[i]     # 今天不持有且处于冷冻期，只能是昨天持有今天卖了
+        #     dp[i][2] = max(dp[i - 1][1], dp[i - 1][2])      # 今天不持有且不处于冷冻期，只能是昨天就不持有
+        # return max(dp[-1][1:])
+
+        # 重复一遍
+        dp = [[0, 0, 0] for _ in range(len(prices))]
+        dp[0] = [-prices[0], 0, 0]
+        for i in range(1, len(prices)):
+            dp[i][0] = max(dp[i - 1][0], dp[i - 1][2] - prices[i])
+            dp[i][1] = dp[i - 1][0] + prices[i]
+            dp[i][2] = max(dp[i - 1][1], dp[i - 1][2])
+        return max(dp[-1][1:])
 
 
 if __name__ == "__main__":
     sl = Solution()
 
-    nums = [20,1,15,3,10,5,8]
-    print(sl.longestArithSeqLength(nums))
+    prices = [1,2,3,0,2]
+    print(sl.maxProfit(prices))
