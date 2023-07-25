@@ -1,4 +1,12 @@
-from typing import List
+from typing import List, Optional
+
+
+# Definition for a binary tree node.
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
 
 
 class Solution:
@@ -525,17 +533,81 @@ class Solution:
         # return max(dp[-1][1:])
 
         # 重复一遍
-        dp = [[0, 0, 0] for _ in range(len(prices))]
+        # dp = [[0, 0, 0] for _ in range(len(prices))]
+        # dp[0] = [-prices[0], 0, 0]
+        # for i in range(1, len(prices)):
+        #     dp[i][0] = max(dp[i - 1][0], dp[i - 1][2] - prices[i])
+        #     dp[i][1] = dp[i - 1][0] + prices[i]
+        #     dp[i][2] = max(dp[i - 1][1], dp[i - 1][2])
+        # return max(dp[-1][1:])
+
+        # 再重复一遍，不嫌烦！
+        n = len(prices)
+        # 3种状态：1.持有 2.不持有，处于冷冻期 3.不持有，不在冷冻期
+        dp = [[0, 0, 0] for _ in range(n)]
         dp[0] = [-prices[0], 0, 0]
-        for i in range(1, len(prices)):
+        for i in range(1, n):
             dp[i][0] = max(dp[i - 1][0], dp[i - 1][2] - prices[i])
             dp[i][1] = dp[i - 1][0] + prices[i]
-            dp[i][2] = max(dp[i - 1][1], dp[i - 1][2])
+            dp[i][2] = max(dp[i - 1][2], dp[i - 1][1])
         return max(dp[-1][1:])
+
+    def maxProfit(self, prices: List[int], fee: int) -> int:
+        """
+        714.买卖股票的最佳时机含手续费
+        2023.07.25 中等
+        题解：状态找不对，本题只有2个状态 https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/solutions/524669/mai-mai-gu-piao-de-zui-jia-shi-ji-han-sh-rzlz/?envType=study-plan-v2&envId=dynamic-programming
+        """
+        n = len(prices)
+        # 本题只2种状态：1.不持有 2.持有
+        dp = [[0, 0] for _ in range(n)]
+        dp[0] = [0, -prices[0] - fee]
+        for i in range(1, n):
+            dp[i][0] = max(dp[i - 1][0], dp[i - 1][1] + prices[i])
+            dp[i][1] = max(dp[i - 1][1], dp[i - 1][0] - prices[i] - fee)
+        return dp[-1][0]
+
+    def numTrees(self, n: int) -> int:
+        """
+        96.不同的二叉搜索树
+        2023.07.25 中等
+        题解：想不起来思路，一看代码就懂了
+        """
+        dp = [0] * (n + 1)    # dp[i]代表i个节点能组成多少不同的BST
+        dp[0] = 1
+        dp[1] = 1
+        for i in range(2, n + 1):       # 遍历计算dp[i]
+            for j in range(i):      # 其中一棵子树使用j个节点，则另一棵子树使用i-1-j个节点(根节点还占一个呢)
+                dp[i] += dp[j] * dp[i - 1 - j]       # 这里是 += 而不是 =，要把i个节点能组成几种不同BST的情况都考虑一遍，这些情况的结果是要累加的
+        return dp[-1]
+
+    def generateTrees(self, n: int) -> List[Optional[TreeNode]]:
+        """
+        95.不同的二叉搜索树II
+        2023.07.25 中等
+        题解：
+        """
+        def func(start, end):
+            if start > end:
+                return [None, ]
+            res = []
+            for i in range(start, end + 1):
+                lefts = func(start, i - 1)
+                rights = func(i + 1, end)
+                for l in lefts:
+                    for r in rights:
+                        root = TreeNode(i)
+                        root.left = l
+                        root.right = r
+                        res.append(root)
+            return res
+
+        res = func(1, n)
+        return res
+
 
 
 if __name__ == "__main__":
     sl = Solution()
 
-    prices = [1,2,3,0,2]
-    print(sl.maxProfit(prices))
+    print(sl.numTrees(1))
