@@ -623,10 +623,49 @@ class Solution:
         return max(max(func(root.left)) + max(func(root.right)),            # 不偷根节点
                    root.val + func(root.left)[0] + func(root.right)[0])     # 偷根节点
 
-        # 找一下动态规划的解法
+    def numSquares(self, n: int) -> int:
+        """
+        279.完全平方数【超时】
+        2023.07.25 中等
+        题解：n由多少个完全平方数相加，n-1*1由多少个完全平方数相加，n-2*2、n-3*3...
+        """
+        # 官方答案C++
+        dp = [0] * (n + 1)
+        for i in range(1, n + 1):
+            minn = float('inf')
+            j = 1
+            while i - j ** 2 >= 0:
+                minn = min(minn, dp[i - j ** 2])
+                j += 1
+            dp[i] = minn + 1    # minn得到的是i-j^2所需最小完全平方数的和
+        return dp[-1]
+
+        # 超时 应该不是代码的原因
+        # dp = [0] * (n + 1)      # dp[0]肯定是0啦；dp[i]  i最少可由多少个完全平方数相加组成
+        # for i in range(1, n + 1):
+        #     dp[i] = i       # 先假设有i个1x1相加，这是最多的可能
+        #     j = 1
+        #     while i - j ** 2 >= 0:      # 通过尝试不断去更新缩小dp[i]
+        #         dp[i] = min(dp[i], dp[i - j ** 2] + 1)
+        #         j += 1
+        # return dp[n]
+
+    def change(self, amount: int, coins: List[int]) -> int:
+        """
+        518.零钱兑换
+        2023.07.25 中等
+        """
+        dp = [0] * (amount + 1)
+        dp[0] = 1       # 这是个细节，很重要，自己想不到
+        for coin in coins:
+            for i in range(coin, amount + 1):       # i指示更新哪个dp；包含了
+                dp[i] += dp[i - coin]       # i-coin表示当前组合加入coin硬币后正好满足金额i，对所有能考虑的i，就是范围coin<=i<=amount；如果组成金额i时，前面有金额i-coin的结果，用来更新即可
+        return dp[-1]
 
 
 if __name__ == "__main__":
     sl = Solution()
 
-    print(sl.numTrees(1))
+    amount = 5
+    coins = [1, 2, 5]
+    print(sl.change(amount, coins))
