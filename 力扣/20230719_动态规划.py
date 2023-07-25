@@ -605,6 +605,25 @@ class Solution:
         res = func(1, n)
         return res
 
+    def rob(self, root: Optional[TreeNode]) -> int:
+        """
+        337.打家劫舍II
+        2023.07.25 中等
+        题解：递归回溯，是动态规划吗
+        """
+        def func(node):
+            if not node:
+                return [0, 0]
+            # 注意leftLs、rightLs返回的形式
+            leftLs = func(node.left)
+            rightLs = func(node.right)
+            return [max(leftLs) + max(rightLs),         # 不偷当前节点
+                    node.val + leftLs[0] + rightLs[0]]  # 偷当前节点
+
+        return max(max(func(root.left)) + max(func(root.right)),            # 不偷根节点
+                   root.val + func(root.left)[0] + func(root.right)[0])     # 偷根节点
+
+        # 找一下动态规划的解法
 
 
 if __name__ == "__main__":
