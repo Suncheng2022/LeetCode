@@ -656,13 +656,21 @@ class Solution:
         2023.07.25 中等
         题解：遍历硬币、遍历更新dp[i] https://leetcode.cn/problems/coin-change-ii/solutions/821278/ling-qian-dui-huan-ii-by-leetcode-soluti-f7uh/?envType=study-plan-v2&envId=dynamic-programming
         """
-        # 重写一遍
+        # 再写一遍
         dp = [0] * (amount + 1)
-        dp[0] = 1       # 【注意】细节，金额为0的使用0个硬币，只有这一种组合
-        for coin in coins:      # 遍历硬币
-            for i in range(coin, amount + 1):   # 考虑所有 金额>=coin，计算所有能把coin放进去的方式
-                dp[i] += dp[i - coin]       # 所有金额为i-coin的，加上一个coin硬币就能组成金额i
+        dp[0] = 1
+        for coin in coins:
+            for i in range(coin, amount + 1):
+                dp[i] += dp[i - coin]       # 本题求几种硬币组合，而不是几个硬币，所以这里不+1
         return dp[-1]
+
+        # 重写一遍
+        # dp = [0] * (amount + 1)
+        # dp[0] = 1       # 【注意】细节，金额为0的使用0个硬币，只有这一种组合
+        # for coin in coins:      # 遍历硬币
+        #     for i in range(coin, amount + 1):   # 考虑所有 金额>=coin，计算所有能把coin放进去的方式
+        #         dp[i] += dp[i - coin]       # 所有金额为i-coin的，加上一个coin硬币就能组成金额i
+        # return dp[-1]
 
         # dp = [0] * (amount + 1)
         # dp[0] = 1       # 这是个细节，很重要，自己想不到
@@ -713,18 +721,61 @@ class Solution:
         2023.07.26 中等
         题解：反向动态规划
         """
+        # n = len(questions)
+        # dp = [0] * (n + 1)      # dp[n]=0作为边界条件初始化；dp[i]表示解决i及以后的题目能得到的最高分数；索引i 同时也是 题目索引
+        # for i in range(n - 1, -1, -1):   # 这里索引范围思考一下
+        #     dp[i] = max(questions[i][0] + dp[min(n, i + questions[i][1] + 1)],      # 当前题 做，则后面的能做的是i+ques[i][1]+1 对的
+        #                 dp[i + 1])      # 当前题 不做，直接使用上一个做了的题的结果
+        # return dp[0]
+
+        # 再写一遍
         n = len(questions)
-        dp = [0] * (n + 1)      # dp[n]=0作为边界条件初始化；dp[i]表示解决i及以后的题目能得到的最高分数；索引i 同时也是 题目索引
-        for i in range(n - 1, -1, -1):   # 这里索引范围思考一下
-            dp[i] = max(questions[i][0] + dp[min(n, i + questions[i][1] + 1)],      # 当前题 做，则后面的能做的是i+ques[i][1]+1 对的
-                        dp[i + 1])      # 当前题 不做，直接使用上一个做了的题的结果
+        dp = [0] * (n + 1)      # dp[n]=0，已经不包含题目了
+        for i in range(n - 1, -1, -1):
+            dp[i] = max(questions[i][0] + dp[min(n, i + questions[i][1] + 1)], dp[i + 1])
         return dp[0]
+
+    def coinChange(self, coins: List[int], amount: int) -> int:
+        """
+        322.零钱兑换
+        2023.07.26 中等
+        题解：答案 方法二 动态规划 dp[i]：金额i所需最少的硬币数
+            https://leetcode.cn/problems/coin-change/solutions/132979/322-ling-qian-dui-huan-by-leetcode-solution/
+        """
+        # 动态规划
+        dp = [float('inf')] * (amount + 1)     # 用一个较大的数初始化dp；dp[i] 组成金额i需要最少硬币数量
+        dp[0] = 0
+        for i in range(1, amount + 1):
+            for coin in coins:
+                if i - coin >= 0:
+                    dp[i] = min(dp[i], dp[i - coin] + 1)
+        return dp[-1] if dp[-1] != float('inf') else -1
+
+        # 递归解法 不好理解，不好背
+        # def func(amount):
+        #     if amount in memo:
+        #         return memo[amount]
+        #     elif amount == 0:
+        #         return 0
+        #     elif amount < 0:
+        #         return -1
+        #
+        #     best = float('inf')     # 用于记录这一轮遍历的最优值
+        #     for coin in coins:
+        #         subproblem = func(amount - coin)    # subproblem少了一个面值为coin的硬币
+        #         if subproblem < 0:      # 小于0说明无解，换硬币继续尝试
+        #             continue
+        #         best = min(best, subproblem + 1)    # subproblem不是少一个硬币的计算结果，再加上就是了
+        #     memo[amount] = best if best != float('inf') else -1
+        #     return memo[amount]
+        #
+        # memo = {}  # 备忘录，记录计算过值，减少计算复杂度
+        # return func(amount)
 
 
 if __name__ == "__main__":
     sl = Solution()
 
-    strs = ["10", "0", "1"]
-    m = 1
-    n = 1
-    print(sl.findMaxForm(strs, m, n))
+    coins = [1]
+    amount = 0
+    print(sl.coinChange(coins, amount))
