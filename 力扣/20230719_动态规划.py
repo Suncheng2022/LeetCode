@@ -772,10 +772,43 @@ class Solution:
         # memo = {}  # 备忘录，记录计算过值，减少计算复杂度
         # return func(amount)
 
+    def countGoodStrings(self, low: int, high: int, zero: int, one: int) -> int:
+        """
+        2466.统计构造好字符串的方案数
+        2023.07.26 中等
+        题解：乍一看比较难 题解说类似 70.爬楼梯
+            爬楼梯一次可以爬1阶或2阶，这里一次添加zero个'0'字符或one个'1'字符，思路果然一样！
+            https://leetcode.cn/problems/count-ways-to-build-good-strings/?envType=study-plan-v2&envId=dynamic-programming
+        """
+        MOD = 10 ** 9 + 7
+        dp = [0] * (high + 1)
+        dp[0] = 1
+        for i in range(1, high + 1):
+            if i >= zero:
+                dp[i] += dp[i - zero]
+            if i >= one:
+                dp[i] += dp[i - one]
+        return sum(dp[low:]) % MOD
+
+    def numDecodings(self, s: str) -> int:
+        """
+        91.解码方法
+        2023.07.26 中等
+        题解：考虑上次解码是1位or2位 https://leetcode.cn/problems/decode-ways/solutions/734344/jie-ma-fang-fa-by-leetcode-solution-p8np/?envType=study-plan-v2&envId=dynamic-programming
+        """
+        dp = [0] * (len(s) + 1)     # 解码前i位的方法数量
+        dp[0] = 1
+        for i in range(1, len(s) + 1):      # 遍历计算dp[i]；当前处理的是s[i]
+            # 解码可选择 解码1位 和 解码2位；和--意味着两种方式要同时考虑！
+            if s[i - 1] != '0':
+                dp[i] += dp[i - 1]                                      # 解码1位
+            if i > 1 and s[i - 2] != '0' and int(s[i - 2:i]) <= 26:     # 解码2位
+                dp[i] += dp[i - 2]
+        return dp[-1]
+
 
 if __name__ == "__main__":
     sl = Solution()
 
-    coins = [1]
-    amount = 0
-    print(sl.coinChange(coins, amount))
+    s = '06'
+    print(sl.numDecodings(s))
