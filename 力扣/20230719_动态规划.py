@@ -654,18 +654,77 @@ class Solution:
         """
         518.零钱兑换
         2023.07.25 中等
+        题解：遍历硬币、遍历更新dp[i] https://leetcode.cn/problems/coin-change-ii/solutions/821278/ling-qian-dui-huan-ii-by-leetcode-soluti-f7uh/?envType=study-plan-v2&envId=dynamic-programming
         """
+        # 重写一遍
         dp = [0] * (amount + 1)
-        dp[0] = 1       # 这是个细节，很重要，自己想不到
-        for coin in coins:
-            for i in range(coin, amount + 1):       # i指示更新哪个dp；包含了
-                dp[i] += dp[i - coin]       # i-coin表示当前组合加入coin硬币后正好满足金额i，对所有能考虑的i，就是范围coin<=i<=amount；如果组成金额i时，前面有金额i-coin的结果，用来更新即可
+        dp[0] = 1       # 【注意】细节，金额为0的使用0个硬币，只有这一种组合
+        for coin in coins:      # 遍历硬币
+            for i in range(coin, amount + 1):   # 考虑所有 金额>=coin，计算所有能把coin放进去的方式
+                dp[i] += dp[i - coin]       # 所有金额为i-coin的，加上一个coin硬币就能组成金额i
         return dp[-1]
+
+        # dp = [0] * (amount + 1)
+        # dp[0] = 1       # 这是个细节，很重要，自己想不到
+        # for coin in coins:
+        #     for i in range(coin, amount + 1):       # i指示更新哪个dp；包含了
+        #         dp[i] += dp[i - coin]       # i-coin表示当前组合加入coin硬币后正好满足金额i，对所有能考虑的i，就是范围coin<=i<=amount；如果组成金额i时，前面有金额i-coin的结果，用来更新即可
+        # return dp[-1]
+
+    def combinationSum4(self, nums: List[int], target: int) -> int:
+        """
+        377.组合总和IV
+        2023.07.26 中等
+        题解：相比 518.零钱兑换，本题将组合的不同顺序视为不同的结果
+            看答案 https://leetcode.cn/problems/combination-sum-iv/solutions/740581/zu-he-zong-he-iv-by-leetcode-solution-q8zv/?envType=study-plan-v2&envId=dynamic-programming
+        """
+        dp = [0] * (target + 1)
+        dp[0] = 1
+        # 先遍历组合的和，再考虑后面是否能添加nums的一个数，这样就考虑了组合顺序
+        for i in range(1, target + 1):
+            for n in nums:
+                if n <= i:
+                    dp[i] += dp[i - n]      # i-n后面放上n能组成i
+        return dp[-1]
+
+    def findMaxForm(self, strs: List[str], m: int, n: int) -> int:
+        """
+        474.一和零
+        2023.07.26 中等
+        题解：背包问题 三维背包问题 三维动态规划 https://leetcode.cn/problems/ones-and-zeroes/solutions/814806/yi-he-ling-by-leetcode-solution-u2z2/?envType=study-plan-v2&envId=dynamic-programming
+        """
+        from collections import Counter
+
+        dp = [[[0] * (n + 1) for _ in range(m + 1)] for _ in range(len(strs) + 1)]
+        for i in range(1, len(strs) + 1):
+            zeros = Counter(strs[i - 1])['0']       # 这里是strs[i-1]
+            ones = Counter(strs[i - 1])['1']
+            for j in range(m + 1):                  # 这里是从几个0开始迭代更新
+                for k in range(n + 1):              # 这里是从几个1开始迭代更新
+                    if j < zeros or k < ones:
+                        dp[i][j][k] = dp[i - 1][j][k]   # 当前字符串中'0' '1'的数量超过了j k，所以不能选
+                    elif j >= zeros and k >= ones:
+                        dp[i][j][k] = max(dp[i - 1][j][k], dp[i - 1][j - zeros][k - ones] + 1)      # 当前字符串strs[i-1]可选可不选，取结果较大的结果
+        return dp[-1][-1][-1]
+
+    def mostPoints(self, questions: List[List[int]]) -> int:
+        """
+        2140.解决智力问题
+        2023.07.26 中等
+        题解：反向动态规划
+        """
+        n = len(questions)
+        dp = [0] * (n + 1)      # dp[n]=0作为边界条件初始化；dp[i]表示解决i及以后的题目能得到的最高分数；索引i 同时也是 题目索引
+        for i in range(n - 1, -1, -1):   # 这里索引范围思考一下
+            dp[i] = max(questions[i][0] + dp[min(n, i + questions[i][1] + 1)],      # 当前题 做，则后面的能做的是i+ques[i][1]+1 对的
+                        dp[i + 1])      # 当前题 不做，直接使用上一个做了的题的结果
+        return dp[0]
 
 
 if __name__ == "__main__":
     sl = Solution()
 
-    amount = 5
-    coins = [1, 2, 5]
-    print(sl.change(amount, coins))
+    strs = ["10", "0", "1"]
+    m = 1
+    n = 1
+    print(sl.findMaxForm(strs, m, n))
