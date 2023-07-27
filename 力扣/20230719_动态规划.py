@@ -806,9 +806,63 @@ class Solution:
                 dp[i] += dp[i - 2]
         return dp[-1]
 
+    def mincostTickets(self, days: List[int], costs: List[int]) -> int:
+        """
+        983.最低票价
+        2023.07.27 中等
+        题解：https://leetcode.cn/problems/minimum-cost-for-tickets/solutions/233810/zui-di-piao-jie-by-leetcode-solution/?envType=study-plan-v2&envId=dynamic-programming
+        """
+        # 答案 递归
+        days = set(days)
+        memo = {}
+
+        def func(i):
+            """ 计算dp[i] 从第i天开始到今年结束所需花费 """
+            if i in memo:
+                return memo[i]
+
+            if i > 365:
+                return 0
+            elif i in days:
+                res = min(func(i + d) + c for d, c in zip([1, 7, 30], costs))
+                memo[i] = res
+                return memo[i]
+            else:
+                return func(i + 1)
+
+        return func(1)
+
+        # 没能全过
+        # dp = [0] * 366      # 1~365天；dp[i]表示从第i天开始到今年结束所需花费
+        # days = set(days)
+        # for i in range(365, 0, -1):     # 反序动态规划
+        #     if i in days:       # 如果这天需要旅行，就得买票啦。怎么买花费最小，细细品味
+        #         dp[i] = min(dp[i + d] + c for d, c in zip([1, 7, 30], costs) if i + d <= 365) if i + 1 <= 365 else costs[0]
+        #     else:               # 如果这天不需要旅行，继承dp[i+1]即可
+        #         dp[i] = dp[i + 1] if i + 1 <= 365 else 0
+        # return dp[1]        # 最后返回 从第1天开始到今年结束 所需花费
+
+    def numTilings(self, n: int) -> int:
+        """
+        790.多米诺和托米诺平铺
+        2023.07.27 中等
+        题解：很难 https://leetcode.cn/problems/domino-and-tromino-tiling/solutions/1962465/duo-mi-nuo-he-tuo-mi-nuo-ping-pu-by-leet-7n0j/?envType=study-plan-v2&envId=dynamic-programming
+            dp[0]的初始化：i从1开始计数，就是0时表示一列都没有，相当于填满
+        """
+        MOD = 10 ** 9 + 7
+        dp = [[0] * 4 for _ in range(n + 1)]
+        dp[0][3] = 1
+        for i in range(1, n + 1):
+            dp[i][0] = dp[i - 1][3] % MOD
+            dp[i][1] = (dp[i - 1][0] + dp[i - 1][2]) % MOD
+            dp[i][2] = (dp[i - 1][0] + dp[i - 1][1]) % MOD
+            dp[i][3] = (dp[i - 1][3] + dp[i - 1][0] + dp[i - 1][1] + dp[i - 1][2]) % MOD
+        return dp[-1][-1] % MOD
+
 
 if __name__ == "__main__":
     sl = Solution()
 
-    s = '06'
-    print(sl.numDecodings(s))
+    days = [364]
+    costs = [3, 3, 1]
+    print(sl.mincostTickets(days, costs))
