@@ -719,7 +719,7 @@ class Solution:
         """
         2140.解决智力问题
         2023.07.26 中等
-        题解：反向动态规划
+        题解：答案 提示2 反向动态规划 https://leetcode.cn/problems/solving-questions-with-brainpower/solutions/1233147/jie-jue-zhi-li-wen-ti-by-leetcode-soluti-ieuq/?envType=study-plan-v2&envId=dynamic-programming
         """
         # n = len(questions)
         # dp = [0] * (n + 1)      # dp[n]=0作为边界条件初始化；dp[i]表示解决i及以后的题目能得到的最高分数；索引i 同时也是 题目索引
@@ -778,7 +778,7 @@ class Solution:
         2023.07.26 中等
         题解：乍一看比较难 题解说类似 70.爬楼梯
             爬楼梯一次可以爬1阶或2阶，这里一次添加zero个'0'字符或one个'1'字符，思路果然一样！
-            https://leetcode.cn/problems/count-ways-to-build-good-strings/?envType=study-plan-v2&envId=dynamic-programming
+            https://leetcode.cn/problems/count-ways-to-build-good-strings/solutions/1964910/by-endlesscheng-4j22/?envType=study-plan-v2&envId=dynamic-programming
         """
         MOD = 10 ** 9 + 7
         dp = [0] * (high + 1)
