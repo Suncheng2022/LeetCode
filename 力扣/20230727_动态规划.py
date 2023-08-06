@@ -80,10 +80,41 @@ class Solution:
                         questions[i][0] + dp[min(n, i + questions[i][1] + 1)])
         return dp[0]
 
+    def findMaxForm(self, strs: List[str], m: int, n: int) -> int:
+        """ 474.一和零
+            背包问题：物品和容量，三维背包问题，考虑两个容量 """
+        from collections import Counter
+
+        dp = [[[0] * (n + 1) for _ in range(m + 1)] for _ in range(len(strs) + 1)]      # dp[i][j][k]
+        for i in range(1, len(strs) + 1):       # i=0 即前0个字符串结果肯定都为0，所以从1开始遍历
+            # 统计当前字符串'0'和'1'的数量
+            zeros = Counter(strs[i - 1])['0']
+            ones = Counter(strs[i - 1])['1']
+            # 针对前i个字符串，动态规划 计算包含m个0、n个1的最大子集长度
+            for j in range(m + 1):
+                for k in range(n + 1):
+                    if j < zeros or k < ones:       # 如果j、k小于当前字符串0、1的数目，则当前字符串不能选，超出j、k数量限制了
+                        dp[i][j][k] = dp[i - 1][j][k]
+                    elif j >= zeros and k >= ones:  # 可以选当前字符串，则 选
+                        dp[i][j][k] = max(dp[i - 1][j][k], dp[i - 1][j - zeros][k - ones] + 1)
+        return dp[-1][-1][-1]
+
+    def combinationSum4(self, nums: List[int], target: int) -> int:
+        """ 377.组合总和IV
+            dp[i] 和为i的组合数 """
+        dp = [0] * (target + 1)
+        dp[0] = 1       # 和为0只有1种方案--什么都不选
+        for i in range(1, target + 1):
+            # 计算每个dp[i]均遍历nums
+            for n in nums:
+                if n <= i:
+                    dp[i] += dp[i - n]      # 和为i-n 的组合后面加上 元素n 就是 和i
+        return dp[-1]
 
 
 if __name__ == '__main__':
     sl = Solution()
 
-    questions = [[3,2],[4,3],[4,4],[2,5]]
-    print(sl.mostPoints(questions))
+    nums = [1,2,3]
+    target = 4
+    print(sl.combinationSum4(nums, target))
