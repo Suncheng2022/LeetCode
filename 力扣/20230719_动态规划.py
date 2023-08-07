@@ -462,7 +462,7 @@ class Solution:
         """
         1027.最长等差数列
         2023.07.24 中等
-        题解：https://leetcode.cn/problems/longest-arithmetic-subsequence/?envType=study-plan-v2&envId=dynamic-programming
+        题解：https://leetcode.cn/problems/longest-arithmetic-subsequence/solutions/2238031/zui-chang-deng-chai-shu-lie-by-leetcode-eieq8/?envType=study-plan-v2&envId=dynamic-programming
         """
         # 代码从内层for开始看
         minV, maxV = min(nums), max(nums)
@@ -572,7 +572,7 @@ class Solution:
         96.不同的二叉搜索树
         2023.07.25 中等
         题解：想不起来思路，一看代码就懂了
-        """
+            https://leetcode.cn/problems/unique-binary-search-trees/solutions/330990/shou-hua-tu-jie-san-chong-xie-fa-dp-di-gui-ji-yi-h/?envType=featured-list&envId=2cktkvj        """
         dp = [0] * (n + 1)    # dp[i]代表i个节点能组成多少不同的BST
         dp[0] = 1
         dp[1] = 1
@@ -585,7 +585,7 @@ class Solution:
         """
         95.不同的二叉搜索树II
         2023.07.25 中等
-        题解：
+        题解：https://leetcode.cn/problems/unique-binary-search-trees-ii/solutions/339143/bu-tong-de-er-cha-sou-suo-shu-ii-by-leetcode-solut/?envType=study-plan-v2&envId=dynamic-programming
         """
         def func(start, end):
             if start > end:
