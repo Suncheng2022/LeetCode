@@ -1,5 +1,12 @@
-from typing import List
+from typing import List, Optional
 
+
+# Definition for a binary tree node.
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
 
 class Solution:
     def numTilings(self, n: int) -> int:
@@ -111,10 +118,47 @@ class Solution:
                     dp[i] += dp[i - n]      # 和为i-n 的组合后面加上 元素n 就是 和i
         return dp[-1]
 
+    def change(self, amount: int, coins: List[int]) -> int:
+        """ 518.零钱兑换II
+            能想到背包问题--物品和容量 """
+        dp = [0] * (amount + 1)
+        dp[0] = 1
+        for coin in coins:      # 本题求组成金额的硬币组合数，由示例可知是包含顺序的，因此从遍历硬币开始，对所有的金额i，其硬币组合顺序都有序--即硬币遍历顺序
+            for i in range(coin, amount + 1):   # 遍历所有能允许加入硬币coin的金额
+                dp[i] += dp[i - coin]       # 组成金额i-coin的，加上coin刚好组成金额i
+        return dp[-1]
+
+    def numSquares(self, n: int) -> int:
+        """ 279.完全平方数
+            dp[i]表示和为i的完全平方数的最少数量，对每个dp[i]遍历1~sqrt(i) """
+        from math import sqrt
+
+        dp = [0] * (n + 1)      # dp[0]为0，防止计算越界
+        for i in range(1, n + 1):
+            minn = n    # 记录和为i所需完全平方数的 最少数量
+            for j in range(1, int(sqrt(i)) + 1):
+                minn = min(minn, dp[i - j * j])     # 从 和i 中把j^2拿掉，用前面的已知推后面的
+            dp[i] = minn + 1    # +1就是内层for去掉的某j^2
+        return dp[-1]
+
+    def rob(self, root: Optional[TreeNode]) -> int:
+        """ 337.打家劫舍III
+            直接看代码好懂些。递归回溯，是动态规划吗？"""
+        def func(node):
+            if not node:
+                return [0, 0]
+            lefts = func(node.left)
+            rights = func(node.right)
+            return [node.val + lefts[1] + rights[1],    # 偷当前节点
+                    max(lefts) + max(rights)]           # 不偷当前节点
+
+        return max(root.val + func(root.left)[1] + func(root.right)[1],
+                   max(func(root.left)) + max(func(root.right)))
+
+
 
 if __name__ == '__main__':
     sl = Solution()
 
-    nums = [1,2,3]
-    target = 4
-    print(sl.combinationSum4(nums, target))
+    n = 13
+    print(sl.numSquares(n))
