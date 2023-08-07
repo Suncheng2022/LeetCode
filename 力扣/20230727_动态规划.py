@@ -155,10 +155,109 @@ class Solution:
         return max(root.val + func(root.left)[1] + func(root.right)[1],
                    max(func(root.left)) + max(func(root.right)))
 
+    def generateTrees(self, n: int) -> List[Optional[TreeNode]]:
+        """ 95.不同的二叉搜索树II
+            递归 回溯 """
+        def func(start, end):
+            """ 生成start~end能够成的所有子树，用于构建二叉搜索树 """
+            if start > end:     # 无法构成二叉搜索树了
+                return [None]   # None也是一种结果，比如有子树为空
+            res = []
+            for i in range(start, end + 1):     # start~end均要作为根节点
+                lefts = func(start, i - 1)
+                rights = func(i + 1, end)
+                for l in lefts:
+                    for r in rights:
+                        root = TreeNode(i)
+                        root.left = l
+                        root.right = r
+                        res.append(root)
+            return res
+
+        return func(1, n)
+
+    def numTrees(self, n: int) -> int:
+        """ 96.不同的二叉搜索树
+            动态规划 不用回溯 https://leetcode.cn/problems/unique-binary-search-trees/solutions/330990/shou-hua-tu-jie-san-chong-xie-fa-dp-di-gui-ji-yi-h/?envType=featured-list&envId=2cktkvj"""
+        dp = [0] * (n + 1)      # dp[i] i个节点能组成的BST数
+        dp[0] = 1   # 0个节点只能组成1种--空树
+        dp[1] = 1   # 1个节点只能组成1种--只有根节点的树
+        for i in range(2, n + 1):
+            for j in range(i):      # 其中一棵子树的节点数量为j，则另一棵为i-1-j
+                dp[i] += dp[j] * dp[i - 1 - j]
+        return dp[-1]
+
+    def maxProfit(self, prices: List[int], fee: int) -> int:
+        """ 714.买卖股票的最佳时机含手续费
+            动态规划 2种状态：不持有、持有，用前一天推今天的结果 """
+        n = len(prices)
+        # 2种状态：1.不持有 2.持有
+        dp = [[0, 0] for _ in range(n)]     # dp[i] 截止到索引第i天的 不持有 和 持有 的最大收益
+        dp[0] = [0, -prices[0] - fee]
+        for i in range(1, n):
+            dp[i][0] = max(dp[i - 1][0], dp[i - 1][1] + prices[i])
+            dp[i][1] = max(dp[i - 1][1], dp[i - 1][0] - prices[i] - fee)
+        return max([ls[0] for ls in dp])
+
+    def maxProfit(self, prices: List[int]) -> int:
+        """ 309.买卖股票的最佳时机含冷冻期
+            股票买卖 每天几种状态
+            据说官方答案解释很清楚 """
+        n = len(prices)
+        # 含冷冻期，则3种状态：1.持有 2.不持有，在冷冻期 3.不持有，不在冷冻期
+        dp = [[0, 0, 0] for _ in range(n)]
+        dp[0] = [-prices[0], 0, 0]      # 第1天/索引第0天要初始化，只能买才持有，不持有就不用区分了，因为这是第一天嘛
+        for i in range(1, n):
+            dp[i][0] = max(dp[i - 1][0], dp[i - 1][2] - prices[i])
+            dp[i][1] = dp[i - 1][0] + prices[i]
+            dp[i][2] = max(dp[i - 1][1], dp[i - 1][2])
+        return max([max(ls[1:]) for ls in dp])
+
+    def maxUncrossedLines(self, nums1: List[int], nums2: List[int]) -> int:
+        """ 1035.不相交的线
+            解题思路就是 1143.最长公共子序列 https://leetcode.cn/problems/uncrossed-lines/solutions/787955/bu-xiang-jiao-de-xian-by-leetcode-soluti-6tqz/?envType=study-plan-v2&envId=dynamic-programming"""
+        m, n = len(nums1), len(nums2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]      # dp[i][j] nums1的前i个字符、nums2的前j个字符 的 最长公共子序列
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if nums1[i - 1] == nums2[j - 1]:    # i-1、j-1就刚好使nums1、nums2的索引不越界了
+                    dp[i][j] = dp[i - 1][j - 1] + 1     # 【注意】dp索引与nums索引的意义区别
+                else:
+                    dp[i][j] = max(dp[i][j - 1], dp[i - 1][j])
+        return dp[-1][-1]
+
+    def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+        """ 1143.最长公共子序列
+            同 1035.不相交的线 """
+        m, n = len(text1), len(text2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if text1[i - 1] == text2[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + 1     # +1就是指的if条件中相等的那个字符
+                else:
+                    dp[i][j] = max(dp[i][j - 1], dp[i - 1][j])
+        return dp[-1][-1]
+
+    def longestArithSeqLength(self, nums: List[int]) -> int:
+        """ 1027.最长等差数列
+            固定等差d，动态规划 计算最长等差数列 没有使用dp """
+        minV, maxV = min(nums), max(nums)
+        difference = maxV - minV
+        res = float('-inf')
+        for d in range(-difference, difference + 1):    # 每固定“等差”，就遍历计算一次
+            f = dict()      # f[k]=v 截止到元素k 最长等差数列的长度是v；没出现在f中，则当前遍历的n是等差数列的第一个元素
+            for n in nums:
+                if n - d in f:
+                    f[n] = f[n - d] + 1
+                else:
+                    f[n] = 1
+                res = max(res, f[n])
+        return res
 
 
 if __name__ == '__main__':
     sl = Solution()
 
-    n = 13
-    print(sl.numSquares(n))
+    nums = [20,1,15,3,10,5,8]
+    print(sl.longestArithSeqLength(nums))
