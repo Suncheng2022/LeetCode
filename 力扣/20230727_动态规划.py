@@ -255,9 +255,101 @@ class Solution:
                 res = max(res, f[n])
         return res
 
+    def longestSubsequence(self, arr: List[int], difference: int) -> int:
+        """ 1218.最长定差子序列
+            同 1027.最长等差数列 """
+        res = float('-inf')
+        # for d in [-difference, difference]:     # 固定“等差”; 注意读题 多虑了
+        f = dict()
+        for n in arr:
+            if n - difference in f:      # 当前遍历 n，若n-d访问过，则n不是子序列的首元素，使用前面的结果推即可
+                f[n] = f[n - difference] + 1
+            else:               # 当前遍历 n 是子序列首元素，长度置1，因为目前子序列只有n自己一个元素
+                f[n] = 1
+            res = max(res, f[n])
+        return res
+
+    def findLongestChain(self, pairs: List[List[int]]) -> int:
+        """ 646.最长数对链
+            题目说了 可以以任意顺序选择数对，那先排下序，方便计算当前遍历pairs[i]和之前pairs[0:i]比较大小
+            https://leetcode.cn/problems/maximum-length-of-pair-chain/solutions/1793617/zui-chang-shu-dui-lian-by-leetcode-solut-ifpn/?envType=study-plan-v2&envId=dynamic-programming"""
+        n = len(pairs)
+        dp = [1] * n    # dp[i]截止到索引i个元素所组成的最长数对链；dp 必须初始化为1，不能初始化为0，因为每个单独的数对都是长度为1的数对链
+        pairs.sort(key=lambda x: x[0])
+        for i in range(1, n):
+            for j in range(i):
+                if pairs[j][-1] < pairs[i][0]:
+                    dp[i] = max(dp[i], dp[j] + 1)   # dp[i]要保留内层for的最大值
+        return dp[-1]
+
+    def findNumberOfLIS(self, nums: List[int]) -> int:
+        """ 673.最长递增子序列的个数
+            dp记录截止到当前元素 最长递增子序列的 长度、cnt记录截止到当前元素 最长递增子序列 的长度出现的次数. 因为题目求的就是 出现次数 """
+        # n = len(nums)
+        # dp = [1] * n    # dp、cnt二者初始化为1，因为每个单独的元素也是 最长递增子序列 嘛
+        # cnt = [1] * n
+        # for i in range(n):
+        #     for j in range(i):
+        #         if nums[j] < nums[i]:
+        #             if dp[i] < dp[j] + 1:
+        #                 dp[i] = dp[j] + 1
+        #                 cnt[i] = cnt[j]
+        #             elif dp[i] == dp[j] + 1:
+        #                 cnt[i] += cnt[j]
+        # maxLen = max(dp)
+        # return sum([cnt[i] for i, d in enumerate(dp) if d == maxLen])
+
+        # 重写一遍
+        # 题目没写可以任意顺序取 所以只能后面的元素和前面的依次比，必然有遍历
+        n = len(nums)
+        # dp、cnt均初始化为1, 因为每一个单独的元素 都是 递增子序列
+        dp = [1] * n    # 截止到索引i元素可组成的递增子序列 长度
+        cnt = [1] * n   # 截止到索引i元素可组成的递增子序列 长度 的出现次数，即组合方式数
+        for i in range(n):      # 遍历计算dp[i]
+            for j in range(i):  # 后面的元素 和 前面的元素 依次比，遍历
+                if nums[j] < nums[i]:   # nums[i]是否能放到nums[j]后面
+                    if dp[i] < dp[j] + 1:   # 放到nums[j]之后组成的递增序列长度可更新，同时要更新cnt[i]，因为最大长度变了 所以不是累加
+                        dp[i] = dp[j] + 1
+                        cnt[i] = cnt[j]
+                    elif dp[i] == dp[j] + 1:    # 放到nums[j]之后递增序列长度不变，则不必更新dp[i]，但发现了组成长度dp[j]+1的其他方式，cnt累加
+                        cnt[i] += cnt[j]
+        maxLen = max(dp)    # 组成的 递增子序列 的最大长度
+        return sum([cnt[i] for i, d in enumerate(dp) if d == maxLen])   # 返回所有 最大长度递增子序列 的出现次数之和，因为每个递增子序列最后一个元素是nums[i]，所以不会有重复
+
+    def lengthOfLIS(self, nums: List[int]) -> int:
+        """ 300.最长递增子序列
+            同 673.最长递增子序列的个数 ，更简单 只求最长递增子序列的 长度 """
+        n = len(nums)
+        dp = [1] * n    # dp[i] 以nums[i]结尾 的 递增子序列的最大长度；初始化 每个单独的元素都是 递增子序列
+        for i in range(n):      # 遍历计算dp[i]
+            for j in range(i):  # nums[i]依次与nums[:i]比较，必然遍历
+                if nums[j] < nums[i]:   # nums[i]能放到nums[j]后面
+                    if dp[i] < dp[j] + 1:
+                        dp[i] = dp[j] + 1
+        return max(dp)
+
+    def minimumDeleteSum(self, s1: str, s2: str) -> int:
+        """ 712.两个字符串的最小ASCII删除和
+            答案评论区 当成最长公共子序列：计算出公共子序列的ACSII和，然后与2字符串总和作差 """
+        m, n = len(s1), len(s2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]      # dp[i][j] s1前i个字符 s2前j个字符 的 最长公共子序列的ACSII码之和
+        sum = 0
+        for c in s1:
+            sum += ord(c)
+        for c in s2:
+            sum += ord(c)
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if s1[i - 1] == s2[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + ord(s1[i - 1]) * 2     # 注意 *2；+1即if条件相等的字符
+                else:
+                    dp[i][j] = max(dp[i][j - 1], dp[i - 1][j])      # 代码是不是很眼熟，以前是记录长度，现在记录ACSII码的和
+        return sum - dp[-1][-1]
+
 
 if __name__ == '__main__':
     sl = Solution()
 
-    nums = [20,1,15,3,10,5,8]
-    print(sl.longestArithSeqLength(nums))
+    s1 = "delete"
+    s2 = "leet"
+    print(sl.minimumDeleteSum(s1, s2))
