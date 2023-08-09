@@ -346,10 +346,107 @@ class Solution:
                     dp[i][j] = max(dp[i][j - 1], dp[i - 1][j])      # 代码是不是很眼熟，以前是记录长度，现在记录ACSII码的和
         return sum - dp[-1][-1]
 
+    def longestPalindromeSubseq(self, s: str) -> int:
+        """ 516.最长回文子序列
+            寻找回文就要考虑两个端点 子序列则需要两个循环对吧 """
+        n = len(s)
+        dp = [[0] * n for _ in range(n)]    # dp[i][j] s的索引i~j范围内最长回文子序列的长度
+        for i in range(n):      # 【注意】任意单独元素都是长度为1的 回文子序列
+            dp[i][i] = 1
+        for i in range(n - 1, -1, -1):      # i~j即寻找最长回文子序列的范围
+            for j in range(i + 1, n):
+                if s[i] == s[j]:
+                    dp[i][j] = dp[i + 1][j - 1] + 2     # 首尾可以各增加1位
+                else:
+                    dp[i][j] = max(dp[i + 1][j], dp[i][j - 1])      # 首增加1尾 或 尾增加1位，取较大的
+        return dp[0][-1]
+
+    def wordBreak(self, s: str, wordDict: List[str]) -> bool:
+        """ 139.单词拆分
+            dp[i]表示前i位字符能否被字典表示 s[i:j]是否能表示 刚好能计算dp[j]"""
+        n = len(s)
+        dp = [False for _ in range(n + 1)]
+        dp[0] = True    # 初始化dp 前0位认为能被字典表示
+        for i in range(n + 1):   # 指示dp[i], 利用s[i:j]计算后面的dp[j]；注意，这里不是从1开始
+            for j in range(i + 1, n + 1):
+                if dp[i] and s[i:j] in wordDict:    # dp[i] 前i位、s[i:j] 二者刚号拼成s[:j]即dp[j]所表示的范围
+                    dp[j] = True
+        return dp[-1]
+
+    def longestPalindrome(self, s: str) -> str:
+        """ 5.最长回文子串
+            题目意思似乎是找 索引连续的 子串 想到中心探测 """
+        n = len(s)
+        res = ""
+        for i in range(n):
+            l, r = i - 1, i + 1
+            curRes = 1
+            while l >= 0 and s[l] == s[i]:
+                l -= 1
+                curRes += 1
+            # l += 1      # while结束，要么l越界、要么不等，所以右移一位到不越界且相等的位置
+            while r <= n - 1 and s[r] == s[i]:
+                r += 1
+                curRes += 1
+            # r -= 1
+            while 0 <= l <= r <= n - 1 and s[l] == s[r]:
+                l -= 1
+                r += 1
+                curRes += 2
+            l += 1
+            r -= 1
+            res = s[l:r + 1] if r - l + 1 > len(res) else res
+        return res
+
+    def maximalSquare(self, matrix: List[List[str]]) -> int:
+        """ 221.最大正方形
+            官方答案最简单 dp大小同matrix
+            https://leetcode.cn/problems/maximal-square/solutions/234964/zui-da-zheng-fang-xing-by-leetcode-solution/?envType=study-plan-v2&envId=dynamic-programming"""
+        rows, cols = len(matrix), len(matrix[0])
+        dp = [[0] * cols for _ in range(rows)]      # 官方答案 dp与matrix大小一致，省的考虑加一行一列了
+        maxSide = 0
+        for i in range(rows):
+            for j in range(cols):
+                if matrix[i][j] == '1':
+                    if i == 0 or j == 0:
+                        dp[i][j] = 1
+                    else:
+                        dp[i][j] = 1 + min(dp[i - 1][j - 1], dp[i][j - 1], dp[i - 1][j])
+                maxSide = max(maxSide, dp[i][j])
+        return maxSide ** 2
+
+    def minFallingPathSum(self, matrix: List[List[int]]) -> int:
+        """ 931.下降路径最小和
+            动态规划 """
+        rows, cols = len(matrix), len(matrix[0])
+        for i in range(1, rows):
+            for j in range(cols):
+                curMin = matrix[i - 1][j]       # 注意 curMin的初始化 调试才知道
+                if j - 1 >= 0:
+                    curMin = min(curMin, matrix[i - 1][j - 1])
+                if j + 1 <= cols - 1:
+                    curMin = min(curMin, matrix[i - 1][j + 1])
+                matrix[i][j] += curMin
+        return min(matrix[-1])
+
+    def minimumTotal(self, triangle: List[List[int]]) -> int:
+        """ 120.三角形最小路径和
+            动态规划 """
+        for i in range(1, len(triangle)):
+            for j in range(len(triangle[i])):
+                # curMin的初始化要注意，要考虑别越了上一行的界
+                if j <= len(triangle[i - 1]) - 1:
+                    curMin = triangle[i - 1][j]
+                else:
+                    curMin = triangle[i - 1][j - 1]
+                if j - 1 >= 0:
+                    curMin = min(curMin, triangle[i - 1][j - 1])
+                triangle[i][j] += curMin
+        return min(triangle[-1])
+
 
 if __name__ == '__main__':
     sl = Solution()
 
-    s1 = "delete"
-    s2 = "leet"
-    print(sl.minimumDeleteSum(s1, s2))
+    triangle = [[2],[3,4],[6,5,7],[4,1,8,3]]
+    print(sl.minimumTotal(triangle))
