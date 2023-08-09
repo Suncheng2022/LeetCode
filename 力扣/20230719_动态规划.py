@@ -214,6 +214,7 @@ class Solution:
         221.最大正方形
         2023.07.21 中等
         题解：还是参考答案解法--dp添加一行0、一列0，dp[i+1][j+1]表示matrix[i][j]为右下角时正方形最大边长，这样可以完整地遍历一遍matrix，最后不需要特殊处理了
+        https://leetcode.cn/problems/maximal-square/solutions/44586/li-jie-san-zhe-qu-zui-xiao-1-by-lzhlyle/
         """
         # 答案解法
         m = len(matrix)
