@@ -444,6 +444,26 @@ class Solution:
                 triangle[i][j] += curMin
         return min(triangle[-1])
 
+    def maxCompatibilitySum(self, students: List[List[int]], mentors: List[List[int]]) -> int:
+        """ 1947.最大兼容性评分和
+            DETR 匈牙利算法
+            题目的意思是 计算 哪个学生与哪个老师的答案最接近 """
+        import numpy as np
+        import 
+
+        all2all = []        # 所有学生对所有老师的匹配结果
+        for stu in students:
+            stu2men = []    # 此学生对所有老师的匹配结果
+            for men in mentors:
+                curMatch = 0    # 遍历计算 此学生与1位老师的匹配结果
+                for s, m in zip(stu, men):
+                    curMatch -= (s + m)     # 匈牙利算法的最优是最小的，所以我们指定“越匹配 则越小(匈牙利 小即是优)”
+                stu2men.append(curMatch)
+            all2all.append(stu2men)
+        print(f'{all2all}')
+        all2all = np.asarray(all2all)
+# 还没写完！！！
+
 
 if __name__ == '__main__':
     sl = Solution()
