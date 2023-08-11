@@ -446,27 +446,89 @@ class Solution:
 
     def maxCompatibilitySum(self, students: List[List[int]], mentors: List[List[int]]) -> int:
         """ 1947.最大兼容性评分和
-            DETR 匈牙利算法
+            DETR 匈牙利算法 https://www.zhihu.com/tardis/zm/art/393028740?source_id=1003
             题目的意思是 计算 哪个学生与哪个老师的答案最接近 """
-        import numpy as np
-        import 
+        # import numpy as np
+        # from scipy.optimize import linear_sum_assignment
+        #
+        # all2all = []        # 所有学生对所有老师的匹配结果
+        # for stu in students:
+        #     stu2men = []    # 此学生对所有老师的匹配结果
+        #     for men in mentors:
+        #         curMatch = 0    # 遍历计算 此学生与1位老师的匹配结果
+        #         for s, m in zip(stu, men):
+        #             if s == m:  # 这个条件不能少，因为只有学生和老师相同题目答案相同才行
+        #                 curMatch -= 1    # 这里也注意，不是减s+m；匈牙利算法的最优是最小的，所以我们指定“越匹配 则越小(匈牙利 小即是优)”
+        #         stu2men.append(curMatch)
+        #     all2all.append(stu2men)
+        # print(f'{all2all}')
+        # all2all = np.asarray(all2all)
+        # rowInd, colInd = linear_sum_assignment(all2all)
+        # return int(all2all[rowInd, colInd].sum()) * (-1)
 
-        all2all = []        # 所有学生对所有老师的匹配结果
+        # 重写一遍
+        import numpy as np
+        from scipy.optimize import linear_sum_assignment
+
+        all2all = []    # 所有学生 对 所有老师 的匹配结果
         for stu in students:
-            stu2men = []    # 此学生对所有老师的匹配结果
+            stu2mens = []       # 一个学生 对 所有老师 的匹配结果
             for men in mentors:
-                curMatch = 0    # 遍历计算 此学生与1位老师的匹配结果
+                curMatch = 0
                 for s, m in zip(stu, men):
-                    curMatch -= (s + m)     # 匈牙利算法的最优是最小的，所以我们指定“越匹配 则越小(匈牙利 小即是优)”
-                stu2men.append(curMatch)
-            all2all.append(stu2men)
-        print(f'{all2all}')
+                    if s == m:
+                        curMatch -= 1       # 只要 学生与老师 的 相同题目的答案相同，就“加1” 因为使用匈牙利算法，只能求最小方案，所以这里使用负数
+                stu2mens.append(curMatch)
+            all2all.append(stu2mens)
+
         all2all = np.asarray(all2all)
-# 还没写完！！！
+        rowInd, colInd = linear_sum_assignment(all2all)
+        return int(all2all[rowInd, colInd].sum()) * (-1)
+
+    def uniquePathsWithObstacles(self, obstacleGrid: List[List[int]]) -> int:
+        """ 64.不同路径II """
+        m, n = len(obstacleGrid), len(obstacleGrid[0])
+        dp = [[0] * n for _ in range(m)]
+        dp[0][0] = 1    # 初始化配合后面判断 obstacleGrid[i][j]是否为1，才叫完美初始化
+        for i in range(m):
+            for j in range(n):
+                if obstacleGrid[i][j] == 1:     # 遇到障碍物；同时能处理obstacleGrid只有1个元素的情况
+                    dp[i][j] = 0
+                    continue
+                if i == 0 and j - 1 >= 0:
+                    dp[i][j] = dp[i][j - 1]
+                elif j == 0 and i - 1 >= 0:
+                    dp[i][j] = dp[i - 1][j]
+                elif i - 1 >= 0 and j - 1 >= 0:
+                    dp[i][j] = (dp[i - 1][j] + dp[i][j - 1])
+        return dp[-1][-1]
+
+    def minPathSum(self, grid: List[List[int]]) -> int:
+        """ 64.最小路径和"""
+        m, n = len(grid), len(grid[0])
+        for i in range(m):
+            for j in range(n):
+                if i == 0 and j - 1 >= 0:
+                    grid[i][j] += grid[i][j - 1]
+                elif j == 0 and i - 1 >= 0:
+                    grid[i][j] += grid[i - 1][j]
+                elif i - 1 >= 0 and j - 1 >= 0:
+                    grid[i][j] += min(grid[i - 1][j], grid[i][j - 1])
+        return grid[-1][-1]
+
+    def uniquePaths(self, m: int, n: int) -> int:
+        """ 62.不同路径 """
+        dp = [[1] * n] + [[1] + [0] * (n - 1) for _ in range(m - 1)]        # 巧妙的初始化 首行首列为1
+        print(dp)
+        for i in range(1, m):
+            for j in range(1, n):
+                dp[i][j] = (dp[i - 1][j] + dp[i][j - 1])
+        return dp[-1][-1]
 
 
 if __name__ == '__main__':
     sl = Solution()
 
-    triangle = [[2],[3,4],[6,5,7],[4,1,8,3]]
-    print(sl.minimumTotal(triangle))
+    m = 3
+    n = 2
+    print(sl.uniquePaths(m, n))
