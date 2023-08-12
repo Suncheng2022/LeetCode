@@ -525,10 +525,38 @@ class Solution:
                 dp[i][j] = (dp[i - 1][j] + dp[i][j - 1])
         return dp[-1][-1]
 
+    def deleteAndEarn(self, nums: List[int]) -> int:
+        """ 740.删除并获得点数
+            类似 打家劫舍 的思路 """
+        from collections import Counter
+
+        num2count = Counter(nums)
+        maxNum = max(nums)
+        total = [0] * (maxNum + 1)      # 统计每个 num * counts
+        for n, c in num2count.items():
+            total[n] = n * c
+        # 因为不能取连续的数字，所以接下来就是 打家劫舍 了
+        n = len(total)
+        dp = [0] * (n + 1)      # 前i个元素中，最多能偷多少钱
+        dp[1] = total[0]
+        for i in range(2, n + 1):       # 遍历计算dp
+            dp[i] = max(dp[i - 2] + total[i - 1], dp[i - 1])        # 注意，当前元素是 total[i-1]
+        return dp[-1]
+
+    def rob(self, nums: List[int]) -> int:
+        """ 198.打家劫舍
+            不能偷相邻的屋子 """
+        n = len(nums)
+        dp = [0] * (n + 1)      # dp[i] 偷前i间屋子能获得的最大金额
+        dp[1] = nums[0]
+        for i in range(2, n + 1):
+            dp[i] = max(dp[i - 2] + nums[i - 1], dp[i - 1])     # 注意，当前元素师 nums[i-1]
+        return dp[-1]
+
+
 
 if __name__ == '__main__':
     sl = Solution()
 
-    m = 3
-    n = 2
-    print(sl.uniquePaths(m, n))
+    nums = [2,2,3,3,3,4]
+    print(sl.deleteAndEarn(nums))
