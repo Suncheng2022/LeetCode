@@ -553,10 +553,47 @@ class Solution:
             dp[i] = max(dp[i - 2] + nums[i - 1], dp[i - 1])     # 注意，当前元素师 nums[i-1]
         return dp[-1]
 
+    def minCostClimbingStairs(self, cost: List[int]) -> int:
+        """ 746.使用最小花费爬楼梯
+            斐波那契数列 """
+        n = len(cost)
+        dp = [0] * (n + 1)
+        dp[0] = dp[1] = 0       # 可以从下标为0或1的台阶开始爬
+        for i in range(2, n + 1):
+            dp[i] = min(dp[i - 1] + cost[i - 1],    # dp[i] 表示到达索引第i个台阶所需最小花费，到达i但没越过i，所以不需要花费，所以加上跨过所需的花费
+                        dp[i - 2] + cost[i - 2])
+        return dp[-1]
+
+    def tribonacci(self, n: int) -> int:
+        """ 1137.第N个泰波那契数 """
+        dp = [0] * (n + 1)
+        dp[:3] = [0, 1, 1]
+        for i in range(3, n + 1):
+            dp[i] = sum(dp[i - 3:i])
+        return dp[-1] if n >= 3 else dp[n]
+
+    def fib(self, n: int) -> int:
+        """ 509.斐波那契数 """
+        if n == 0:
+            return 0
+        f = [0] * (n + 1)
+        f[1] = 1
+        for i in range(2, n + 1):
+            f[i] = f[i - 1] + f[i - 2]
+        return f[-1]
+
+    def climbStairs(self, n: int) -> int:
+        """ 70.爬楼梯 """
+        dp = [0] * (n + 1)      # dp[i] 爬到第i阶所需的方法数
+        dp[0] = 1
+        dp[1] = 1
+        for i in range(2, n + 1):
+            dp[i] = dp[i - 1] + dp[i - 2]
+        return dp[-1]
 
 
 if __name__ == '__main__':
     sl = Solution()
 
-    nums = [2,2,3,3,3,4]
-    print(sl.deleteAndEarn(nums))
+    n = 4
+    print(sl.fib(n))
