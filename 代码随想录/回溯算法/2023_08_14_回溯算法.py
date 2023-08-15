@@ -39,10 +39,87 @@ class Solution:
 
     def combinationSum3(self, k: int, n: int) -> List[List[int]]:
         """ 216.组合总和III """
-        # https://programmercarl.com/0216.%E7%BB%84%E5%90%88%E6%80%BB%E5%92%8CIII.html#%E6%80%9D%E8%B7%AF
+        # def backtracking(startInd):
+        #     # 回溯递归 的 终止条件，结束本次回溯
+        #     if sum(path) > n:       # 剪枝操作
+        #         return
+        #     if len(path) == k:
+        #         if sum(path) == n:
+        #             res.append(path[:])
+        #         return
+        #     for i in range(startInd, 9 + 1):    # 从1~9中选数; 也是起始索引
+        #         path.append(i)
+        #         backtracking(i + 1)
+        #         path.pop()
+        #
+        # res = []
+        # path = []
+        # backtracking(1)
+        # return res
 
+        # 剪枝 1.放在回溯函数的开始 【更好理解】
+        # 剪枝 2.放在for循环
+        def backtracking(startInd):
+            # 回溯递归 的 结束条件
+            if len(path) == k:
+                if sum(path) == n:
+                    res.append(path[:])
+                return
+            # 遍历
+            for i in range(startInd, 9 - (k - len(path)) + 1 + 1):      # 剪枝 索引最大的 起始点；也是遍历范围
+                path.append(i)
+                backtracking(i + 1)
+                path.pop()
+
+        res = []
+        path = []
+        backtracking(1)
+        return res
+
+    def letterCombinations(self, digits: str) -> List[str]:
+        """ 17.电话号码的字母组合 """
+        if len(digits) == 0:
+            return []
+        digit2letter = dict(zip(range(2, 10), ['abc', 'def',
+                                               'ghi', 'jkl', 'mno',
+                                               'pqrs', 'tuv', 'wxyz']))
+        # res = []
+        #
+        # def backtracking(index, curPath):
+        #     # 递归终止条件
+        #     if index == len(digits):
+        #         res.append(curPath)
+        #         return
+        #     # 遍历
+        #     letters = digit2letter[ord(digits[index]) - ord('0')]
+        #     for c in letters:
+        #         curPath += c
+        #         backtracking(index + 1, curPath)
+        #         curPath = curPath[:-1]      # 这里要注意 用字符串转还错了
+        #
+        # backtracking(0, '')
+        # return res
+
+        # 再写一遍
+        def backtracking(index, path):
+            """ index 当前遍历字符索引; path 当前字符组合 """
+            # 回溯终止条件: 遍历到最后一个字符，收集结果，结束本次回溯
+            if index == len(digits):
+                res.append(path)
+                return
+            # 遍历，注意 这里遍历的是 “每个按键的所有字符”
+            letters = digit2letter[ord(digits[index]) - ord('0')]
+            for c in letters:
+                path += c
+                backtracking(index + 1, path)
+                path = path[:-1]
+
+        res = []
+        path = ""
+        backtracking(0, path)
+        return res
 
 if __name__ == '__main__':
     sl = Solution()
 
-    print(sl.combine(4, 2))
+    print(sl.letterCombinations("23"))
