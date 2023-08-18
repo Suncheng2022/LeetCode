@@ -200,8 +200,72 @@ class Solution:
         backtracking(0)
         return res
 
+    def restoreIpAddresses(self, s: str) -> List[str]:
+        """ 93.复原IP地址 """
+        def isValid(s):
+            if len(s) != 1 and s[0] == '0':
+                return False
+            if not 0 <= int(s) <= 255:
+                return False
+            return True
+
+        def backtracking(startInd):
+            if startInd == len(s) and len(path) == 4:       # 必须判断startInd是否指示到了最后索引，这种情况下的4段才是一个可能得完整的结果
+                res.append(".".join(path))
+                return
+            for i in range(startInd, len(s)):
+                if isValid(s[startInd:i + 1]):
+                    path.append(s[startInd:i + 1][:])
+                    backtracking(i + 1)
+                    path.pop()
+
+        res = []
+        path = []
+        backtracking(0)
+        return res
+
+        # 没写对，后期可以看看错在哪
+        # def isValid(s):
+        #     """ 字符串s是否为合法段 """
+        #     if s[0] == '0' or not 0 <= int(s) <= 255:
+        #         return False
+        #     return True
+        #
+        # def insert(s, ind):
+        #     """ 在字符串s索引位置ind之前插入字符c; 返回插入后的字符串"""
+        #     s = list(s)
+        #     s.insert(ind, '.')
+        #     s = "".join(s)
+        #     return s
+        #
+        # def redo_insert(s, ind):
+        #     s = list(s)
+        #     _ = s.pop(ind)
+        #     s = "".join(s)
+        #     return s
+        #
+        # def backtracking(s, startInd, pointNum):
+        #     # 递归终止条件 3个点号说明分割完毕
+        #     if pointNum == 3:
+        #         if isValid(s[startInd:]):
+        #             res.append(s[:])
+        #         return
+        #     # 遍历
+        #     for i in range(startInd, len(s)):
+        #         if not isValid(s[startInd:i + 1]):
+        #             break
+        #         s = insert(s, startInd)
+        #         pointNum += 1
+        #         backtracking(s, i + 2, pointNum)
+        #         s = redo_insert(s, startInd)
+        #         pointNum -= 1
+        #
+        # res = []
+        # backtracking(s, 0, 0)
+        # return res
+
 if __name__ == '__main__':
     sl = Solution()
 
-    s = 'a'
-    print(sl.partition(s))
+    s = "25525511135"
+    print(sl.restoreIpAddresses(s))
