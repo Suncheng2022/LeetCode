@@ -119,7 +119,89 @@ class Solution:
         backtracking(0, path)
         return res
 
+    def combinationSum(self, candidates: List[int], target: int) -> List[List[int]]:
+        """ 39.组合总和 """
+        def backtracking(startInd):
+            # 回溯递归的终止条件
+            if sum(path) > target:
+                return
+            elif sum(path) == target:
+                res.append(path[:])
+                return
+            # 遍历
+            for i in range(startInd, len(candidates)):
+                # 剪枝操作[本题剪枝操作，首先要把数组排序]
+                if sum(path) + candidates[i] > target:
+                    break
+                path.append(candidates[i])
+                backtracking(i)     # 递归调用的时候startInd不+1 表示可重复选取
+                path.pop()      # 回溯
+
+        candidates.sort()       # 本题剪枝操作，要把数组排序
+        res = []
+        path = []
+        backtracking(0)
+        return res
+
+    def combinationSum2(self, candidates: List[int], target: int) -> List[List[int]]:
+        """ 40.组合总和II """
+        def backtracking(startInd):
+            if sum(path) == target:
+                res.append(path[:])
+                return
+            for i in range(startInd, len(candidates)):
+                # 剪枝，否则超时
+                if sum(path) + candidates[i] > target:
+                    continue
+                if i > 0 and candidates[i - 1] == candidates[i] and used[i - 1] == False:   # 同层重复的元素，跳过
+                    continue
+                path.append(candidates[i])
+                used[i] = True
+                backtracking(i + 1)
+                used[i] = False
+                path.pop()
+
+        res = []
+        path = []
+        used = [False] * len(candidates)
+        candidates.sort()       # 切记，本题这种题目需要排序 达到去重的目的
+        backtracking(0)
+        return res
+
+    def partition(self, s: str) -> List[List[str]]:
+        """ 131.分割回文串 """
+        def isPal(s):
+            l, r = 0, len(s) - 1
+            while l <= r:
+                if s[l] != s[r]:
+                    return False
+                l += 1
+                r -= 1
+            return True
+
+        def backtracking(startIndex):
+            # 回溯递归的终止条件
+            if startIndex >= len(s):
+                res.append(path[:])
+                return
+            # 遍历，横向遍历回溯的二叉树示例图
+            for i in range(startIndex, len(s)):
+                # 这里要注意索引s[startIndex:i + 1]  要+1
+                if isPal(s[startIndex:i + 1]):
+                    path.append(s[startIndex:i + 1][:])     # 终于想明白了，是横向遍历的时候 考虑不同的分支(比如第一层子节点)
+                else:
+                    continue
+
+                backtracking(i + 1)
+                path.pop()
+
+        res = []
+        path = []
+        backtracking(0)
+        return res
+
 if __name__ == '__main__':
     sl = Solution()
 
-    print(sl.letterCombinations("23"))
+    s = 'a'
+    print(sl.partition(s))
