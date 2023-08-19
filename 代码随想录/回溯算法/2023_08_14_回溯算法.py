@@ -264,8 +264,125 @@ class Solution:
         # backtracking(s, 0, 0)
         # return res
 
+    def subsets(self, nums: List[int]) -> List[List[int]]:
+        """ 78.子集 """
+        def backtracking(startInd):
+            """ 因为题目求无序组合，元素不重复用，所以使用索引 """
+            res.append(path[:])     # 因为是收集所有子集，所以收集代码的位置要注意
+            if startInd >= len(nums):
+                return
+            for i in range(startInd, len(nums)):
+                path.append(nums[i])
+                backtracking(i + 1)
+                path.pop()
+
+        res = []
+        path = []
+        backtracking(0)
+        return res
+
+    def subsetsWithDup(self, nums: List[int]) -> List[List[int]]:
+        """ 90.子集II """
+        def backtracking(startInd):
+            res.append(path[:])     # 注意收集子集 的代码的位置
+            # 回溯终止条件
+            if startInd >= len(nums):
+                return
+            # 遍历计算
+            for i in range(startInd, len(nums)):
+                if i > 0 and nums[i - 1] == nums[i] and not used[i - 1]:
+                    continue    # continue or break?
+                path.append(nums[i])
+                used[i] = True  # 不要忘记处理 used
+                backtracking(i + 1)
+                path.pop()
+                used[i] = False
+
+        res = []
+        path = []
+        used = [False] * len(nums)
+        nums.sort()     # 去重，要先排序
+        backtracking(0)
+        return res
+
+    def findSubsequences(self, nums: List[int]) -> List[List[int]]:
+        """ 491.递增子序列 """
+        def backtracking(startInd):
+            if len(path) > 1:   # 题目要求至少2个元素
+                res.append(path[:])     # 收集所有节点/子集
+            # 递归终止条件 似乎就是startInd >= len(nums)
+            if startInd >= len(nums):
+                return
+            # 遍历计算
+            used = set()      # 仅对本层起作用
+            for i in range(startInd, len(nums)):
+                if (path and path[-1] > nums[i]) or nums[i] in used:
+                    continue
+                used.add(nums[i])     # 本层使用
+                path.append(nums[i])
+                backtracking(i + 1)
+                path.pop()
+
+        res = []
+        path = []
+        backtracking(0)
+        return res
+
+    def permute(self, nums: List[int]) -> List[List[int]]:
+        """ 46.全排列 """
+        def backtracking():
+            # 回溯递归终止条件
+            if len(path) == len(nums):
+                res.append(path[:])     # 收集子集
+                return
+            # 遍历
+            for i in range(0, len(nums)):       # 这个for负责 层；起始索引为0  你想呀，父节点下子节点的结果是互不影响的，一个分支能使用所有元素，其他元素也能使用所有元素
+                # for里面则负责 具体的树枝
+                if used[i]:     # 树枝上，使用过的元素不能再使用了
+                    continue
+                used[i] = True
+                path.append(nums[i])
+                backtracking()
+                used[i] = False
+                path.pop()
+
+        res = []
+        path = []
+        used = [False] * len(nums)
+        backtracking()
+        return res
+
+    def permuteUnique(self, nums: List[int]) -> List[List[int]]:
+        """ 47.全排列II
+            本题有重复元素了，要对结果去重  """
+        def backtracking():
+            # 回溯终止条件
+            if len(path) == len(nums):
+                res.append(path[:])
+                return
+            # 遍历
+            for i in range(0, len(nums)):       # 求排列 所以每个树枝都要考虑全部 不使用startIndex
+                if i > 0 and nums[i - 1] == nums[i] and not used[i - 1]:    # 同一层不能使用重复元素
+                    continue
+                if used[i]:
+                    continue
+                path.append(nums[i])
+                used[i] = True
+                backtracking()
+                path.pop()
+                used[i] = False
+
+        res = []
+        path = []
+        used = [False] * len(nums)
+        nums.sort()     # 去重一定要排序
+        backtracking()
+        return res
+
+
+
 if __name__ == '__main__':
     sl = Solution()
 
-    s = "25525511135"
-    print(sl.restoreIpAddresses(s))
+    nums = [1, 2, 3]
+    print(sl.permuteUnique(nums))
