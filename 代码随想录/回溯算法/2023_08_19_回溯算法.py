@@ -142,10 +142,113 @@ class Solution:
         backtracking(0)
         return res
 
+    def partition(self, s: str) -> List[List[str]]:
+        """ 131.分割回文串
+            《代码随想录》：分割类似组合问题，所以使用startInd """
+        def isPal(s):
+            """ 判断s是否为回文串 """
+            l, r = 0, len(s) - 1
+            while l <= r:
+                if s[l] != s[r]:
+                    return False
+                l += 1
+                r -= 1
+            return True
+
+        def backtracking(startInd):
+            """ startInd:切割起始位置索引(从某字符后开始切割、切割首元素之前，能懂不) """
+            if startInd >= len(s):      # 切割起始位置到了字符串最后，表示完成了一种切割方式
+                res.append(path[:])
+                return
+            # 遍历，计算每种切割方式
+            for i in range(startInd, len(s)):
+                if isPal(s[startInd:i + 1]):        # s[startInd:i + 1]若是回文串
+                    path.append(s[startInd:i + 1][:])       # 注意这里是添加到path中；path表示一种切割方式
+                else:       # 若某种切割方式，其中切下来的段s[startInd:i + 1]不是回文，说明此种切割方式不符合题目要求，不往后切了
+                    continue
+                backtracking(i + 1)     # 因为切割不能切割重复元素
+                path.pop()
+
+        res = []
+        path = []
+        backtracking(0)
+        return res
+
+    def restoreIpAddresses(self, s: str) -> List[str]:
+        """ 93.复原IP地址
+            注意 插入 和 删除 '.'的索引
+                收集结果时要同时判断最后一段是否合法
+            本题也可使用path来收集某种切割的结果，就不用插入和删除'.'了，实现更简洁 """
+        # def isVal(s):
+        #     """ s是否合法 """
+        #     if len(s) == 0 or (len(s) > 1 and s[0] == '0') or not 0 <= int(s) <= 255:
+        #         return False
+        #     return True
+        #
+        # def insert(s, ind):
+        #     """ 传入字符串s，在索引ind之前插入'.'
+        #         返回插入'.'后的字符串s """
+        #     s = list(s)
+        #     s.insert(ind, '.')
+        #     return "".join(s)
+        #
+        # def redo_insert(s, ind):
+        #     """ 回溯 撤销s中刚才插入的'.'
+        #         返回 撤销指定'.'的字符串s """
+        #     s = list(s)
+        #     _ = s.pop(ind)
+        #     return "".join(s)
+        #
+        # def backtracking(s, startInd, pointNum):
+        #     """ s在回溯递归中可能会插入'.'，所以作为参数
+        #         pointNum作为递归终止的判定条件，当分割为4段/已插入3个'.'了 """
+        #     # 回溯递归终止条件
+        #     if pointNum == 3:
+        #         if isVal(s.split('.')[-1]):
+        #             res.append(s[:])
+        #         return
+        #     # 遍历
+        #     for i in range(startInd, len(s)):
+        #         if isVal(s[startInd:i + 1]):
+        #             s = insert(s, i + 1)        # 可理解为：在原s中插入'.'
+        #             pointNum += 1
+        #         else:
+        #             continue
+        #         backtracking(s, i + 2, pointNum)
+        #         s = redo_insert(s, i + 1)       # 刚才插入'.'的索引为 i+1
+        #         pointNum -= 1
+        #
+        # res = []
+        # backtracking(s, 0, 0)
+        # return res
+
+        # 使用path保存某种分割结果，不用考虑插入删除'.'
+        def isVal(s):
+            """ s是否合法 """
+            if len(s) == 0 or (len(s) > 1 and s[0] == '0') or not 0 <= int(s) <= 255:
+                return False
+            return True
+
+        def backtracking(startInd):
+            # 回溯递归终止条件
+            if startInd == len(s) and len(path) == 4:
+                res.append(".".join(path))
+                return
+            # 遍历 不同的分割方式
+            for i in range(startInd, len(s)):
+                if isVal(s[startInd:i + 1]):
+                    path.append(s[startInd:i + 1][:])
+                    backtracking(i + 1)
+                    path.pop()
+
+        res = []
+        path = []       # 保存某种分割结果
+        backtracking(0)
+        return res
+
 
 if __name__ == "__main__":
     sl = Solution()
 
-    candidates = [10,1,2,7,6,1,5]
-    target = 8
-    print(sl.combinationSum2(candidates, target))
+    s = "101023"
+    print(sl.restoreIpAddresses(s))
