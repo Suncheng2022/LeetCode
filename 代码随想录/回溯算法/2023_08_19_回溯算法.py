@@ -246,9 +246,88 @@ class Solution:
         backtracking(0)
         return res
 
+    def subsets(self, nums: List[int]) -> List[List[int]]:
+        """ 78.子集 """
+        def backtracking(startInd):
+            res.append(path[:])
+            if startInd >= len(nums):
+                return
+            for i in range(startInd, len(nums)):
+                path.append(nums[i])
+                backtracking(i + 1)
+                path.pop()
+
+        res = []
+        path = []
+        backtracking(0)
+        return res
+
+    def subsetsWithDup(self, nums: List[int]) -> List[List[int]]:
+        """ 90.子集II """
+        def backtracking(startInd):
+            res.append(path[:])
+            if startInd >= len(nums):
+                return
+            for i in range(startInd, len(nums)):
+                if i > 0 and nums[i - 1] == nums[i] and not used[i - 1]:
+                    continue
+                path.append(nums[i])
+                used[i] = True
+                backtracking(i + 1)
+                path.pop()
+                used[i] = False
+
+        res = []
+        path = []
+        used = [False] * (len(nums))
+        nums.sort()
+        backtracking(0)
+        return res
+
+    def findSubsequences(self, nums: List[int]) -> List[List[int]]:
+        """ 491.递增子序列 """
+        def backtracking(startInd):
+            used = []
+            if len(path) > 1:
+                res.append(path[:])
+            if startInd >= len(nums):
+                return
+            for i in range(startInd, len(nums)):
+                if (path and path[-1] > nums[i]) or nums[i] in used:
+                    continue
+                path.append(nums[i])
+                used.append(nums[i])
+                backtracking(i + 1)
+                path.pop()
+
+        res = []
+        path = []
+        backtracking(0)
+        return res
+
+    def permute(self, nums: List[int]) -> List[List[int]]:
+        """ 46.全排列 """
+        def backtracking():
+            if len(path) == len(nums):
+                res.append(path[:])
+                return
+            for i in range(0, len(nums)):
+                if used[i]:
+                    continue
+                path.append(nums[i])
+                used[i] = True
+                backtracking()
+                path.pop()
+                used[i] = False
+
+        res = []
+        path = []
+        used = [False] * len(nums)
+        backtracking()
+        return res
 
 if __name__ == "__main__":
     sl = Solution()
 
-    s = "101023"
-    print(sl.restoreIpAddresses(s))
+    nums = [1,2,3]
+    print(sl.permute(nums))
