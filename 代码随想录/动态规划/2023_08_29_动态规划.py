@@ -50,13 +50,59 @@ class Solution:
         #     dp[1] = dp_i
         # return dp[1]
 
+    def uniquePaths(self, m: int, n: int) -> int:
+        """ 62.不同路径 """
+        dp = [[1] * n] + [[1] + [0] * (n - 1) for _ in range(m - 1)]    # 从位置[0,0]到达[i,j]的不同路径数
+        for i in range(1, m):
+            for j in range(1, n):
+                dp[i][j] = dp[i - 1][j] + dp[i][j - 1]
+        return dp[-1][-1]
+
+    def uniquePathsWithObstacles(self, obstacleGrid: List[List[int]]) -> int:
+        """ 63.不同路径II """
+        m = len(obstacleGrid)
+        n = len(obstacleGrid[0])
+        dp = [[0] * n for _ in range(m)]
+        # 初始化dp首行
+        for i in range(n):
+            if obstacleGrid[0][i] == 1:
+                break
+            dp[0][i] = 1
+        # 初始化dp首列
+        for i in range(m):
+            if obstacleGrid[i][0] == 1:
+                break
+            dp[i][0] = 1
+        # print(dp)
+        for i in range(1, m):
+            for j in range(1, n):
+                if obstacleGrid[i][j] == 0:
+                    dp[i][j] = dp[i - 1][j] + dp[i][j - 1]
+        return dp[-1][-1]
+
+    def integerBreak(self, n: int) -> int:
+        """ 343.整数拆分 """
+        # 重写一遍
+        dp = [0] * (n + 1)      # 拆分i得到的最大乘积为dp[i]
+        dp[2] = 1       # 初始化dp，不使用dp[0]、dp[1] 因为不符合dp定义，直接从dp[2]开始计算
+        for i in range(3, n + 1):
+            for j in range(1, i):       # 其实j可以拆分到 n/2,因为拆分成近似大小的数字乘积才最大，拆分成n/2也就是拆分成两个数，两个数差不多都是n/2的情况
+                dp[i] = max(dp[i], (i - j) * j, dp[i - j] * j)      # dp递推公式
+        return dp[-1]
+
+        # dp = [0] * (n + 1)
+        # dp[2] = 1       # dp计算过程忽略dp[0]、dp[1]，因为这两者不符合dp含义；所以从dp[2]开始
+        # for i in range(3, n + 1):
+        #     for j in range(1, i):
+        #         dp[i] = max(dp[i], (i - j) * j, dp[i - j] * j)      # dp[i]会通过for j循环计算多次，保留最大的而已
+        # return dp[-1]
 
 
 if __name__ == '__main__':
     sl = Solution()
 
-    cost = [10,15,20]
-    print(sl.minCostClimbingStairs(cost))
+    n = 10
+    print(sl.integerBreak(n))
 
     """
     动态规划五部曲：
