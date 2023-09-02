@@ -207,11 +207,34 @@ class Solution:
                 dp[j] = max(dp[j], dp[j - weights[i]] + values[i])
         return dp[-1]
 
+    def canPartition(self, nums: List[int]) -> bool:
+        """ 416.分割等和子集 """
+        V = 100 * 200 // 2 + 1      # 由题意得 背包最大容量
+        dp = [0] * V
+        if sum(nums) % 2:
+            return False
+        target = sum(nums) // 2
+        for i in range(len(nums)):
+            for j in range(target, nums[i] - 1, -1):
+                dp[j] = max(dp[j], dp[j - nums[i]] + nums[i])
+        return dp[target] == target
+
+    def lastStoneWeightII(self, stones: List[int]) -> int:
+        """ 1049.最后一块石头的重量II """
+        target = sum(stones) // 2   # 这里取整了，注意分成的2堆石头孰多孰少
+        dp = [0] * (target + 1)       # 这里+1，否则报错越界；dp[i] 容量为i的背包 所能盛下最大重量(也说价值)为dp[i]
+        # 一维01背包的遍历：外层是物品、内层是倒序遍历背包容量
+        for i in range(len(stones)):
+            for j in range(target, stones[i] - 1, -1):
+                dp[j] = max(dp[j], dp[j - stones[i]] + stones[i])
+        return (sum(stones) - dp[-1]) - dp[-1]      # 2堆石头相减，就是所求
+
         
 if __name__ == '__main__':
     sl = Solution()
 
-    print(sl.test_1_wei_bag_problem())
+    stones = [31,26,33,21,40]
+    print(sl.lastStoneWeightII(stones))
 
     """
     动态规划五部曲：
