@@ -229,12 +229,49 @@ class Solution:
                 dp[j] = max(dp[j], dp[j - stones[i]] + stones[i])
         return (sum(stones) - dp[-1]) - dp[-1]      # 2堆石头相减，就是所求
 
-        
+    def findTargetSumWays(self, nums: List[int], target: int) -> int:
+        """ 494.目标和 """
+        if (sum(nums) + target) % 2 or abs(target) > sum(nums):       # 无解
+            return 0
+        bagSize = (sum(nums) + target) // 2
+        dp = [0] * (bagSize + 1)    # dp[i] 装满容量为i的背包，有dp[i]种方式
+        dp[0] = 1       # 初始化
+        for i in range(len(nums)):
+            for j in range(bagSize, nums[i] - 1, -1):
+                dp[j] += dp[j - nums[i]]
+        return dp[-1]
+
+    def findMaxForm(self, strs: List[str], m: int, n: int) -> int:
+        """ 474.一和零 """
+        from collections import Counter
+
+        dp = [[0] * (n + 1) for _ in range(m + 1)]      # dp[i][j] 最多有i个0、j个1 的 最大子集长度
+        for s in strs:
+            zeroNum = Counter(s)['0']
+            oneNum = Counter(s)['1']
+            for i in range(m, zeroNum - 1, -1):
+                for j in range(n, oneNum - 1, -1):
+                    dp[i][j] = max(dp[i][j], dp[i - zeroNum][j - oneNum] + 1)       # +1 可能表示比上一个dp多1个字符串
+        return dp[-1][-1]
+
+        # 重写一遍
+        # dp = [[0] * (n + 1) for _ in range(m + 1)]      # 最多有i个0、j个1的  strs的最大子集的  大小为dp[i][j]--即字符串数量
+        # for s in strs:
+        #     zeroNum = Counter(s)['0']
+        #     oneNum = len(s) - zeroNum
+        #     for i in range(m, zeroNum - 1, -1):
+        #         for j in range(n, oneNum - 1, -1):
+        #             dp[i][j] = max(dp[i][j], dp[i - zeroNum][j - oneNum] + 1)
+        # return dp[-1][-1]
+
+
 if __name__ == '__main__':
     sl = Solution()
 
-    stones = [31,26,33,21,40]
-    print(sl.lastStoneWeightII(stones))
+    strs = ["10", "0", "1"]
+    m = 1
+    n = 1
+    print(sl.findMaxForm(strs, m, n))
 
     """
     动态规划五部曲：
