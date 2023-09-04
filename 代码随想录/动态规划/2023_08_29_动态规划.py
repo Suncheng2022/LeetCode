@@ -301,7 +301,7 @@ class Solution:
         return dp[-1]
 
     def climbStairs(self, n: int) -> int:
-        """ 70.爬楼梯
+        """ 70.爬楼梯(进阶版)
             之前使用回溯，直接 斐波那契数列
             本次使用动态规划，完全背包思路
             1.每次可以爬几层台阶--物品  n阶到达楼顶--背包容量
@@ -328,15 +328,25 @@ class Solution:
                     dp[j] = min(dp[j], dp[j - coins[i]] + 1)
         return dp[-1] if dp[-1] != float('inf') else -1
 
+    def numSquares(self, n: int) -> int:
+        """ 279.完全平方数
+            1.物品--完全平方数，背包--整数n
+            2.物品可重复使用，完全背包 """
+        dp = [float('inf')] * (n + 1)       # dp[i] 组成和为i的数 所需 完全平方数的最少个数；因为是求最小，所以初始化为最大值，从后面递推公式也可得出要初始化为最大值
+        dp[0] = 0
+        # 完全背包 则内外循环均可
+        for i in range(1, int(pow(n, 0.5)) + 1):     # 物品
+            for j in range(i ** 2, n + 1):      # 容量；容量范围稍加考虑，可省去if条件
+                dp[j] = min(dp[j], dp[j - i ** 2] + 1)
+        return dp[-1] if dp[-1] != float('inf') else 0
 
 
 
 if __name__ == '__main__':
     sl = Solution()
 
-    coins = [2147483647]
-    amount = 2
-    print(sl.coinChange(coins, amount))
+    n = 1
+    print(sl.numSquares(n))
 
     """
     动态规划五部曲：
