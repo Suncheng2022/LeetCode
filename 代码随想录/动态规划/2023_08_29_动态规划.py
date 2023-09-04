@@ -264,14 +264,79 @@ class Solution:
         #             dp[i][j] = max(dp[i][j], dp[i - zeroNum][j - oneNum] + 1)
         # return dp[-1][-1]
 
+    def test_CompletePack(self):
+        """ 完全背包 导读 """
+        # 已知条件
+        weights = [1, 3, 4]
+        vaules = [15, 20, 30]
+        bagSize = 4
+        # 初始化dp
+        dp = [0] * (bagSize + 1)
+        # 遍历计算
+        for i in range(len(weights)):
+            for j in range(weights[i], bagSize + 1):    # 完全背包，背包容量 则从小到大遍历
+                dp[j] = max(dp[j], dp[j - weights[i]] + vaules[i])
+        print(dp[-1])
+
+    def change(self, amount: int, coins: List[int]) -> int:
+        """ 518.零钱兑换II
+            求组合数/装满背包有多少种方法，使用累加，初始化dp[0]=1 """
+        dp = [0] * (amount + 1)     # dp[i] 容量为i的组合数是dp[i]
+        dp[0] = 1
+        for i in range(len(coins)):         # 遍历物品
+            for j in range(coins[i], amount + 1):       # 遍历容量
+                dp[j] += dp[j - coins[i]]
+        return dp[-1]
+
+    def combinationSum4(self, nums: List[int], target: int) -> int:
+        """ 377.组合总和IV
+            不限制使用元素个数，因此是完全背包问题
+            本题求的是 排列，因此先遍历容量、再遍历物品；求组合反是 """
+        dp = [0] * (target + 1)
+        dp[0] = 1
+        for i in range(target + 1):     # 遍历容量
+            for j in range(len(nums)):      # 遍历物品
+                if i >= nums[j]:    # 当背包>=当前物品的时候
+                    dp[i] += dp[i - nums[j]]
+        return dp[-1]
+
+    def climbStairs(self, n: int) -> int:
+        """ 70.爬楼梯
+            之前使用回溯，直接 斐波那契数列
+            本次使用动态规划，完全背包思路
+            1.每次可以爬几层台阶--物品  n阶到达楼顶--背包容量
+            2.物品可重复使用，完全背包 """
+        weights = [1, 2]        # 物品
+        dp = [0] * (n + 1)
+        dp[0] = 1       # 完全背包 dp[0]初始化为1
+        for i in range(n + 1):
+            for j in range(len(weights)):    # [1,2]即物品
+                if i >= weights[j]:
+                    dp[i] += dp[i - weights[j]]
+        return dp[-1]
+
+    def coinChange(self, coins: List[int], amount: int) -> int:
+        """ 322.零钱兑换
+            金币可重复使用--完全背包
+            1.不在乎顺序，所以物品、容量的先后遍历顺序均可，我们按组合思路做--先遍历物品、再遍历容量
+            2.完全背包，内层循环正序 """
+        dp = [float('inf')] * (amount + 1)     # dp[i] 组成总和i所需最少硬币数为dp[i]；初始化为最大，因为求最小值
+        dp[0] = 0   # 强调一下这里的初始化 组成总和为0最少需要0个硬币
+        for i in range(len(coins)):
+            for j in range(amount + 1):
+                if j >= coins[i]:       # 似乎是完全背包都有的if条件
+                    dp[j] = min(dp[j], dp[j - coins[i]] + 1)
+        return dp[-1] if dp[-1] != float('inf') else -1
+
+
+
 
 if __name__ == '__main__':
     sl = Solution()
 
-    strs = ["10", "0", "1"]
-    m = 1
-    n = 1
-    print(sl.findMaxForm(strs, m, n))
+    coins = [2147483647]
+    amount = 2
+    print(sl.coinChange(coins, amount))
 
     """
     动态规划五部曲：
