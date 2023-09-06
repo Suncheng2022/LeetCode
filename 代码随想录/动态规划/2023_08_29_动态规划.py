@@ -484,13 +484,29 @@ class Solution:
                     dp[i][j] = max(dp[i - 1][j], dp[i - 1][j - 1] + prices[i])
         return dp[-1][-1]
 
+    def maxProfit_freeze(self, prices: List[int]) -> int:
+        """ 309.买卖股票的最佳时机含冷冻期
+            《代码随想录》的周末总结用的方法和官方答案比较接近，也可以看一下 https://programmercarl.com/%E5%91%A8%E6%80%BB%E7%BB%93/20210304%E5%8A%A8%E8%A7%84%E5%91%A8%E6%9C%AB%E6%80%BB%E7%BB%93.html#%E5%91%A8%E5%9B%9B
+            看之前写的代码吧，更容易懂
+            3种状态：
+                1.持有
+                2.不持有，在冷冻期
+                3.不持有，不在冷冻期 """
+        dp = [[0, 0, 0] for _ in range(len(prices))]
+        dp[0] = [-prices[0], 0, 0]      # 初始化索引第0天
+        for i in range(1, len(prices)):
+            dp[i][0] = max(dp[i - 1][0], dp[i - 1][2] - prices[i])
+            dp[i][1] = dp[i - 1][0] + prices[i]
+            dp[i][2] = max(dp[i - 1][1], dp[i - 1][2])
+        return max(max(ls) for ls in dp)
+
+
 
 if __name__ == '__main__':
     sl = Solution()
 
-    k = 2
-    prices = [3,2,6,5,0,3]
-    print(sl.maxProfitIV(k, prices))
+    prices = [1]
+    print(sl.maxProfit_freeze(prices))
 
     """
     动态规划五部曲：
