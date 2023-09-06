@@ -411,12 +411,86 @@ class Solution:
             return (val0, val1)
         return max(robTree(root))
 
+    def maxProfit(self, prices: List[int]) -> int:
+        """ 121.买卖股票的最佳时机
+            本题‘只买卖一次’
+            递推公式有些不明白 做完 122.买卖股票的最佳时机II 清楚很多！
+            因为本题只能买卖一次，所以买入股票的时候不能考虑之前操作可能'剩了'多少钱，因为买意味着重新开始，不能考虑之前，否则不是一次买卖了 """
+        # 动态规划 五部曲
+        dp = [[0, 0] for _ in range(len(prices))]       # dp[i] 索引第i天的 持有/不持有 所获得的现金
+        dp[0] = [-prices[0], 0]     # 初始化索引第0天的dp，持有只能是本天买入，不持有那就是不持有
+        for i in range(1, len(prices)):
+            dp[i][0] = max(dp[i - 1][0], -prices[i])
+            dp[i][1] = max(dp[i - 1][1], dp[i - 1][0] + prices[i])
+        return dp[-1][1]
+
+        # 本题是'简单'题，这个方法也简单，尝试动态规划
+        # minVal = float('inf')       # 记录最小值
+        # res = 0     # 保存最终结果
+        # for p in prices:
+        #     minVal = min(minVal, p)
+        #     res = max(res, p - minVal)
+        # return res
+
+    def maxProfitII(self, prices: List[int]) -> int:
+        """ 122.买卖股票的最佳时机II
+            本题递推公式与 121.买卖股票的最佳时机 有差别，结合两道题目清楚很多 """
+        dp = [[0, 0] for _ in range(len(prices))]
+        dp[0] = [-prices[0], 0]
+        for i in range(1, len(prices)):
+            dp[i][0] = max(dp[i - 1][0], dp[i - 1][1] - prices[i])      # 本题允许多次买卖了，所以递推公式相比上一题也变化了
+            dp[i][1] = max(dp[i - 1][1], dp[i - 1][0] + prices[i])
+        return dp[-1][1]
+
+    def maxProfitIII(self, prices: List[int]) -> int:
+        """ 123.买卖股票的最佳时机III
+            最多可完成2笔交易
+            虽然每天有5个状态，但是0状态不需要考虑，其他状态只由 前一天的2个状态转移而来，所以并不复杂
+            状态:
+                0 无操作
+                1 第一次持有
+                2 第一次不持有
+                3 第二次持有
+                4 第二次不持有 """
+        dp = [[0] * 5 for _ in range(len(prices))]
+        dp[0] = [0, -prices[0], 0, -prices[0], 0]
+        for i in range(1, len(prices)):
+            dp[i][1] = max(dp[i - 1][1], -prices[i])
+            dp[i][2] = max(dp[i - 1][2], dp[i - 1][1] + prices[i])
+            dp[i][3] = max(dp[i - 1][3], dp[i - 1][2] - prices[i])
+            dp[i][4] = max(dp[i - 1][4], dp[i - 1][3] + prices[i])
+        return dp[-1][-1]
+
+    def maxProfitIV(self, k: int, prices: List[int]) -> int:
+        """ 188.买卖股票的最佳时机IV
+            相比上一题 123. 的至多2次交易，本题允许k次交易，依然延续上一题思路
+            状态：
+                0 无操作
+                1 第一次持有
+                2 第一次不持有
+                3 第二次持有
+                4 第二次不持有
+                ...
+                2*k+1 第k次不持有 """
+        dp = [[0] * (2 * k + 1) for _ in range(len(prices))]
+        for i in range(2 * k + 1):
+            if i % 2:       # 初始化索引第0天 持有 的状态
+                dp[0][i] = -prices[0]
+        for i in range(1, len(prices)):
+            for j in range(1, 2 * k + 1):
+                if j % 2:   # 奇数 持有
+                    dp[i][j] = max(dp[i - 1][j], dp[i - 1][j - 1] - prices[i])
+                else:       # 偶数 不持有
+                    dp[i][j] = max(dp[i - 1][j], dp[i - 1][j - 1] + prices[i])
+        return dp[-1][-1]
+
 
 if __name__ == '__main__':
     sl = Solution()
 
-    nums = [1,2]
-    print(sl.robII(nums))
+    k = 2
+    prices = [3,2,6,5,0,3]
+    print(sl.maxProfitIV(k, prices))
 
     """
     动态规划五部曲：
