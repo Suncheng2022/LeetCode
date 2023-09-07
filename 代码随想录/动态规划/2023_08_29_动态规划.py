@@ -500,13 +500,71 @@ class Solution:
             dp[i][2] = max(dp[i - 1][1], dp[i - 1][2])
         return max(max(ls) for ls in dp)
 
+    def maxProfit_fee(self, prices: List[int], fee: int) -> int:
+        """ 714.买卖股票的最佳时机含手续费 """
+        dp = [[0, 0] for _ in range(len(prices))]
+        dp[0] = [-prices[0], 0]
+        for i in range(1, len(prices)):
+            dp[i][0] = max(dp[i - 1][0], dp[i - 1][1] - prices[i])
+            dp[i][1] = max(dp[i - 1][1], dp[i - 1][0] + prices[i] - fee)
+        return dp[-1][-1]
+
+    def lengthOfLIS(self, nums: List[int]) -> int:
+        """ 300.最长递增子序列
+            总体思路就是把nums[i]放到nums[j]后面，看看这么放行不行，行就更新dp[i]，不行拉倒 """
+        dp = [1] * len(nums)    # dp[i] 截止到索引i(包括)的最长递增子序列的长度；初始均为1，每个元素即为长度为1的子序列
+        for i in range(1, len(nums)):
+            for j in range(i):
+                if nums[j] < nums[i]:       # 如果nums[i]可以放到nums[j]的后面，dp[i]可由dp[j]推断
+                    dp[i] = max(dp[i], dp[j] + 1)
+        return max(dp)
+
+    def findLengthOfLCIS(self, nums: List[int]) -> int:
+        """ 674.最长连续递增序列
+            与 300.最长递增子序列 几乎一模一样，只不过本题加入了'连续'的限制 """
+        dp = [1] * len(nums)        # 因为每个元素都是长度为1的'连续递增子序列'
+        for i in range(1, len(nums)):
+            if nums[i - 1] < nums[i]:   # 如果nums[i]能放到nums[i-1]后面，就能组成比dp[i-1]更长的连续递增序列
+                dp[i] = dp[i - 1] + 1
+        return max(dp)
+
+    def findLength(self, nums1: List[int], nums2: List[int]) -> int:
+        """ 718.最长重复子数组
+            '二维数组能记录2个字符串的所有比较结果'
+            本题要求是连续的子数组，所以只能由dp[i-1][j-1]来推dp[i][j] """
+        m, n = len(nums1), len(nums2)
+        # dp[i][j] 以nums1[i-1]、nums2[j-1]结尾的字符串 的 最长重复子数组的长度
+        # 因为dp要表示到 nums1[m-1] nums[n-1]结尾的，所以dp索引要能取到m和n
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        # 两层for为了指示要更新的dp
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if nums1[i - 1] == nums2[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + 1
+        return max([max(ls) for ls in dp])
+
+    def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+        """ 1143.最长公共子序列
+            与 718.最长重复子数组 的区别是，本题不要求'连续'，保持相对顺序即可
+             二者dp含义不同，718. dp[i][j]为以索引i-1、j-1为结尾的字符串的最长重复子数组长度；
+             而本题dp是0~i-1、0~j-1个字符串的最长公共子序列 """
+        m, n = len(text1), len(text2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]      # dp[i][j] text1的前i个字符、text2的前j个字符 所构成的最长公共子序列
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if text1[i - 1] == text2[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + 1
+                else:
+                    dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])      # 注意这里，如果text1[i - 1] != text2[j - 1], 则两边分别放一个，
+        return max([max(ls) for ls in dp])
 
 
 if __name__ == '__main__':
     sl = Solution()
 
-    prices = [1]
-    print(sl.maxProfit_freeze(prices))
+    text1 = "abcde"
+    text2 = "ace"
+    print(sl.longestCommonSubsequence(text1, text2))
 
     """
     动态规划五部曲：
