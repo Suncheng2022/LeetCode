@@ -595,12 +595,30 @@ class Solution:
                     dp[i][j] = max(dp[i][j - 1], dp[i - 1][j])
         return dp[-1][-1] == m
 
+    def numDistinct(self, s: str, t: str) -> int:
+        """ 115.不同的子序列
+            解析稍微难懂一些，认真多读一会(读了60分钟)就能懂了 """
+        m, n = len(s), len(t)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        dp[0][0] = 1    # 这是为了递推吧，意义我也没看懂; 0代表空字符串呗
+        for i in range(1, m + 1):
+            dp[i][0] = 1    # 以索引i-1结尾的s子串、空的t子串，只有1种方法相等
+        for j in range(1, n + 1):
+            dp[0][j] = 0    # 空的s子串、以索引j-1结尾的t子串，只有1种方法相等。其实多余特意初始化，就当强调吧
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if s[i - 1] == t[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + dp[i - 1][j]
+                else:
+                    dp[i][j] = dp[i - 1][j]
+        return dp[-1][-1]
+
 if __name__ == '__main__':
     sl = Solution()
 
-    s = "axc"
-    t = "ahbgdc"
-    print(sl.isSubsequence(s, t))
+    s = "babgbag"
+    t = "bag"
+    print(sl.numDistinct(s, t))
 
     """
     动态规划五部曲：
