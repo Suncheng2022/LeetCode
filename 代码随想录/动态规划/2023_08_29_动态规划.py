@@ -558,13 +558,49 @@ class Solution:
                     dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])      # 注意这里，如果text1[i - 1] != text2[j - 1], 则两边分别放一个，
         return max([max(ls) for ls in dp])
 
+    def maxUncrossedLines(self, nums1: List[int], nums2: List[int]) -> int:
+        """ 1035.不相交的线
+            感觉和 1143.最长公共子序列 是一样的 """
+        m, n = len(nums1), len(nums2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if nums1[i - 1] == nums2[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + 1
+                else:
+                    dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+        return max([max(ls) for ls in dp])
+
+    def maxSubArray(self, nums: List[int]) -> int:
+        """ 53.最大子数组和
+            自己想的和答案分析一样 """
+        n = len(nums)
+        # 为什么这次能正确想到dp '以nums[i]为结尾' 而不是 '0~i-1范围'，由示例得到的灵感
+        dp = [0] * n        # dp[i] 以nums[i]为结尾的连续子序列的和
+        dp[0] = nums[0]     # 初始化dp
+        for i in range(1, n):
+            dp[i] = max(dp[i - 1] + nums[i], nums[i])       # 体现'连续子序列'
+        return max(dp)
+
+    def isSubsequence(self, s: str, t: str) -> bool:
+        """ 392.判断子序列
+            自己想出来的 """
+        m, n = len(s), len(t)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if s[i - 1] == t[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + 1
+                else:
+                    dp[i][j] = max(dp[i][j - 1], dp[i - 1][j])
+        return dp[-1][-1] == m
 
 if __name__ == '__main__':
     sl = Solution()
 
-    text1 = "abcde"
-    text2 = "ace"
-    print(sl.longestCommonSubsequence(text1, text2))
+    s = "axc"
+    t = "ahbgdc"
+    print(sl.isSubsequence(s, t))
 
     """
     动态规划五部曲：
