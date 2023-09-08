@@ -613,12 +613,58 @@ class Solution:
                     dp[i][j] = dp[i - 1][j]
         return dp[-1][-1]
 
+        # 自己又做了一遍 细细品味
+        # m, n = len(s), len(t)
+        # dp = [[0] * (n + 1) for _ in range(m + 1)]  # dp[i][j] 以索引i-1元素结尾的s子串 中出现 以索引j-1元素结尾的t子串 的个数
+        # for i in range(m + 1):
+        #     dp[i][0] = 1  # 根据定义，只有1种方法
+        # for j in range(n + 1):
+        #     dp[0][j] = 0  # 根据定义，有0种方法，因为不可能让空的s子串包含t子串
+        # dp[0][0] = 1  # 为了递推吧
+        # for i in range(1, m + 1):
+        #     for j in range(1, n + 1):
+        #         if s[i - 1] == t[j - 1]:
+        #             # 如果s[i - 1] == t[j - 1]，1.使用s[i-1]匹配，与计算以i-2结尾的s子串 中包含 以j-2结尾的t子串 的个数 是一样的；2.不使用s[i-1]匹配，可能s这边有连续的重复元素，即计算以i-2结尾的s子串 中包含 以j-1结尾的t子串 的个数
+        #             dp[i][j] = dp[i - 1][j - 1] + dp[i - 1][j]
+        #         else:
+        #             dp[i][j] = dp[i - 1][j]  # 只能删s子串的元素，因为是求s子序列中包含t的个数嘛
+        # return dp[-1][-1]
+
+    def minDistance(self, word1: str, word2: str) -> int:
+        """ 583.两个字符串的删除操作 """
+        # 自己想的，牛逼！就是初始化dp要注意
+        # m, n = len(word1), len(word2)
+        # dp = [[0] * (n + 1) for _ in range(m + 1)]      # dp[i][j] 以索引i-1结尾的word1子串、以索引j-1结尾的word2子串 的最长公共子序列长度
+        # for i in range(1, m + 1):
+        #     for j in range(1, n + 1):
+        #         if word1[i - 1] == word2[j - 1]:
+        #             dp[i][j] = dp[i - 1][j - 1] + 1
+        #         else:
+        #             dp[i][j] = max(dp[i][j - 1], dp[i - 1][j])
+        # return m + n - dp[-1][-1] * 2
+
+        # 《代码随想录》思路类似 115.不同的子序列, 本题则二者均可以删。还是觉得上面的方法更简单
+        m, n = len(word1), len(word2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]      # dp[i][j] 以索引i-1结尾的word1子串、以索引j-1结尾的word2子串 需要删除多少元素才能相同
+        for i in range(m + 1):
+            dp[i][0] = i
+        for j in range(n + 1):
+            dp[0][j] = j
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if word1[i - 1] == word2[j - 1]:    # 如果二者当前元素相同，那么要二者相同需要删除元素的个数就是dp[i-1][j-1]，因为当前元素相同嘛
+                    dp[i][j] = dp[i - 1][j - 1]
+                else:       # 如果二者当前元素不等，删其中一个、或都删，取代价最小的
+                    dp[i][j] = min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + 2)    # dp[i-1][j-1]+2等于dp[i-1][j]+1或dp[i][j-1]+1 ?
+        return dp[-1][-1]
+
+
 if __name__ == '__main__':
     sl = Solution()
 
-    s = "babgbag"
-    t = "bag"
-    print(sl.numDistinct(s, t))
+    word1 = "sea"
+    word2 = "eat"
+    print(sl.minDistance(word1, word2))
 
     """
     动态规划五部曲：
