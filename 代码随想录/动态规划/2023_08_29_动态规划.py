@@ -660,8 +660,23 @@ class Solution:
 
     def minDistance(self, word1: str, word2: str) -> int:
         """ 72.编辑距离 """
-
-
+        # 再写一遍，理解透彻一些
+        m, n = len(word1), len(word2)
+        # dp[i][j] 以索引i-1元素结尾的word1、以索引j-1元素结尾的word2 的 编辑距离
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        for i in range(m + 1):
+            dp[i][0] = i        # 以索引i-1元素结尾的word1、空的word2 的 编辑距离，即删除word1的所有元素 编辑距离为i
+        for j in range(n + 1):
+            dp[0][j] = j        # 同上
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if word1[i - 1] == word2[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1]
+                else:
+                    dp[i][j] = min(dp[i - 1][j] + 1,
+                                   dp[i][j - 1] + 1,
+                                   dp[i - 1][j - 1] + 1)
+        return dp[-1][-1]
 
         # m, n = len(word1), len(word2)
         # dp = [[0] * (n + 1) for _ in range(m + 1)]      # dp[i][j] 以索引i-1元素结尾的word1子串、以索引j-1元素结尾的word2子串 的编辑距离
@@ -677,13 +692,53 @@ class Solution:
         #             dp[i][j] = min(dp[i - 1][j - 1] + 1, dp[i][j - 1] + 1, dp[i - 1][j] + 1)
         # return dp[-1][-1]
 
+    def countSubstrings(self, s: str) -> int:
+        """ 647.回文子串 """
+        n = len(s)
+        dp = [[False] * n for _ in range(n)]    # dp[i][j] 闭区间索引[i,j]是否为回文子串
+        for i in range(n - 1, -1, -1):
+            for j in range(i, n):
+                if s[i] == s[j]:
+                    if j - i <= 1:
+                        dp[i][j] = True
+                    else:
+                        if dp[i + 1][j - 1]:
+                            dp[i][j] = True
+        return sum([sum(ls) for ls in dp])
+
+    def longestPalindromeSubseq(self, s: str) -> int:
+        """ 516.最长回文子序列
+            注意区别 647.回文子串 是连续的，本题子序列是不连续的 """
+        # n = len(s)
+        # dp = [[0] * n for _ in range(n)]      # dp[i][j] 闭区间[i,j]的最长回文子序列
+        # for i in range(n):
+        #     dp[i][i] = 1
+        # for i in range(n - 1, -1, -1):
+        #     for j in range(i + 1, n):       # j从i+1开始，而不是i，因为上面已经初始化了dp[i][i]
+        #         if s[i] == s[j]:
+        #             dp[i][j] = dp[i + 1][j - 1] + 2
+        #         else:
+        #             dp[i][j] = max(dp[i][j - 1], dp[i + 1][j])      # 这里递推公式要注意
+        # return dp[0][-1]
+
+        # 再写一遍; 太巧妙了，以后注意研究下dp数组推导图，多维dp想象力
+        n = len(s)
+        dp = [[0] * n for _ in range(n)]    # dp[i][j] 闭区间[i,j]的最长回文子序列长度
+        for i in range(n):
+            dp[i][i] = 1
+        for i in range(n - 1, -1, -1):
+            for j in range(i + 1, n):       # 上面已经初始化了 dp[i][i]，注意这里的范围
+                if s[i] == s[j]:
+                    dp[i][j] = dp[i + 1][j - 1] + 2
+                else:
+                    dp[i][j] = max(dp[i + 1][j], dp[i][j - 1])      # 注意这里，在dp[i+1][j-1]的基础上放s[i]或s[j]
+        return dp[0][-1]
 
 if __name__ == '__main__':
     sl = Solution()
 
-    word1 = "intention"
-    word2 = "execution"
-    print(sl.minDistance(word1, word2))
+    s = 'cbbd'
+    print(sl.longestPalindromeSubseq(s))
 
     """
     动态规划五部曲：
