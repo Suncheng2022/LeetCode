@@ -53,12 +53,48 @@ class Solution:
 
     def uniquePathsWithObstacles(self, obstacleGrid: List[List[int]]) -> int:
         """ 63.不同路径II """
-        pass
+        m, n = len(obstacleGrid), len(obstacleGrid[0])
+        dp = [[0] * n for _ in range(m)]    # dp[i][j] 从位置[0,0]走到位置[i,j] 的 不同路径数
+        # 初始化dp 首行首列遇到障碍物后面的都会是0
+        for i in range(m):
+            if obstacleGrid[i][0] == 1:
+                break
+            dp[i][0] = 1
+        for j in range(n):
+            if obstacleGrid[0][j] == 1:
+                break
+            dp[0][j] = 1
+        for i in range(1, m):       # 注意两个for循环起始索引
+            for j in range(1, n):
+                if obstacleGrid[i][j] == 1:
+                    continue
+                dp[i][j] = dp[i][j - 1] + dp[i - 1][j]
+        return dp[-1][-1]
+
+    def integerBreak(self, n: int) -> int:
+        """ 343.整数拆分
+            没思路：dp[i] 将数字i拆分最大乘积
+            """
+        dp = [0] * (n + 1)      # 要拆分到n，所以要有n+1个数
+        dp[2] = 1       # dp[0] dp[1]不符合dp的设计要求，忽略不使用
+        for i in range(3, n + 1):
+            for j in range(1, i // 2 + 1):       # 从i上拆分下一个j来, 同时注意其范围
+                dp[i] = max(dp[i], j * (i - j), j * dp[i - j])      # j的for循环会多次计算dp[i]，取最大的dp[i]而已
+        return dp[-1]
+
+    def numTrees(self, n: int) -> int:
+        """ 96.不同的二叉搜索树
+            没思路：dp[i] i个节点组成的BST数量+=dp[j]*dp[i-1-j] 即遍历所有左右子树的情况 """
+        dp = [0] * (n + 1)      # 根据dp定义，最终答案是dp[n] 所以元素一共n+1个
+        dp[0] = 1       # 初始化，因为递推公式的需要
+        for i in range(1, n + 1):   # 计算dp[i]
+            for j in range(i):      # 其中一棵子树所能拥有的节点数量为 0~i-1，-1表示父节点占用1个
+                dp[i] += dp[j] * dp[i - 1 - j]      # 与《代码随想录稍有区别》--只要两棵子树节点数量相加为i-1即可
+        return dp[-1]
 
 
 if __name__ == '__main__':
     sl = Solution()
 
-    m = 1
     n = 1
-    print(sl.uniquePaths(m, n))
+    print(sl.numTrees(n))
