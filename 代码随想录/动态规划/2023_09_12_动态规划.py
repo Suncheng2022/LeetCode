@@ -179,11 +179,55 @@ class Solution:
                 dp[j] += dp[j - nums[i]]
         return dp[-1]
 
+    def findMaxForm(self, strs: List[str], m: int, n: int) -> int:
+        """ 474.一和零
+            将0的个数、1的个数视为物品的重量 """
+        from collections import Counter
+
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        for s in strs:      # 遍历物品
+            zeroNum = Counter(s)['0']
+            oneNum = Counter(s)['1']
+            # 两个for 遍历容量
+            for i in range(m, zeroNum - 1, -1):
+                for j in range(n, oneNum - 1, -1):
+                    dp[i][j] = max(dp[i][j],                            # 相当于二维dp的 dp[i-1][j]
+                                   dp[i - zeroNum][j - oneNum] + 1)     # 相当于二维dp的 dp[i-1][j-weights[i]] + values[i]
+        return dp[-1][-1]
+
+        # 再写一遍
+        # from collections import Counter
+        #
+        # dp = [[0] * (n + 1) for _ in range(m + 1)]      # dp[i][j] i个0、j个1能组成的最大子集
+        # for s in strs:
+        #     zeroNum = Counter(s)['0']
+        #     oneNum = Counter(s)['1']
+        #     for i in range(m, zeroNum - 1, -1):
+        #         for j in range(n, oneNum - 1, -1):
+        #             dp[i][j] = max(dp[i][j], dp[i - zeroNum][j - oneNum] + 1)
+        # return dp[-1][-1]
+
+    def test_CompletePack(self):
+        """ 完全背包 导读
+            完全背包 与 01背包 的唯一区别，遍历容量顺序不同[01背包要倒序，完全背包要正序]
+            完全背包内外层循环先后顺序均可，01背包内外层循环只能外层物品内层容量 """
+        weights = [1, 3, 4]
+        values = [15, 20, 30]
+        bagweight = 4
+        # 答案应为60
+
+        dp = [0] * (bagweight + 1)
+        for i in range(len(weights)):
+            for j in range(weights[i], bagweight + 1):
+                dp[j] = max(dp[j], dp[j - weights[i]] + values[i])
+            print(dp)
+        print(dp[-1])
 
 
 if __name__ == '__main__':
     sl = Solution()
 
-    nums = [100]
-    target = -200
-    print(sl.findTargetSumWays(nums, target))
+    strs = ["10", "0001", "111001", "1", "0"]
+    m = 5
+    n = 3
+    print(sl.test_CompletePack())
