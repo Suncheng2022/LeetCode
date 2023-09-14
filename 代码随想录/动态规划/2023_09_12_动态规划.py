@@ -92,9 +92,98 @@ class Solution:
                 dp[i] += dp[j] * dp[i - 1 - j]      # 与《代码随想录稍有区别》--只要两棵子树节点数量相加为i-1即可
         return dp[-1]
 
+    def test_2_wei_bag_problem1(self):
+        """ 01背包问题 导读
+            二维dp dp[i][j] 从0~i的物品中选 放入容量为j的背包，所得最大价值 """
+        weights = [1, 3, 4]
+        values = [15, 20, 30]
+        bagweight = 4
+        # 答案应为35
+
+        n = len(weights)
+        dp = [[0] * (bagweight + 1) for _ in range(n)]
+        for j in range(bagweight + 1):      # 初始化首行
+            if j >= weights[0]:
+                dp[0][j] = values[0]
+        # 首列需要初始化为0 dp[i][0]=0，因为包的容量为0，啥也放不下。可省略
+        # 二维dp先遍历谁都行，这里先遍历物品、再遍历背包容量
+        for i in range(1, n):
+            for j in range(weights[i], bagweight + 1):
+                dp[i][j] = max(dp[i - 1][j],                            # 不放weights[i]
+                               dp[i - 1][j - weights[i]] + values[i])   # 放weigits[i]
+        print(dp[-1][-1])
+
+    def test_1_wei_bag_problem(self):
+        """ 01背包问题 导读
+            一维dp dp[j] 去掉了i维度，表示：容量为j的背包能装下的最大价值
+             仔细看《代码随想录》讲解，一维dp[j]是将上一层即i-1层复制到i层，递推公式为dp[j]=max(dp[j], dp[j-weights[i]]+values[i]),
+             其实本质上还是取 左、上的最大值 """
+        weights = [1, 3, 4]
+        values = [15, 20, 30]
+        bagweight = 4
+        # 答案应为35
+
+        dp = [0] * (bagweight + 1)      # dp[j] 背包容量j能装下的最大价值
+        dp[0] = 0       # 初始化，强调一下吧
+        # 一维dp，先遍历物品、再遍历背包容量且倒序；
+        # 先遍历背包容量则遍历物品时每次只会放进1个物品，这是不对的
+        # 正序遍历容量会导致物品放入2次，因为推导公式dp[j]=max(dp[j], dp[j-weights[i]]+values[i])可以看出每次都要用到前面的dp，正序会导致物品重复放入
+        for i in range(len(weights)):       # 这里起始索引为0，0号物品也要取！
+            for j in range(bagweight, weights[i] - 1, -1):
+                dp[j] = max(dp[j],                              # 其实是取二维的dp[i-1][j]
+                            dp[j - weights[i]] + values[i])     # 其实是取二维的dp[i-1][j-weights[i]] + values[i]
+        print(dp[-1])
+
+    def canPartition(self, nums: List[int]) -> bool:
+        """ 416.分割等和子集
+            竟然也能想到用背包问题，dp[i] 容量为i的背包能盛下的最大价值 """
+        if sum(nums) % 2:
+            return False
+        target = sum(nums) // 2
+        dp = [0] * (target + 1)
+        # 一维dp 先遍历物品、再遍历容量且倒序；
+        # 遍历顺序：若先遍历容量、再遍历物品，会导致每次只有1个物品放入
+        # 遍历容量倒序：若正序，根据递推公式，会导致每个物品放入2次，01背包不能重复放入
+        for i in range(len(nums)):
+            for j in range(target, nums[i] - 1, -1):
+                dp[j] = max(dp[j],                          # 不放入nums[i]；即二维dp的dp[i-1][j]
+                            dp[j - nums[i]] + nums[i])      # 放入nums[i]
+        return dp[-1] == target
+
+    def lastStoneWeightII(self, stones: List[int]) -> int:
+        """ 1049.最后一块石头的重量II
+            类似 416.分割等和子集 只不过本题不是问的能不能恰好装下一半 """
+        target = sum(stones) // 2
+        dp = [0] * (target + 1)     # dp[i] 容量为i的背包所能装下的最大价值
+        dp[0] = 0
+        # 01背包一维dp 先遍历物品、再遍历容量且倒序
+        # 先遍历物品：若先遍历容量，会导致每次只装入1个物品
+        # 遍历容量倒序：若正序，由递推公式 物品会装入2次
+        for i in range(len(stones)):
+            for j in range(target, stones[i] - 1, -1):
+                dp[j] = max(dp[j], dp[j - stones[i]] + stones[i])
+        return sum(stones) - dp[-1] - dp[-1]        # 返回2堆之差
+
+    def findTargetSumWays(self, nums: List[int], target: int) -> int:
+        """ 494.目标和
+            重要的是能想到 left=(sum(nums) + target) / 2
+            之前01背包是求 装满容量j的背包所得最大价值，本题是求装满容量j的背包有几种方式，其实是组合问题——dp[j] += dp[j-nums[i]]
+            【记住】求装满背包有几种方法时，递推公式一般为dp[j]+=dp[j-nums[i]] """
+        if (sum(nums) + target) % 2 or abs(target) > sum(nums):
+            return 0
+        target = (sum(nums) + target) // 2
+        dp = [0] * (target + 1)    # dp[j] 装满容量j的背包有几种方法
+        dp[0] = 1       # dp[0]是递推公式的起点；若nums=[0], target=0, 只有1种方法，无论元素前添加的是加号还是减号
+        for i in range(len(nums)):
+            for j in range(target, nums[i] - 1, -1):
+                dp[j] += dp[j - nums[i]]
+        return dp[-1]
+
+
 
 if __name__ == '__main__':
     sl = Solution()
 
-    n = 1
-    print(sl.numTrees(n))
+    nums = [100]
+    target = -200
+    print(sl.findTargetSumWays(nums, target))
