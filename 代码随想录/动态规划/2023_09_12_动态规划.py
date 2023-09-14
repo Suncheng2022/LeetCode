@@ -223,11 +223,23 @@ class Solution:
             print(dp)
         print(dp[-1])
 
+    def change(self, amount: int, coins: List[int]) -> int:
+        """ 518.零钱兑换II
+            硬币可重复用--完全背包
+            求组合数--dp[j]+=dp[j-nums[i]]
+        完全背包：1.内外遍历顺序都可以【但本题不可以，只能外层物品、内层容量——1.1求组合数 外层物品、内层容量 1.2求排列数 外层容量、内层物品】
+                2.遍历容量必须正序，以保证物品可重复放入
+        01背包：1.外层遍历物品、内层遍历容量 2.内层遍历容量必须倒序，以保证物品不重复放入 """
+        dp = [0] * (amount + 1)     # dp[i] 组成金额i，有几种方式
+        dp[0] = 1
+        for i in range(len(coins)):
+            for j in range(coins[i], amount + 1):
+                dp[j] += dp[j - coins[i]]
+        return dp[-1]
 
 if __name__ == '__main__':
     sl = Solution()
 
-    strs = ["10", "0001", "111001", "1", "0"]
-    m = 5
-    n = 3
-    print(sl.test_CompletePack())
+    amount = 3
+    coins = [2]
+    print(sl.change(amount, coins))
