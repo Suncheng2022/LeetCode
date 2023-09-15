@@ -250,7 +250,7 @@ class Solution:
         return dp[-1]
 
     def climbStairs(self, n: int) -> int:
-        """ 70.爬楼梯
+        """ 70.爬楼梯（进阶版）
             可转化为背包问题，物品--每次爬1个台阶、每次爬2个台阶 容量--需要爬n阶
             物品可重复使用--完全背包，内层遍历正序(似乎无论内层遍历的什么)
             根据题意，是有顺序的--外层容量、内层物品
@@ -276,10 +276,20 @@ class Solution:
                 dp[j] = min(dp[j], dp[j - coins[i]] + 1)        # 装满容量j的背包所需最少物品数
         return dp[-1] if dp[-1] != float('inf') else -1
 
+    def numSquares(self, n: int) -> int:
+        """ 279.完全平方数
+            元素可重复使用--完全背包 内层for正序（无论内层遍历什么）
+            装满背包所需最少物品数--递推公式 dp[j]=min(dp[j],dp[j-nums[i]] + 1) """
+        dp = [float('inf')] * (n + 1)
+        dp[0] = 0
+        for i in range(1, int(pow(n, .5)) + 1):     # 这里若写成n//2 + 1，取不到i=1，计算n=1时会错误；物品最大也是n开方嘛
+            for j in range(i * i, n + 1):
+                dp[j] = min(dp[j], dp[j - i * i] + 1)
+        return dp[-1] if dp[-1] != float('inf') else -1
+
 
 if __name__ == '__main__':
     sl = Solution()
 
-    coins = [1]
-    amount = 0
-    print(sl.coinChange(coins, amount))
+    n = 1
+    print(sl.numSquares(n))
