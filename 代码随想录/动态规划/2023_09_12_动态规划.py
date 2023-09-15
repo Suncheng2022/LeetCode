@@ -237,9 +237,49 @@ class Solution:
                 dp[j] += dp[j - coins[i]]
         return dp[-1]
 
+    def combinationSum4(self, nums: List[int], target: int) -> int:
+        """ 377.组合总和IV
+            元素可重复使用--完全背包 内层for正序(似乎无论内层遍历是容量还是物品)
+            顺序不同视为不同组合--求排列 外层容量、内层物品，若外层物品、内层容量，若nums={1,3,4} 则3只会出现在1后面 """
+        dp = [0] * (target + 1)     # dp[i] 组成和为i有几种方法
+        dp[0] = 1
+        for i in range(1, target + 1):
+            for j in range(len(nums)):
+                if i >= nums[j]:
+                    dp[i] += dp[i - nums[j]]
+        return dp[-1]
+
+    def climbStairs(self, n: int) -> int:
+        """ 70.爬楼梯
+            可转化为背包问题，物品--每次爬1个台阶、每次爬2个台阶 容量--需要爬n阶
+            物品可重复使用--完全背包，内层遍历正序(似乎无论内层遍历的什么)
+            根据题意，是有顺序的--外层容量、内层物品
+            题目求有多少种方法，即装满容量为n的背包有多少种方法--递推公式dp[j]+=dp[j-nums[i]] """
+        dp = [0] * (n + 1)      # dp[i] 装满容量i的背包有多少种方法
+        dp[0] = 1       # 初始化
+        nums = [1, 2]   # 相当于物品
+        for j in range(n + 1):              # 遍历容量
+            for i in range(len(nums)):      # 遍历物品
+                if j >= nums[i]:
+                    dp[j] += dp[j - nums[i]]
+        return dp[-1]
+
+    def coinChange(self, coins: List[int], amount: int) -> int:
+        """ 322.零钱兑换
+            硬币数量无限--完全背包，内层for正序(无论内层遍历什么)
+            装满背包的最少方法--那就将每个物品价值视为1(即个数)；
+                            递推公式能想到是dp[j]=dp[j-nums[i]]+1, 但没表达'最少个数'，所以完整递推公式应为dp[j]=min(dp[j],dp[j-nums[i]]+1) """
+        dp = [float('inf')] * (amount + 1)     # 根据递推特性，求最小值，所以初始化为最大的数；dp[i] 组成金额i所需最少硬币数 / 装满容量为i的背包所需最小物品数量，我觉得我解释是对的
+        dp[0] = 0
+        for i in range(len(coins)):
+            for j in range(coins[i], amount + 1):
+                dp[j] = min(dp[j], dp[j - coins[i]] + 1)        # 装满容量j的背包所需最少物品数
+        return dp[-1] if dp[-1] != float('inf') else -1
+
+
 if __name__ == '__main__':
     sl = Solution()
 
-    amount = 3
-    coins = [2]
-    print(sl.change(amount, coins))
+    coins = [1]
+    amount = 0
+    print(sl.coinChange(coins, amount))
