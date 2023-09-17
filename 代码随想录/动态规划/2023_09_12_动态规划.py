@@ -287,9 +287,23 @@ class Solution:
                 dp[j] = min(dp[j], dp[j - i * i] + 1)
         return dp[-1] if dp[-1] != float('inf') else -1
 
+    def wordBreak(self, s: str, wordDict: List[str]) -> bool:
+        """ 139.单词拆分
+            物品--字典的单词，背包--字符串s；s能否被装满，即背包问题
+            物品可重复使用--完全背包，内层for正序(无论内层遍历什么)
+            题目隐含了顺序问题--先遍历容量、再遍历物品 """
+        n = len(s)
+        dp = [False] * (n + 1)      # dp[i] 前i个字符能否被字典的单词表示
+        dp[0] = True    # 纯为递推公式
+        for i in range(1, n + 1):
+            for j in range(i):      # 遍历物品没写正确，本题并不是遍历wordDict
+                if dp[j] and s[j:i] in wordDict:       # j指示当前遍历s的下标，dp[j:i]是否能被字典表示
+                    dp[i] = True
+        return dp[-1]
 
 if __name__ == '__main__':
     sl = Solution()
 
-    n = 1
-    print(sl.numSquares(n))
+    s = "applepenapple"
+    wordDict = ["apple", "pen"]
+    print(sl.wordBreak(s, wordDict))
