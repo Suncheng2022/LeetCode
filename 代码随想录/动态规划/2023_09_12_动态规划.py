@@ -301,9 +301,33 @@ class Solution:
                     dp[i] = True
         return dp[-1]
 
+    def rob(self, nums: List[int]) -> int:
+        """ 198.打家劫舍 """
+        # 《代码随想录》感觉dp更清晰
+        n = len(nums)
+        if n <= 2:
+            return max(nums)
+        dp = [0] * n    # dp[i] 截止到索引i房屋能偷到的最大金额
+        dp[0] = nums[0]
+        dp[1] = max(nums[:2])
+        for i in range(2, n):
+            dp[i] = max(dp[i - 1], dp[i - 2] + nums[i])
+        return dp[-1]
+
+        # n = len(nums)
+        # dp = [0] * (n + 1)      # dp[i] 前i个房屋能偷到的最大金额
+        # dp[1] = nums[0]
+        # for i in range(2, n + 1):
+        #     dp[i] = max(dp[i - 1], dp[i - 2] + nums[i - 1])
+        # return dp[-1]
+
+    def robII(self, nums: List[int]) -> int:
+        """ 213.打家劫舍II """
+        pass
+
+
 if __name__ == '__main__':
     sl = Solution()
 
-    s = "applepenapple"
-    wordDict = ["apple", "pen"]
-    print(sl.wordBreak(s, wordDict))
+    nums = [2]
+    print(sl.rob(nums))
