@@ -482,10 +482,23 @@ class Solution:
             dp[i][1] = max(dp[i - 1][1], dp[i - 1][0] - prices[i])
         return dp[-1][0]    # 同 max(dp[-1])
 
+    def lengthOfLIS(self, nums: List[int]) -> int:
+        """ 300.最长递增子序列
+            不是你想的那么简单滴
+            如果nums[j] < nums[i], 则nums[i]可以放到nums[j]后面-->nums[i]能放到哪些nums[j]后面，需要遍历j了，从0到i-1 """
+        n = len(nums)
+        dp = [1] * n
+        for i in range(1, n):
+            for j in range(i):
+                if nums[j] < nums[i]:    # 如果nums[i]可以放到这个nums[j]后面，则dp[i]更新为dp[j]+1
+                    dp[i] = max(dp[i], dp[j] + 1)
+            print(dp)
+        return max(dp)      # 这里不能返回dp[-1]，因为以nums[-1]结尾的不一定是最长的子序列，万一中间有元素比最后的元素大呢，对不对。这题并不简单呀
+
+
 
 if __name__ == '__main__':
     sl = Solution()
 
-    prices = [1,3,7,5,10,3]
-    fee = 3
-    print(sl.maxProfitFee(prices, fee))
+    nums = [1,3,6,7,9,4,10,5,6]
+    print(sl.lengthOfLIS(nums))
