@@ -1,5 +1,12 @@
-from typing import List
+from typing import List, Optional
 
+
+# Definition for a binary tree node.
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
 
 class Solution:
     def fib(self, n: int) -> int:
@@ -323,11 +330,162 @@ class Solution:
 
     def robII(self, nums: List[int]) -> int:
         """ 213.打家劫舍II """
-        pass
+        # 《代码随想录》边界条件就比较简洁了
+        def rob_(nums, start, end):
+            """ start end均包含 """
+            if start == end:
+                return nums[start]
+            dp = [0] * len(nums)
+            # 看人家这初始化，避免了自己那样复杂的边界处理
+            dp[start] = nums[start]
+            dp[start + 1] = max(nums[start:start + 2])
+            for i in range(start + 2, end + 1):
+                dp[i] = max(dp[i - 1], dp[i - 2] + nums[i])
+            return dp[end]
+
+        # 特殊处理长度为1，则rob_刚好可以处理len(nums)>=2的情况
+        if len(nums) == 1:      # 题目说明nums长度至少为1
+            return nums[0]
+        res1 = rob_(nums, 0, len(nums) - 2)
+        res2 = rob_(nums, 1, len(nums) - 1)
+        return max(res1, res2)
+
+        # 自己实现的，逻辑太复杂，尤其边界条件
+        # def rob_(nums, start, end):
+        #     """ 198.打家劫舍 的逻辑
+        #         start、end均为包含元素 """
+        #     nums = nums[start:end + 1][:]
+        #     n = len(nums)
+        #     dp = [0] * n    # dp[i] 截止到索引i房间(包括)，能偷到的最大金额
+        #     dp[0] = nums[0]
+        #     dp[1] = max(nums[:2])
+        #     for i in range(2, n):
+        #         dp[i] = max(dp[i - 1], dp[i - 2] + nums[i])
+        #     return dp[-1]
+        #
+        # # 成环的 打家劫舍 逻辑
+        # n = len(nums)
+        # if n <= 2:
+        #     return max(nums)
+        # res1 = rob_(nums, 0, len(nums) - 2)     # 不考虑尾元素
+        # res2 = rob_(nums, 1, len(nums) - 1)     # 不考虑首元素
+        # return max(res1, res2)
+
+    def rob(self, root: Optional[TreeNode]) -> int:
+        """ 337.打家劫舍III
+            回溯递归 + 动态规划"""
+        def rob_(node):
+            # 递归终止条件
+            if not node:
+                return [0, 0]
+            lefts = rob_(node.left)
+            rights = rob_(node.right)
+            val0 = max(lefts) + max(rights)             # 不偷当前节点
+            val1 = node.val + lefts[0] + rights[0]      # 偷当前节点
+            return [val0, val1]
+
+        return max(rob_(root))
+
+    def maxProfit(self, prices: List[int]) -> int:
+        """ 121.买卖股票的最佳时机
+            只一次买卖，因此'买入'的时候只能是-prices[i]，而不是 昨天持有-prices[i] """
+        # 《代码随想录》动态规划思路，状态转移，把系列题目串起来
+        n = len(prices)
+        dp = [[0, 0] for _ in range(n)]    # dp[i] 索引第i天的 不持有/持有 的最大收益
+        dp[0] = [0, -prices[0]]         # 初始化索引第0天
+        for i in range(1, n):
+            dp[i][0] = max(dp[i - 1][0], dp[i - 1][1] + prices[i])
+            dp[i][1] = max(dp[i - 1][1], -prices[i])    # 注意 昨天不持有 转移到 今天持有 的状态转移
+        return dp[-1][0]
+
+        # 自己写的，想了一会；还是没有系统的解题思路，还是得《代码随想录》
+        # res = 0
+        # minPrice = float('inf')
+        # for i in range(1, len(prices)):
+        #     minPrice = min(minPrice, prices[i - 1])
+        #     res = max(res, prices[i] - minPrice)
+        # return res
+
+    def maxProfitII(self, prices: List[int]) -> int:
+        """ 122.买卖股票的最佳时机II
+            可多次买卖，因此 相比 121.买卖股票的最佳时机，'买入'的时候是 昨天持有-prices[i]了，因为可多次买卖，买入之前可能有些盈利累计了 """
+        n = len(prices)
+        dp = [[0, 0] for _ in range(n)]     # dp[i] 索引第i天的 不持有/持有 的最大收益
+        dp[0] = [0, -prices[0]]         # 初始化索引第0天
+        for i in range(1, n):
+            dp[i][0] = max(dp[i - 1][0], dp[i - 1][1] + prices[i])
+            dp[i][1] = max(dp[i - 1][1], dp[i - 1][0] - prices[i])
+        return dp[-1][0]
+
+    def maxProfitIII(self, prices: List[int]) -> int:
+        """ 123.买卖股票的最佳时机III
+            至多买卖2次，状态多了而已
+            状态：
+                状态0：无操作(可不写)
+                状态1：第一次持有
+                状态2：第一次不持有
+                状态3：第二次持有
+                状态4：第二次不持有 """
+        n = len(prices)
+        dp = [[0] * 5 for _ in range(n)]
+        dp[0] = [0, -prices[0], 0, -prices[0], 0]
+        for i in range(1, n):
+            # 我就没有考虑状态0的计算，也能AC
+            dp[i][1] = max(dp[i - 1][1], dp[i - 1][0] - prices[i])
+            dp[i][2] = max(dp[i - 1][2], dp[i - 1][1] + prices[i])
+            dp[i][3] = max(dp[i - 1][3], dp[i - 1][2] - prices[i])
+            dp[i][4] = max(dp[i - 1][4], dp[i - 1][3] + prices[i])
+        return max(dp[-1])
+
+    def maxProfitIV(self, k: int, prices: List[int]) -> int:
+        """ 188.买卖股票的最佳时机IV
+            至多买卖k次，状态再多些而已 """
+        n = len(prices)
+        dp = [[0] * (2 * k + 1) for _ in range(n)]      # 索引第i天的 第几次股票持有或不持有 所得最大收益
+        # 初始化索引第0天dp
+        for i in range(1, 2 * k + 1):
+            if i % 2:   # 奇数 代表 第某次持有
+                dp[0][i] = -prices[0]
+            else:       # 偶数 代表 第某次不持有
+                dp[0][i] = 0
+        for i in range(1, n):
+            for j in range(1, 2 * k + 1):
+                if j % 2:   # 奇数 持有
+                    dp[i][j] = max(dp[i - 1][j], dp[i - 1][j - 1] - prices[i])
+                else:       # 偶数 不持有
+                    dp[i][j] = max(dp[i - 1][j], dp[i - 1][j - 1] + prices[i])
+        return dp[-1][-1]   # 同 max(dp[-1])
+
+    def maxProfitFreeze(self, prices: List[int]) -> int:
+        """ 309.买卖股票的最佳时机含冷冻期
+            含冷冻期，依然是设置状态
+                状态0：持有
+                状态1：不持有(在冷冻期)
+                状态2：不持有(不在冷冻期) """
+        n = len(prices)
+        dp = [[0, 0, 0] for _ in range(n)]
+        dp[0] = [-prices[0], 0, 0]
+        for i in range(1, n):
+            dp[i][0] = max(dp[i - 1][0], dp[i - 1][2] - prices[i])
+            dp[i][1] = dp[i - 1][0] + prices[i]
+            dp[i][2] = max(dp[i - 1][2], dp[i - 1][1])
+        return max(dp[-1])
+
+    def maxProfitFee(self, prices: List[int], fee: int) -> int:
+        """ 714.买买股票的最佳时机含手续费
+            相比 122.买卖股票的最佳时机II 仅多了手续费而已 """
+        n = len(prices)
+        dp = [[0, 0] for _ in range(n)]
+        dp[0] = [0, -prices[0]]
+        for i in range(1, n):
+            dp[i][0] = max(dp[i - 1][0], dp[i - 1][1] + prices[i] - fee)
+            dp[i][1] = max(dp[i - 1][1], dp[i - 1][0] - prices[i])
+        return dp[-1][0]    # 同 max(dp[-1])
 
 
 if __name__ == '__main__':
     sl = Solution()
 
-    nums = [2]
-    print(sl.rob(nums))
+    prices = [1,3,7,5,10,3]
+    fee = 3
+    print(sl.maxProfitFee(prices, fee))
