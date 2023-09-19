@@ -495,10 +495,45 @@ class Solution:
             print(dp)
         return max(dp)      # 这里不能返回dp[-1]，因为以nums[-1]结尾的不一定是最长的子序列，万一中间有元素比最后的元素大呢，对不对。这题并不简单呀
 
+    def findLengthOfLCIS(self, nums: List[int]) -> int:
+        """ 674.最长连续递增序列 """
+        n = len(nums)
+        dp = [1] * n    # 以nums[i]结尾的最长连续递增序列的长度为 dp[i]
+        for i in range(1, n):
+            if nums[i - 1] < nums[i]:
+                dp[i] = dp[i - 1] + 1
+        return max(dp)      # 注意，不是返回dp[-1]，自己想想
+
+    def findLength(self, nums1: List[int], nums2: List[int]) -> int:
+        """ 718.最长重复子数组
+            竟然是求 最长连续公共子序列，注意是 连续 """
+        m, n = len(nums1), len(nums2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]      # dp[i][j] 以nums1[i-1]结尾的连续子序列、以nums2[j]结尾的连续子序列 的 连续公共子序列长度
+        # dp 索引有0的似乎不参与计算，只参与推导，因为dp有0没意义 初始化为0即可
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if nums1[i - 1] == nums2[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + 1     # 注意，是求 连续子序列 的长度
+        return max(max(ls) for ls in dp)
+
+    def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+        """ 1143.最长公共子序列
+            dp定义与 718.最长重复子数组 是不同的 """
+        m, n = len(text1), len(text2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]      # dp[i][j] 索引从 0~i-1 的text1、索引从 0~j-1 的text2 的 公共子序列长度；并非text1[i-1] text2[j-1]结尾哈
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                # 这里计算dp[i][j]要分情况了：text1[i-1]==text2[j-1] 或 text1[i-1]!=text2[j-1]
+                if text1[i - 1] == text2[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + 1
+                else:
+                    dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])      # 之所以有这句，看dp定义；看dp推导图，dp[i][j]的左上角都会<=左、上
+        return dp[-1][-1]       # 现在结果是dp[-1][-1]了，因为从左上、上、左三个方向最大值推导来的
 
 
 if __name__ == '__main__':
     sl = Solution()
 
-    nums = [1,3,6,7,9,4,10,5,6]
-    print(sl.lengthOfLIS(nums))
+    text1 = "abc"
+    text2 = "abc"
+    print(sl.longestCommonSubsequence(text1, text2))
