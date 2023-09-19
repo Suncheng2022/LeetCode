@@ -530,10 +530,51 @@ class Solution:
                     dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])      # 之所以有这句，看dp定义；看dp推导图，dp[i][j]的左上角都会<=左、上
         return dp[-1][-1]       # 现在结果是dp[-1][-1]了，因为从左上、上、左三个方向最大值推导来的
 
+    def maxUncrossedLines(self, nums1: List[int], nums2: List[int]) -> int:
+        """ 1035.不相交的线
+            即 最长公共子序列，'不连续' """
+        m, n = len(nums1), len(nums2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]      # dp[i][j] 索引0~i-1的nums1、索引0~j-1的nums2 的 公共子序列长度
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if nums1[i - 1] == nums2[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + 1
+                else:
+                    dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+        return dp[-1][-1]
+
+    def maxSubArray(self, nums: List[int]) -> int:
+        """ 53.最大子数组和
+            题目包含求'连续'元素时，dp[i]似乎都要定义为 以nums[i]为结尾的 ... """
+        n = len(nums)
+        dp = [0] * n    # dp[i] 以nums[i]结尾的连续子数组的和
+        dp[0] = nums[0]
+        for i in range(1, n):   # 我多写了判断条件 if nums[i] > 0 ，导致dp不能全部更新
+            dp[i] = max(dp[i - 1] + nums[i], nums[i])
+        return max(dp)      # 不一定是dp[i]最大，你想，中间达到最大 后面都是负数，对吧
+
+    def isSubsequence(self, s: str, t: str) -> bool:
+        """ 392.判断子序列
+            自己没想通递推公式，推一遍dp图清爽很多
+            很像 1143.最长公共子序列：分2种情况
+                1.nums1[i-1]==nums2[j-1]则dp[i][j]=dp[i-1][j-1]+1
+                2.nums1[i-1]!=nums2[j-1]则只放一边（1143.是两边都放试试，挑大的）"""
+        m, n = len(s), len(t)
+        # dp[i][j] 以s[i-1]结尾、以t[j-1]结尾 的 公共子序列长度
+        # 初始化 dp索引带0的均为0，因为0表示空子串
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if s[i - 1] == t[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + 1
+                else:
+                    dp[i][j] = dp[i][j - 1]     # 只删t 的与s不相等的元素，因为是判断s是否为t的子序列
+        return dp[-1][-1] == m
+
 
 if __name__ == '__main__':
     sl = Solution()
 
-    text1 = "abc"
-    text2 = "abc"
-    print(sl.longestCommonSubsequence(text1, text2))
+    s = "axc"
+    t = "ahbgdc"
+    print(sl.isSubsequence(s, t))
