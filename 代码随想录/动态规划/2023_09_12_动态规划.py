@@ -571,10 +571,137 @@ class Solution:
                     dp[i][j] = dp[i][j - 1]     # 只删t 的与s不相等的元素，因为是判断s是否为t的子序列
         return dp[-1][-1] == m
 
+    def numDistinct(self, s: str, t: str) -> int:
+        """ 115.不同的子序列
+            感觉进入子序列就比较难了，涉及'删除' """
+        # m, n = len(s), len(t)
+        # dp = [[0] * (n + 1) for _ in range(m + 1)]      # dp[i][j] 以s[i-1]结尾的子序列 中出现 以t[j-1]结尾的子序列 的个数
+        # # 初始化dp
+        # for i in range(m + 1):
+        #     dp[i][0] = 1        # 以s[i-1]结尾的子序列 变成 空串，删除所有元素--1种方法；dp[0][0] 空串s 变 空串t 需要删除0个元素--1种
+        # for i in range(1, m + 1):
+        #     for j in range(1, n + 1):
+        #         if s[i - 1] == t[j - 1]:    # 相等：使用s[i-1]匹配 或 不使用s[i-1]匹配；因为本题求s中出现t的次数，所以只删s
+        #             dp[i][j] = dp[i - 1][j - 1] + dp[i - 1][j]
+        #         else:                       # 不相等，不使用s[i-1]匹配
+        #             dp[i][j] = dp[i - 1][j]
+        # return dp[-1][-1]
+
+        # 再写一遍
+        m, n = len(s), len(t)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        for i in range(m + 1):
+            dp[i][0] = 1
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if s[i - 1] == t[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + dp[i - 1][j]      # 递推公式与 583.两个字符串的删除操作 不同，不太好理解
+                else:
+                    dp[i][j] = dp[i - 1][j]
+        return dp[-1][-1]
+
+    def minDistance(self, word1: str, word2: str) -> int:
+        """ 583.两个字符串的删除操作
+            推荐 方法一 """
+        # 方法一：1143.最长公共子序列
+        # m, n = len(word1), len(word2)
+        # dp = [[0] * (n + 1) for _ in range(m + 1)]
+        # for i in range(1, m + 1):
+        #     for j in range(1, n + 1):
+        #         if word1[i - 1] == word2[j - 1]:
+        #             dp[i][j] = dp[i - 1][j - 1] + 1
+        #         else:
+        #             dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+        # return m + n - 2 * dp[-1][-1]
+
+        # 方法二：与 115.不同的子序列 相似，但递推公式二者差异较大，没理解透
+        m, n = len(word1), len(word2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        for i in range(1, m + 1):
+            dp[i][0] = i
+        for j in range(1, n + 1):
+            dp[0][j] = j
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if word1[i - 1] == word2[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1]
+                else:
+                    dp[i][j] = min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + 2)        # 可以拿掉dp[i - 1][j - 1] + 2
+        return dp[-1][-1]
+
+    def minDistance_72(self, word1: str, word2: str) -> int:
+        """ 72.编辑距离 """
+        m, n = len(word1), len(word2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        for i in range(1, m + 1):
+            dp[i][0] = i
+        for j in range(1, n + 1):
+            dp[0][j] = j
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if word1[i - 1] == word2[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1]
+                else:
+                    dp[i][j] = min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]) + 1
+        return dp[-1][-1]
+
+    def countSubstrings(self, s: str) -> int:
+        """ 647.回文子串
+            动归的遍历顺序要注意，根据递推公式来
+            认真品dp定义 """
+        # 《代码随想录》动态规划
+        n = len(s)
+        dp = [[False] * n for _ in range(n)]        # dp[i][j] 索引[i,j]闭区间是否为回文子串
+        for i in range(n):      # 初始化可删除，因为下面遍历能访问到
+            dp[i][i] = True
+        for i in range(n - 1, -1, -1):      # 由递推公式，遍历顺序为 从下到上、从左到右
+            for j in range(i, n):       # j是要在i右边的，否则计算错误
+                if s[i] == s[j]:        # 相等，分3种情况
+                    if j - i <= 1:      # 情况1.i==j 情况2.j-i==1
+                        dp[i][j] = True
+                    elif dp[i + 1][j - 1]:      # 情况3.i与j相差超过1，就要看dp[i+1][j-1]是不是回文了
+                        dp[i][j] = True
+        return sum(sum(ls) for ls in dp)
+
+        # 中心探测法，向两边探测
+        # n = len(s)
+        # res = set()     # 可去重
+        # for i in range(n):
+        #     res.add((i))
+        #     l, r = i - 1, i + 1
+        #     while l >= 0 and s[l] == s[i]:
+        #         res.add((l, i))
+        #         l -= 1
+        #     while r <= n - 1 and s[r] == s[i]:
+        #         res.add((i, r))
+        #         r += 1
+        #     while 0 <= l <= r <= n - 1 and s[l] == s[r]:
+        #         res.add((l, r))
+        #         l -= 1
+        #         r += 1
+        #     # l += 1
+        #     # r -= 1
+        # return len(res)
+
+    def longestPalindromeSubseq(self, s: str) -> int:
+        """ 516.最长回文子序列
+            647.回文子串 求的回文子串要求'连续'，因此只判断s[i]、s[j]是否相等--同时加入是否能构成回文子串，不等都不用处理
+            本题求最长回文子序列，不要求'连续'，除了要判断s[i]、s[j]是否相等--同时加入，不等的时候要看只加入一个会不会也能构成，因为不要求连续了--不同时加入 """
+        n = len(s)
+        dp = [[0] * n for _ in range(n)]
+        for i in range(n):
+            dp[i][i] = 1
+        for i in range(n - 1, -1, -1):      # 由递推公式，行倒序、列正序遍历
+            for j in range(i + 1, n):
+                if s[i] == s[j]:
+                    dp[i][j] = dp[i + 1][j - 1] + 2
+                else:
+                    dp[i][j] = max(dp[i + 1][j], dp[i][j - 1])
+        return dp[0][-1]
+
 
 if __name__ == '__main__':
     sl = Solution()
 
-    s = "axc"
-    t = "ahbgdc"
-    print(sl.isSubsequence(s, t))
+    s = "cbbd"
+    print(sl.longestPalindromeSubseq(s))
