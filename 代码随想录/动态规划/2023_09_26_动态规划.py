@@ -180,8 +180,38 @@ class Solution:
                 dp[j] = max(dp[j], dp[j - weights[i]] + values[i])
         print(dp[-1])
 
+    def canPartition(self, nums: List[int]) -> bool:
+        """ 416.分割等和子集
+            中等
+            01背包：先遍历物品、再遍历容量且倒序 """
+        # 时间：O(n^2) 空间：O(n)
+        if sum(nums) % 2:       # 注意 % / 的区别，竟然错在这
+            return False
+        bagweight = sum(nums) // 2
+        n = len(nums)
+        dp = [0] * (bagweight + 1)
+        for i in range(n):
+            for j in range(bagweight, nums[i] - 1, -1):
+                dp[j] = max(dp[j], dp[j - nums[i]] + nums[i])
+        return dp[-1] == bagweight
+
+    def lastStoneWeightII(self, stones: List[int]) -> int:
+        """ 1049.最后一块石头的重量II
+            中等
+            01背包 先遍历物品、再遍历容量，内层for倒序
+            dp[sum/2]能装下多少石头; 就是想求容量为sum(stones)//2的背包能放下重量为多少的石头 """
+        # 时间：O(mxn) 空间：O(m)
+        target = sum(stones) // 2
+        dp = [0] * (target + 1)
+        for i in range(len(stones)):
+            for j in range(target, stones[i] - 1, -1):
+                dp[j] = max(dp[j], dp[j - stones[i]] + stones[i])
+        return (sum(stones) - dp[-1]) - dp[-1]
+
+
+
 if __name__ == "__main__":
     sl = Solution()
 
-    n = 1
-    print(sl.test_1_wei_bag_problem())
+    stones = [31,26,33,21,40]
+    print(sl.lastStoneWeightII(stones))
