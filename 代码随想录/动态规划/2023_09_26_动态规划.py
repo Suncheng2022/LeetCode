@@ -267,10 +267,60 @@ class Solution:
                 dp[j] += dp[j - coins[i]]
         return dp[-1]
 
+    def combinationSum4(self, nums: List[int], target: int) -> int:
+        """ 377.组合总和IV
+            中等
+            元素个数无限--完全背包
+            求组合个数 且 顺序不同视为不同结果--即排列，外层for容量、内层for物品且正序
+            求排列、组合递推公式--dp[j] += dp[j - nums[i]] """
+        # 时间：O(target * n) 空间：O(target)
+        n = len(nums)
+        dp = [0] * (target + 1)
+        dp[0] = 1
+        for j in range(1, target + 1):
+            for i in range(n):
+                if j >= nums[i]:
+                    dp[j] += dp[j - nums[i]]
+        return dp[-1]
+
+    def climbStairsPro(self, n: int) -> int:
+        """ 70.爬楼梯(进阶)
+            简单
+            之前做过 现在使用背包做
+            元素不限--完全背包
+            顺序不同的结果视为不同--求排列 外层for容量、内层for物品 """
+        # 时间：O(nxm) 空间：O(n)
+        if n == 1:
+            return 1
+        dp = [0] * (n + 1)
+        dp[1] = 1
+        dp[2] = 2
+        weights = [1, 2]
+        for i in range(3, n + 1):
+            for j in range(len(weights)):
+                dp[i] += dp[i - weights[j]]
+        return dp[-1]
+
+    def coinChange(self, coins: List[int], amount: int) -> int:
+        """ 322.零钱兑换
+            中等
+            元素无限--完全背包
+            不求 排列 or 组合，所以 外层for物品、内层for容量且正序
+            求最小硬币个数，递推公式应为dp[j] = min(dp[j], dp[j-weight[i] + 1]) """
+        # 时间：O(nxm) 空间：O(m)
+        n = len(coins)
+        dp = [float('inf')] * (amount + 1)
+        dp[0] = 0       # 注意 dp 意义
+        for i in range(n):
+            for j in range(1, amount + 1):
+                if j >= coins[i]:
+                    dp[j] = min(dp[j], dp[j - coins[i]] + 1)
+        return dp[-1] if dp[-1] != float('inf') else -1
+
 
 if __name__ == "__main__":
     sl = Solution()
 
-    amount = 5
-    coins = [1, 2, 5]
-    print(sl.change(amount, coins))
+    coins = [2]
+    amount = 3
+    print(sl.coinChange(coins, amount))
