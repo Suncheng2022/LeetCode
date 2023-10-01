@@ -208,10 +208,69 @@ class Solution:
                 dp[j] = max(dp[j], dp[j - stones[i]] + stones[i])
         return (sum(stones) - dp[-1]) - dp[-1]
 
+    def findTargetSumWays(self, nums: List[int], target: int) -> int:
+        """ 494.目标和
+            中等
+            要能推导出 Left = (target+sum)/2，就能想到背包
+            组合问题--dp[j]+=dp[j-nums[i]] """
+        # 时间：O(mxn) 空间：O(n)
+        if (target + sum(nums)) % 2:
+            return 0
+        left = (target + sum(nums)) // 2
+        dp = [0] * (left + 1)       # dp[j] 装满容量j的背包有几种方法; 排列问题
+        dp[0] = 1
+        for i in range(len(nums)):
+            for j in range(left, nums[i] - 1, -1):
+                dp[j] += dp[j - nums[i]]
+        return dp[-1]
+
+    def findMaxForm(self, strs: List[str], m: int, n: int) -> int:
+        """ 474.一和零
+            中等 """
+        # 时间：O(mxn) 空间：O(mxn)
+        from collections import Counter
+
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        for s in strs:
+            zeroNum = Counter(s)['0']
+            oneNum = Counter(s)['1']
+            for i in range(m, -1, -1):
+                for j in range(n, -1, -1):
+                    if zeroNum <= i and oneNum <= j:
+                        dp[i][j] = max(dp[i][j], dp[i - zeroNum][j - oneNum] + 1)
+        return dp[-1][-1]
+
+    def test_CompletePack(self):
+        """ 完全背包 导读 """
+        weights = [1, 3, 4]
+        values = [15, 20, 30]
+        bagweight = 4
+
+        dp = [0] * (bagweight + 1)
+        for i in range(len(weights)):
+            for j in range(weights[i], bagweight + 1):
+                dp[j] = max(dp[j], dp[j - weights[i]] + values[i])
+        print(dp[-1])
+
+    def change(self, amount: int, coins: List[int]) -> int:
+        """ 518.零钱兑换II
+            中等
+            硬币数无限--完全背包
+                        1.遍历顺序均可，2.内层遍历正序
+            求组合数--dp[j] += dp[j-weight[i]] """
+        # 时间：O(nxm) 空间：O(n)
+        n = len(coins)
+        dp = [0] * (amount + 1)
+        dp[0] = 1
+        for i in range(n):
+            for j in range(coins[i], amount + 1):       # 一定注意范围，好几次错在这里
+                dp[j] += dp[j - coins[i]]
+        return dp[-1]
 
 
 if __name__ == "__main__":
     sl = Solution()
 
-    stones = [31,26,33,21,40]
-    print(sl.lastStoneWeightII(stones))
+    amount = 5
+    coins = [1, 2, 5]
+    print(sl.change(amount, coins))
