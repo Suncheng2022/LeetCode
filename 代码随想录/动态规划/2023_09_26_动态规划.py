@@ -1,5 +1,12 @@
-from typing import List
+from typing import List, Optional
 
+
+# Definition for a binary tree node.
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
 
 class Solution:
     def fib(self, n: int) -> int:
@@ -308,19 +315,148 @@ class Solution:
             不求 排列 or 组合，所以 外层for物品、内层for容量且正序
             求最小硬币个数，递推公式应为dp[j] = min(dp[j], dp[j-weight[i] + 1]) """
         # 时间：O(nxm) 空间：O(m)
+        # n = len(coins)
+        # dp = [float('inf')] * (amount + 1)
+        # dp[0] = 0       # 注意 dp 意义
+        # for i in range(n):
+        #     for j in range(1, amount + 1):
+        #         if j >= coins[i]:
+        #             dp[j] = min(dp[j], dp[j - coins[i]] + 1)
+        # return dp[-1] if dp[-1] != float('inf') else -1
+
+        # 再写一遍
+        """ 装满背包所需最少物品数量 递推公式dp[j]=min(dp[j], dp[j-weights[i]] + 1)
+            物品无限--完全背包：外层、内层遍历顺序均可，内层遍历正序 """
         n = len(coins)
         dp = [float('inf')] * (amount + 1)
-        dp[0] = 0       # 注意 dp 意义
+        dp[0] = 0
         for i in range(n):
-            for j in range(1, amount + 1):
-                if j >= coins[i]:
-                    dp[j] = min(dp[j], dp[j - coins[i]] + 1)
+            for j in range(coins[i], amount + 1):
+                dp[j] = min(dp[j], dp[j - coins[i]] + 1)
         return dp[-1] if dp[-1] != float('inf') else -1
+
+    def numSquares(self, n: int) -> int:
+        """ 279.完全平方数
+            装满容量为j的背包所需最少物品数量 所以递推公式 dp[j] = min(dp[j], dp[j - i * i] + 1)
+            物品数量不限--完全背包 1.遍历顺序均可 2.内层正序 """
+        # 时间：O(n^3/2) 空间：O(n)
+        if n == 1:
+            return 1
+        dp = [float('inf')] * (n + 1)
+        dp[0] = 0       # 完全为了递推公式
+        for i in range(1, n // 2 + 1):
+            for j in range(i * i, n + 1):
+                dp[j] = min(dp[j], dp[j - i * i] + 1)       # dp[j - i * i]会用到dp[0]，你想想
+        return dp[-1]
+
+    def wordBreak(self, s: str, wordDict: List[str]) -> bool:
+        """ 139.单词拆分
+            中等 """
+        # 自己做的！
+        # n = len(s)
+        # dp = [False] * (n + 1)
+        # dp[0] = True
+        # for i in range(1, n + 1):
+        #     for j in range(i, n + 1):
+        #         if dp[i - 1] and s[i - 1:j] in wordDict:
+        #             dp[j] = True
+        # return dp[-1]
+
+        # 完全背包
+        """ 单词可重复用--完全背包，1.内、外层遍历顺序均可 2.内层遍历正序
+            求排列，有顺序要求--外层背包、内层物品且正序 """
+        n = len(s)
+        dp = [False] * (n + 1)
+        dp[0] = True
+        for i in range(1, n + 1):
+            for j in range(i):
+                if dp[j] and s[j:i] in wordDict:
+                    dp[i] = True
+
+    def test_multi_pack(self):
+        """ 多重背包->01背包
+            01背包 外层for物品、内层for容量且倒序 """
+        # 示例答案也是90
+        weights = [1, 3, 4]
+        values = [15, 20, 30]
+        nums = [2, 3, 2]
+        bagweight = 10
+
+        tmp_w =[]
+        tmp_v = []
+        for i in range(len(nums)):
+            tmp_w += [weights[i]] * nums[i]
+            tmp_v += [values[i]] * nums[i]
+        weights = tmp_w
+        values = tmp_v
+
+        dp = [0] * (bagweight + 1)
+        for i in range(len(weights)):
+            for j in range(bagweight, weights[i] - 1, -1):
+                dp[j] = max(dp[j], dp[j - weights[i]] + values[i])
+        print(dp[-1])
+
+    def rob(self, nums: List[int]) -> int:
+        """ 198.打家劫舍
+            中等 """
+        # 时间：O(n) 空间：O(n)
+        # n = len(nums)
+        # if n == 1:
+        #     return nums[0]
+        # dp = [0] * (n + 1)
+        # dp[1] = nums[0]
+        # dp[2] = max(nums[:2])
+        # for i in range(3, n + 1):
+        #     dp[i] = max(dp[i - 1], dp[i - 2] + nums[i - 1])
+        # return dp[-1]
+
+        # dp[i] 截止到索引i家，能抢劫到最大金额为dp[i]
+        n = len(nums)
+        if n == 1:
+            return nums[0]
+        dp = [0] * n
+        dp[0] = nums[0]
+        dp[1] = max(nums[:2])
+        for i in range(2, n):
+            dp[i] = max(dp[i - 1], dp[i - 2] + nums[i])
+        return dp[-1]
+
+    def robII(self, nums: List[int]) -> int:
+        """ 213.打家劫舍II """
+        def rob_(startInd, endInd):
+            if startInd == endInd:
+                return nums[startInd]
+            dp = [0] * len(nums)
+            dp[startInd] = nums[startInd]
+            dp[startInd + 1] = max(nums[startInd:startInd + 2])
+            for i in range(startInd + 2, endInd + 1):
+                dp[i] = max(dp[i - 1], dp[i - 2] + nums[i])
+            return dp[endInd]
+
+        n = len(nums)
+        if n == 1:
+            return nums[0]
+        rob1 = rob_(0, n - 2)
+        rob2 = rob_(1, n - 1)
+        return max(rob1, rob2)
+
+    def robIII(self, root: Optional[TreeNode]) -> int:
+        """ 337.打家劫舍III """
+        # 时间：O(n) 空间：O(logn)
+        def rob_(node):
+            if not node:
+                return [0, 0]       # 不偷/偷 当前节点
+            lefts = rob_(node.left)
+            rights = rob_(node.right)
+            res1 = max(lefts) + max(rights)
+            res2 = node.val + lefts[0] + rights[0]
+            return (res1, res2)
+
+        return max(rob_(root)[0], rob_(root)[1])
 
 
 if __name__ == "__main__":
     sl = Solution()
 
-    coins = [2]
-    amount = 3
-    print(sl.coinChange(coins, amount))
+    nums = [1]
+    print(sl.robII(nums))
