@@ -538,9 +538,74 @@ class Solution:
             dp[i][2] = max(dp[i - 1][2], dp[i - 1][1])
         return max(dp[-1])
 
+    def maxProfitFee(self, prices: List[int], fee: int) -> int:
+        """ 714.买卖股票的最佳时机含手续费
+            题目说明无限次交易 """
+        # 时间：O(n)   空间：O(n)
+        n = len(prices)
+        dp = [[0] * 2 for _ in range(n)]
+        dp[0] = [0, -prices[0]]     # 不持有/持有
+        for i in range(1, n):
+            dp[i][0] = max(dp[i - 1][0], dp[i - 1][1] + prices[i] - fee)
+            dp[i][1] = max(dp[i - 1][1], dp[i - 1][0] - prices[i])
+        return max(dp[-1])
+
+    def lengthOfLIS(self, nums: List[int]) -> int:
+        """ 300.最长递增子序列
+            中等 """
+        # 时间：O(n^2) 空间：O(n)
+        n = len(nums)
+        dp = [1] * n
+        for i in range(n):
+            for j in range(i):
+                if nums[j] < nums[i]:
+                    dp[i] = max(dp[j] + 1, dp[i])
+        return max(dp)
+
+    def findLengthOfLCIS(self, nums: List[int]) -> int:
+        """ 674.最长连续递增子序列
+            简单 """
+        n = len(nums)
+        dp = [1] * n
+        for i in range(1, n):
+            if nums[i - 1] < nums[i]:
+                dp[i] = dp[i - 1] + 1
+        return max(dp)
+
+    def findLength(self, nums1: List[int], nums2: List[int]) -> int:
+        """ 718.最长重复子数组
+            中等
+            其实是求 最长的连续子数组 长度 """
+        # 时间：O(m x n)   空间：O(m x n)
+        m, n = len(nums1), len(nums2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if nums1[i - 1] == nums2[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + 1
+        return max(max(ls) for ls in dp)
+
+        # 尝试优化空间复杂度--失败
+        # m, n = len(nums1), len(nums2)
+        # dp = [0] * (n + 1)
+        # for i in range(1, m + 1):
+        #     for j in range(n, 0, -1):
+        #         if nums1[i - 1] == nums2[j - 1]:
+        #             dp[j] = dp[j - 1] + 1
+        #         else:
+        #             dp[j] = 0
+        # return max(dp)
+
+    def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+        """ 1143.最长公共子序列
+            中等
+            不要求 '连续' """
+        pass
+
 
 if __name__ == "__main__":
     sl = Solution()
 
-    prices = [1]
-    print(sl.maxProfitFreeze(prices))
+    text1 = "abcde"
+    text2 = "ace"
+    print(sl.longestCommonSubsequence(text1, text2))
