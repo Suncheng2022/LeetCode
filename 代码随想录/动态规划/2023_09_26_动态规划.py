@@ -454,9 +454,93 @@ class Solution:
 
         return max(rob_(root)[0], rob_(root)[1])
 
+    def maxProfit(self, prices: List[int]) -> int:
+        """ 121.买卖股票的最佳时机
+            简单
+            尝试动态规划 """
+        # 动规五部曲
+        # 时间：O(n)   空间：O(n)
+        n = len(prices)
+        dp = [[0, 0] for _ in range(n)]
+        dp[0] = [0, -prices[0]]     # 不持有/持有
+        for i in range(1, n):
+            dp[i][0] = max(dp[i - 1][0], prices[i] + dp[i - 1][1])
+            dp[i][1] = max(dp[i - 1][1], -prices[i])
+        return max(dp[-1])      # 其实就是返回最后一天状态金额最大的--其实就是返回最后一天 不持有 状态时的所得金额
+
+        # 先用最快的方法做出来
+        # res = 0
+        # minPrice = float('inf')
+        # for i in range(len(prices)):
+        #     minPrice = min(minPrice, prices[i])
+        #     res = max(res, prices[i] - minPrice)
+        # return res
+
+    def maxProfitII(self, prices: List[int]) -> int:
+        """ 122.买卖股票的最佳时机II
+            中等
+            无限次交易 """
+        # 时间：O(n)   空间：O(n)
+        n = len(prices)
+        dp = [[0, 0] for _ in range(n)]     # 不持有/持有
+        dp[0] = [0, -prices[0]]
+        for i in range(1, n):
+            dp[i][0] = max(dp[i - 1][0], dp[i - 1][1] + prices[i])
+            dp[i][1] = max(dp[i - 1][1], dp[i - 1][0] - prices[i])
+        return max(dp[-1])
+
+    def maxProfitIII(self, prices: List[int]) -> int:
+        """ 123.买卖股票的最佳时机III
+            困难
+            最多两笔交易 """
+        # 时间：O(n)   空间：O(5n)
+        n = len(prices)
+        dp = [[0] * 5 for _ in range(n)]
+        dp[0] = [0, -prices[0], 0, -prices[0], 0]
+        for i in range(1, n):
+            dp[i][1] = max(dp[i - 1][1], dp[i - 1][0] - prices[i])
+            dp[i][2] = max(dp[i - 1][2], dp[i - 1][1] + prices[i])
+            dp[i][3] = max(dp[i - 1][3], dp[i - 1][2] - prices[i])
+            dp[i][4] = max(dp[i - 1][4], dp[i - 1][3] + prices[i])
+        return max(dp[-1])
+
+    def maxProfitIV(self, k: int, prices: List[int]) -> int:
+        """ 188.买卖股票的最佳时机IV
+            困难
+            买卖k次 """
+        # 时间：O(k*n)   空间：O(k*n)
+        n = len(prices)
+        dp = [[0] * (2 * k + 1) for _ in range(n)]
+        for j in range(1, 2 * k + 1):
+            if j % 2:
+                dp[0][j] = -prices[0]
+        for i in range(1, n):
+            for j in range(1, 2 * k + 1):
+                if j % 2:
+                    dp[i][j] = max(dp[i - 1][j], dp[i - 1][j - 1] - prices[i])
+                else:
+                    dp[i][j] = max(dp[i - 1][j], dp[i - 1][j - 1] + prices[i])
+        return max(dp[-1])
+
+    def maxProfitFreeze(self, prices: List[int]) -> int:
+        """ 309.买卖股票的最佳时机含冷冻期
+            中等
+            状态：
+                状态0.持有
+                状态1.不持有，在冷冻期
+                状态2.不持有，不在冷冻期 """
+        n = len(prices)
+        dp = [[0] * 3 for _ in range(n)]
+        dp[0] = [-prices[0], 0, 0]
+        for i in range(1, n):
+            dp[i][0] = max(dp[i - 1][0], dp[i - 1][2] - prices[i])
+            dp[i][1] = dp[i - 1][0] + prices[i]
+            dp[i][2] = max(dp[i - 1][2], dp[i - 1][1])
+        return max(dp[-1])
+
 
 if __name__ == "__main__":
     sl = Solution()
 
-    nums = [1]
-    print(sl.robII(nums))
+    prices = [1]
+    print(sl.maxProfitFreeze(prices))
