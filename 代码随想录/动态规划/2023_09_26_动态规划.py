@@ -577,6 +577,15 @@ class Solution:
             中等
             其实是求 最长的连续子数组 长度 """
         # 时间：O(m x n)   空间：O(m x n)
+        # m, n = len(nums1), len(nums2)
+        # dp = [[0] * (n + 1) for _ in range(m + 1)]
+        # for i in range(1, m + 1):
+        #     for j in range(1, n + 1):
+        #         if nums1[i - 1] == nums2[j - 1]:
+        #             dp[i][j] = dp[i - 1][j - 1] + 1
+        # return max(max(ls) for ls in dp)
+
+        # 再写一遍
         m, n = len(nums1), len(nums2)
         dp = [[0] * (n + 1) for _ in range(m + 1)]
         for i in range(1, m + 1):
@@ -600,12 +609,139 @@ class Solution:
         """ 1143.最长公共子序列
             中等
             不要求 '连续' """
-        pass
+        # m, n = len(text1), len(text2)
+        # dp = [[0] * (n + 1) for _ in range(m + 1)]
+        # for i in range(1, m + 1):
+        #     for j in range(1, n + 1):
+        #         if text1[i - 1] == text2[j - 1]:
+        #             dp[i][j] = dp[i - 1][j - 1] + 1
+        #         else:
+        #             dp[i][j] = max(dp[i][j - 1], dp[i - 1][j])
+        # return max(max(ls) for ls in dp)
+
+        # 重写一遍
+        m, n = len(text1), len(text2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if text1[i - 1] == text2[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + 1
+                else:
+                    dp[i][j] = max(dp[i][j - 1], dp[i - 1][j])
+        return dp[-1][-1]
+
+    def maxUncrossedLines(self, nums1: List[int], nums2: List[int]) -> int:
+        """ 1035.不相交的线
+            中等
+            即 1143.最长公共子序列，一模一样 """
+        m, n = len(nums1), len(nums2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if nums1[i - 1] == nums2[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + 1
+                else:
+                    dp[i][j] = max(dp[i][j - 1], dp[i - 1][j])
+        return max(max(ls) for ls in dp)
+
+    def maxSubArray(self, nums: List[int]) -> int:
+        """ 53.最大子数组和
+            中等 """
+        # 时间：O(n)   空间：O(n)
+        n = len(nums)
+        dp = [0] * n
+        dp[0] = nums[0]
+        for i in range(1, n):
+            dp[i] = max(dp[i - 1] + nums[i], nums[i])
+        return max(dp)
+
+    def isSubsequence(self, s: str, t: str) -> bool:
+        """ 392.判断子序列
+            简单 不简单
+            -> 不连续子序列：dp[i]==dp[j], dp[i][j] = dp[i-1][j-1]+1; dp[i]!=dp[j], dp[i][j]=max(dp[i][j-1], dp[i-1][j])
+            ->   连续子序列：dp[i]==dp[j], dp[i][j] = dp[i-1][j-1]+1 """
+        m, n = len(s), len(t)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]      # dp[i][j] 以索引i-1结尾的s、以j-1结尾的t 的 最长子序列长度
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if s[i - 1] == t[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + 1
+                else:
+                    dp[i][j] = dp[i][j - 1]
+        return dp[-1][-1] == m
+
+    def numDistinct(self, s: str, t: str) -> int:
+        """ 115.不同的子序列
+            困难 """
+        m, n = len(s), len(t)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]      # dp[i][j] 以索引i-1元素结尾的s的子序列 中 出现索引j-1元素结尾的t 的次数
+        # dp初始化
+        for i in range(m + 1):
+            dp[i][0] = 1        # 以索引i-1元素结尾的s子序列 中出现 空串的次数，只能1种
+        for j in range(n + 1):
+            dp[0][j] = 0        # 空串 中出现 以索引j-1元素结尾的t 的次数，无法出现，所以是0种
+        dp[0][0] = 1            # 空串 中出现 空串 的次数，1种
+        # 遍历计算
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                # 子序列问题，基本就是2种情况 1.当前元素相等 2.当前元素不相等
+                if s[i - 1] == t[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + dp[i - 1][j]
+                else:
+                    dp[i][j] = dp[i - 1][j]
+        return dp[-1][-1]
+
+    def minDistance(self, word1: str, word2: str) -> int:
+        """ 583.两个字符串的删除操作
+            中等 """
+        # m, n = len(word1), len(word2)
+        # dp = [[0] * (n + 1) for _ in range(m + 1)]
+        # # 初始化dp首行首列
+        # for i in range(m + 1):
+        #     dp[i][0] = i
+        # for j in range(n + 1):
+        #     dp[0][j] = j
+        # for i in range(1, m + 1):
+        #     for j in range(1, n + 1):
+        #         if word1[i - 1] == word2[j - 1]:
+        #             dp[i][j] = dp[i - 1][j - 1]
+        #         else:
+        #             dp[i][j] = min(dp[i - 1][j] + 1, dp[i][j - 1] + 1)
+        # return dp[-1][-1]
+
+        # 同 1143.最长公共子序列
+        m, n = len(word1), len(word2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if word1[i - 1] == word2[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + 1
+                else:
+                    dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+        return m + n - 2 * dp[-1][-1]
+
+    def minDistance_super(self, word1: str, word2: str) -> int:
+        """ 72.编辑距离
+            困难 """
+        m, n = len(word1), len(word2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        for i in range(m + 1):
+            dp[i][0] = i
+        for j in range(n + 1):
+            dp[0][j] = j
+        for i in range(m + 1):
+            for j in range(n + 1):
+                if word1[i - 1] == word2[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1]
+                else:
+                    dp[i][j] = min(dp[i][j - 1] + 1, dp[i - 1][j] + 1,      # 增/删  增即删，删即增
+                                   dp[i - 1][j - 1] + 1)                    # 替换
+        return dp[-1][-1]
 
 
 if __name__ == "__main__":
     sl = Solution()
 
-    text1 = "abcde"
-    text2 = "ace"
-    print(sl.longestCommonSubsequence(text1, text2))
+    word1 = "sea"
+    word2 = "eat"
+    print(sl.minDistance_super(word1, word2))
