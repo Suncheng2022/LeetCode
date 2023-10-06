@@ -796,7 +796,7 @@ class Solution:
     def countSubstrings(self, s: str) -> int:
         """ 647.回文子串
             中等 """
-        n = len(s)
+        # n = len(s)
         # dp = [[False] * n for _ in range(n)]
         # for i in range(n):
         #     dp[i][i] = True
@@ -810,8 +810,23 @@ class Solution:
         # return sum(sum(ls) for ls in dp)
 
         # 再写一遍
+        # n = len(s)
+        # dp = [[False] * n for i in range(n)]
+        # for i in range(n):
+        #     dp[i][i] = True
+        # for i in range(n - 1, -1, -1):
+        #     for j in range(i + 1, n):
+        #         if s[i] == s[j]:
+        #             if j - i == 1:
+        #                 dp[i][j] = True
+        #             elif dp[i + 1][j - 1]:
+        #                 dp[i][j] = True
+        # return sum(sum(ls) for ls in dp)
+
+        # 再写一遍
+        # 包含'连续', 用True/False表示
         n = len(s)
-        dp = [[False] * n for i in range(n)]
+        dp = [[False] * n for _ in range(n)]
         for i in range(n):
             dp[i][i] = True
         for i in range(n - 1, -1, -1):
@@ -826,6 +841,20 @@ class Solution:
     def longestPalindromeSubseq(self, s: str) -> int:
         """ 516.最长回文子序列
             中等 """
+        # n = len(s)
+        # dp = [[0] * n for _ in range(n)]
+        # for i in range(n):
+        #     dp[i][i] = 1
+        # for i in range(n - 1, -1, -1):
+        #     for j in range(i + 1, n):
+        #         if s[i] == s[j]:
+        #             dp[i][j] = dp[i + 1][j - 1] + 2
+        #         else:
+        #             dp[i][j] = max(dp[i][j - 1], dp[i + 1][j])
+        # return max(max(ls) for ls in dp)
+
+        # 再写一遍
+        # 不包含'连续'，则dp[i][j]=具体长度
         n = len(s)
         dp = [[0] * n for _ in range(n)]
         for i in range(n):
@@ -842,5 +871,5 @@ class Solution:
 if __name__ == "__main__":
     sl = Solution()
 
-    s = "aaa"
-    print(sl.countSubstrings(s))
+    s = "cbbd"
+    print(sl.longestPalindromeSubseq(s))
