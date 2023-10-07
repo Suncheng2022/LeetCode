@@ -59,10 +59,98 @@ class Solution:
                     dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
         return max(max(ls) for ls in dp)
 
+    def maxUncrossedLines(self, nums1: List[int], nums2: List[int]) -> int:
+        """ 1035.不相交的线
+            即 1143.最长公共子序列 """
+        m, n = len(nums1), len(nums2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if nums1[i - 1] == nums2[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + 1
+                else:
+                    dp[i][j] = max(dp[i][j - 1], dp[i - 1][j])
+        return max(max(ls) for ls in dp)
+
+    def maxSubArray(self, nums: List[int]) -> int:
+        """ 53.最大子数组和
+            中等 """
+        n = len(nums)
+        dp = [0] * n
+        dp[0] = nums[0]
+        for i in range(1, n):
+            dp[i] = max(dp[i - 1] + nums[i], nums[i])
+        return max(dp)
+
+    def isSubsequence(self, s: str, t: str) -> bool:
+        """ 392.判断子序列
+            简单
+            后来才想过来，这就是 最长公共子序列 """
+        m, n = len(s), len(t)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if s[i - 1] == t[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + 1
+                else:
+                    dp[i][j] = max(dp[i][j - 1], dp[i - 1][j])
+        return max(dp[-1]) == m
+
+    def numDistinct(self, s: str, t: str) -> int:
+        """ 115.不同的子序列
+            困难 确实不好想 自己不会 """
+        m, n = len(s), len(t)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        for i in range(m + 1):
+            dp[i][0] = 1
+        for j in range(1, n + 1):
+            dp[0][j] = 0
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if s[i - 1] == t[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + dp[i - 1][j]
+                else:
+                    dp[i][j] = dp[i - 1][j]
+        return dp[-1][-1]
+
+    def minDistance(self, word1: str, word2: str) -> int:
+        """ 583.两个字符串的删除操作
+            中等 """
+        m, n = len(word1), len(word2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        for i in range(m + 1):
+            dp[i][0] = i
+        for j in range(n + 1):
+            dp[0][j] = j
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if word1[i - 1] == word2[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1]
+                else:
+                    dp[i][j] = min(dp[i][j - 1], dp[i - 1][j]) + 1
+        return dp[-1][-1]
+
+    def minDistance_super(self, word1: str, word2: str) -> int:
+        """ 72.编辑距离
+            困难 """
+        m, n = len(word1), len(word2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        for i in range(m + 1):
+            dp[i][0] = i
+        for j in range(n + 1):
+            dp[0][j] = j
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if word1[i - 1] == word2[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1]
+                else:
+                    dp[i][j] = min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + 1)
+        return dp[-1][-1]
+
 
 if __name__ == "__main__":
     sl = Solution()
 
-    text1 = "c"
-    text2 = "f"
-    print(sl.longestCommonSubsequence(text1, text2))
+    word1 = ""
+    word2 = ""
+    print(sl.minDistance_super(word1, word2))
