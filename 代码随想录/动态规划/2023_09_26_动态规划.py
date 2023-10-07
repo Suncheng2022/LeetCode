@@ -554,13 +554,24 @@ class Solution:
         """ 300.最长递增子序列
             中等 """
         # 时间：O(n^2) 空间：O(n)
+        # n = len(nums)
+        # dp = [1] * n
+        # for i in range(n):
+        #     for j in range(i):
+        #         if nums[j] < nums[i]:
+        #             dp[i] = max(dp[j] + 1, dp[i])
+        # return max(dp)
+
+        # 再写一遍
+        # 没想出来，看的答案：就看nums[i]能不能放到前一个数的后面
         n = len(nums)
         dp = [1] * n
         for i in range(n):
-            for j in range(i):
+            for j in range(i):      # nums[i]能否放到nums[j]后面
                 if nums[j] < nums[i]:
                     dp[i] = max(dp[j] + 1, dp[i])
         return max(dp)
+
 
     def findLengthOfLCIS(self, nums: List[int]) -> int:
         """ 674.最长连续递增子序列
@@ -871,5 +882,5 @@ class Solution:
 if __name__ == "__main__":
     sl = Solution()
 
-    s = "cbbd"
-    print(sl.longestPalindromeSubseq(s))
+    nums = [7,7,7,7,7,7,7]
+    print(sl.lengthOfLIS(nums))
