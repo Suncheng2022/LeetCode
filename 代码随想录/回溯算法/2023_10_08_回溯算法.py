@@ -234,12 +234,31 @@ class Solution:
         backtracking(0)
         return res
 
+    def subsets(self, nums: List[int]) -> List[List[int]]:
+        """ 78.子集
+            中等
+            上面 组合、切割 问题，是收取树的叶子节点
+            本题 子集 问题，是收取所有节点，res收集结果的时候不需要任何条件 """
+        # 时间：O(n*2^n) 每个节点都有取/不取2种状态 构建每种状态需要O(n)   空间：O(n)递归深度
+        path = []
+        res = []
+
+        def backtracking(startInd):
+            res.append(path[:])
+            for i in range(startInd, len(nums)):
+                path.append(nums[i])
+                backtracking(i + 1)
+                path.pop()
+
+        backtracking(0)
+        return res
+
 
 if __name__ == "__main__":
     sl = Solution()
 
-    s = "101023"
-    print(sl.restoreIpAddresses(s))
+    nums = [0]
+    print(sl.subsets(nums))
 
     """
     回溯三部曲：
