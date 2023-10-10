@@ -253,12 +253,59 @@ class Solution:
         backtracking(0)
         return res
 
+    def subsetsWithDup(self, nums: List[int]) -> List[List[int]]:
+        """ 90.子集II
+            中等
+            同层剪枝 """
+        # 时间：O(n*2^n)   空间：O(n)
+        path = []
+        res = []
+        used = [False] * len(nums)
+
+        def backtracking(startInd):
+            res.append(path[:])
+            for i in range(startInd, len(nums)):
+                if i > 0 and nums[i - 1] == nums[i] and used[i - 1] == False:
+                    continue
+                used[i] = True
+                path.append(nums[i])
+                backtracking(i + 1)
+                path.pop()
+                used[i] = False
+
+        nums.sort()
+        backtracking(0)
+        return res
+
+    def findSubsequences(self, nums: List[int]) -> List[List[int]]:
+        """ 491.递增子序列
+            中等
+            类似子集问题，但不是收集所有节点，而是收集len(path)>1的节点 """
+        # 时间：O(n*2^n)   空间：O(n)
+        path = []
+        res = []
+
+        def backtracking(startInd):
+            if len(path) >= 2:
+                res.append(path[:])
+            seen = set()
+            for i in range(startInd, len(nums)):
+                if nums[i] in seen or (len(path) and path[-1] > nums[i]):
+                    continue
+                seen.add(nums[i])
+                path.append(nums[i])
+                backtracking(i + 1)
+                path.pop()
+
+        backtracking(0)
+        return res
+
 
 if __name__ == "__main__":
     sl = Solution()
 
-    nums = [0]
-    print(sl.subsets(nums))
+    nums = [4,4,3,2,1]
+    print(sl.findSubsequences(nums))
 
     """
     回溯三部曲：
