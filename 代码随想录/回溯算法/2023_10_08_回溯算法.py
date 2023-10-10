@@ -300,12 +300,104 @@ class Solution:
         backtracking(0)
         return res
 
+    def permute(self, nums: List[int]) -> List[List[int]]:
+        """ 46.全排列
+            中等
+            排列问题:
+                1.不使用startInd，因为使用过的元素还要使用 """
+        # 时间：O(n!)      空间：O(n)
+        # path = []
+        # res = []
+        # used = [False] * len(nums)
+        #
+        # def backtracking(used):
+        #     if len(path) == len(nums):
+        #         res.append(path[:])
+        #         return
+        #     for i in range(len(nums)):
+        #         if used[i]:
+        #             continue
+        #         used[i] = True
+        #         path.append(nums[i])
+        #         backtracking(used)
+        #         path.pop()
+        #         used[i] = False
+        #
+        # backtracking(used)
+        # return res
+
+        # 再写一遍
+        path = []
+        res = []
+        used = [False] * len(nums)
+
+        def backtracking(used):
+            if len(path) == len(nums):
+                res.append(path[:])
+                return
+            for i in range(len(nums)):
+                if not used[i]:
+                    used[i] = True
+                    path.append(nums[i])
+                    backtracking(used)
+                    path.pop()
+                    used[i] = False
+
+        backtracking(used)
+        return res
+
+    def permuteUnique(self, nums: List[int]) -> List[List[int]]:
+        """ 47.全排列II
+            中等 """
+        # path = []
+        # res = []
+        # used = [False] * len(nums)
+        #
+        # def backtracking(used):
+        #     if len(path) == len(nums):
+        #         res.append(path[:])
+        #         return
+        #     for i in range(len(nums)):
+        #         if i > 0 and nums[i - 1] == nums[i] and not used[i - 1]:
+        #             continue
+        #         if not used[i]:
+        #             used[i] = True
+        #             path.append(nums[i])
+        #             backtracking(used)
+        #             path.pop()
+        #             used[i] = False
+        #
+        # nums.sort()
+        # backtracking(used)
+        # return res
+
+        path = []
+        res = []
+        used = [False] * len(nums)
+
+        def backtracking(used):
+            if len(path) == len(nums):
+                res.append(path[:])
+                return
+            for i in range(len(nums)):
+                if i > 0 and nums[i - 1] == nums[i] and not used[i - 1]:
+                    continue
+                if not used[i]:
+                    used[i] = True
+                    path.append(nums[i])
+                    backtracking(used)
+                    path.pop()
+                    used[i] = False
+
+        nums.sort()
+        backtracking(used)
+        return res
 
 if __name__ == "__main__":
     sl = Solution()
 
-    nums = [4,4,3,2,1]
-    print(sl.findSubsequences(nums))
+    nums = [1,2,3]
+    print(sl.permute(nums))
 
     """
     回溯三部曲：
