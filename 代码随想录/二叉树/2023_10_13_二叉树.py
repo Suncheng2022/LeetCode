@@ -8,11 +8,18 @@ class TreeNode:
         self.right = right
 
 
-class Node:
-    def __init__(self, val=0, children=None):
-        self.val = val
-        self.children = children
+# class Node:
+#     def __init__(self, val=0, children=None):
+#         self.val = val
+#         self.children = children
 
+
+class Node:
+    def __init__(self, val=0, left=None, right=None, next=None):
+        self.val = val
+        self.left = left
+        self.right = right
+        self.next = next
 
 class Solution:
     def preorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
@@ -316,6 +323,133 @@ class Solution:
                 res.append(tmp)
         return res
 
+    def largestValues(self, root: Optional[TreeNode]) -> List[int]:
+        """ 515.在每个数行中找最大值
+            中等 """
+        queue = [root]
+        res = []
+        while queue:
+            length = len(queue)
+            tmp = []
+            for _ in range(length):
+                node = queue.pop(0)
+                if not node:
+                    continue
+                tmp.append(node.val)
+                queue.extend([node.left, node.right])
+            if tmp:
+                res.append(max(tmp))
+        return res
+
+    def connect(self, root: 'Optional[Node]') -> 'Optional[Node]':
+        """ 116.填充每个节点的下一个右侧节点指针
+            中等 """
+        queue = [root]
+        res = []
+        while queue:
+            length = len(queue)
+            tmp = []
+            for i in range(length):
+                node = queue.pop(0)
+                if not node:
+                    continue
+                tmp.append(node)
+                queue.extend([node.left, node.right])
+            if tmp:
+                res.append(tmp)
+        for tmp in res:
+            for i in range(len(tmp) - 1):
+                tmp[i].next = tmp[i + 1]
+        return root
+
+    def connectII(self, root: 'Node') -> 'Node':
+        """ 117.填充每个节点的下一个右侧节点指针II
+            中等
+            本题，空node不能进队列 """
+        queue = []
+        res = []
+        if not root:
+            return root
+        queue.append(root)
+        while queue:
+            length = len(queue)
+            tmp = []    # 空node不能进来
+            for _ in range(length):
+                node = queue.pop(0)
+                if not node:
+                    continue
+                tmp.append(node)
+                if node.left:
+                    queue.append(node.left)
+                if node.right:
+                    queue.append(node.right)
+            res.append(tmp)
+        for tmp in res:
+            for i in range(len(tmp) - 1):
+                tmp[i].next = tmp[i + 1]
+        return root
+
+    def maxDepth(self, root: Optional[TreeNode]) -> int:
+        """ 104.二叉树的最大深度
+            简单
+            稍作修改 灵活运用吧 """
+        queue = [root]
+        res = 0
+        while queue:
+            length = len(queue)
+            tmp = 0
+            for _ in range(length):
+                node = queue.pop(0)
+                if not node:
+                    continue
+                tmp += 1
+                queue.extend([node.left, node.right])
+            if tmp:
+                res += 1
+        return res
+
+    def minDepth(self, root: Optional[TreeNode]) -> int:
+        """ 111.二叉树的最小深度
+            简单
+            自己没想对... """
+        # 自己想的有些复杂
+        # queue = [root]
+        # res = []
+        # while queue:
+        #     length = len(queue)
+        #     tmp = []
+        #     for _ in range(length):
+        #         node = queue.pop(0)
+        #         if not node:
+        #             continue
+        #         tmp.append(node)
+        #         queue.extend([node.left, node.right])
+        #         if not (node.left or node.right):
+        #             break
+        #     if tmp:
+        #         res.append(tmp)
+        # return len(res)
+
+        # 《代码随想录》
+        queue = []
+        res = 0
+        if not root:
+            return 0
+        queue.append(root)
+        while queue:
+            res += 1
+            length = len(queue)
+            # tmp = []
+            for _ in range(length):
+                node = queue.pop(0)
+                if not (node.left or node.right):
+                    return res
+                # tmp.append(node)
+                if node.left:
+                    queue.append(node.left)
+                if node.right:
+                    queue.append(node.right)
+        return res
 
 if __name__ == "__main__":
     sl = Solution()
