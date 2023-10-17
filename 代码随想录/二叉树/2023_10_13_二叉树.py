@@ -8,6 +8,12 @@ class TreeNode:
         self.right = right
 
 
+class Node:
+    def __init__(self, val=0, children=None):
+        self.val = val
+        self.children = children
+
+
 class Solution:
     def preorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
         """ 144.二叉树的前序遍历
@@ -235,6 +241,80 @@ class Solution:
             if tmp:
                 res.append(tmp)
         return res[::-1]
+
+    def rightSideView(self, root: Optional[TreeNode]) -> List[int]:
+        """ 199.二叉树的右视图
+            中等
+            思路：层序遍历 """
+        # queue = [root]
+        # res = []
+        # while queue:
+        #     length = len(queue)
+        #     tmp = []
+        #     for _ in range(length):
+        #         node = queue.pop(0)
+        #         if not node:
+        #             continue
+        #         tmp.append(node.val)
+        #         queue.extend([node.left, node.right])
+        #     if tmp:
+        #         res.append(tmp)
+        # return [ls[-1] for ls in res]
+
+        # 答案思路，只收集单层最后一个元素
+        # 这个思路queue只能进非空node
+        queue = []
+        res = []
+        if not root:
+            return res
+        queue.append(root)
+        while queue:
+            length = len(queue)
+            for i in range(length):
+                node = queue.pop(0)
+                if node.left:
+                    queue.append(node.left)
+                if node.right:
+                    queue.append(node.right)
+                if i == length - 1:
+                    res.append(node.val)
+        return res
+
+    def averageOfLevels(self, root: Optional[TreeNode]) -> List[float]:
+        """ 637.二叉树的层平均值
+            简单 """
+        queue = [root]      # 注意细节，我这里node空不空都能进queue，有的层序遍历只能进非空node
+        res = []
+        while queue:
+            length = len(queue)
+            tmp = []
+            for _ in range(length):
+                node = queue.pop(0)
+                if not node:
+                    continue
+                tmp.append(node.val)
+                queue.extend([node.left, node.right])
+            if tmp:
+                res.append(tmp)
+        return [sum(ls)/len(ls) for ls in res]
+
+    def levelOrder(self, root: 'Node') -> List[List[int]]:
+        """ 429.N叉树的层序遍历
+            中等 """
+        queue = [root]
+        res = []
+        while queue:
+            length = len(queue)
+            tmp = []
+            for _ in range(length):
+                node = queue.pop(0)
+                if not node:
+                    continue
+                tmp.append(node.val)
+                queue.extend(node.children)
+            if tmp:
+                res.append(tmp)
+        return res
 
 
 if __name__ == "__main__":
