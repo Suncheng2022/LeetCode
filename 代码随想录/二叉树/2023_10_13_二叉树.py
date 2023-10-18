@@ -8,18 +8,18 @@ class TreeNode:
         self.right = right
 
 
-# class Node:
-#     def __init__(self, val=0, children=None):
-#         self.val = val
-#         self.children = children
-
-
 class Node:
-    def __init__(self, val=0, left=None, right=None, next=None):
+    def __init__(self, val=0, children=None):
         self.val = val
-        self.left = left
-        self.right = right
-        self.next = next
+        self.children = children
+
+
+# class Node:
+#     def __init__(self, val=0, left=None, right=None, next=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+#         self.next = next
 
 class Solution:
     def preorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
@@ -449,6 +449,81 @@ class Solution:
                     queue.append(node.left)
                 if node.right:
                     queue.append(node.right)
+        return res
+
+    def invertTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+        """ 226.翻转二叉树
+            简单
+            只要遍历的过程中，交换node的2个孩子节点就可以 """
+        # 自己写的层序遍历
+        # queue = []
+        # if not root:
+        #     return root
+        # queue.append(root)
+        # while queue:
+        #     length = len(queue)
+        #     for _ in range(length):
+        #         node = queue.pop(0)
+        #         if not node:
+        #             continue
+        #         node.left, node.right = node.right, node.left
+        #         queue.extend([node.left, node.right])
+        # return root
+
+        # 《代码随想录》先序递归
+        # def backtracking(node):
+        #     if not node:
+        #         return
+        #     node.left, node.right = node.right, node.left
+        #     backtracking(node.left)
+        #     backtracking(node.right)
+        #
+        # backtracking(root)
+        # return root
+
+        # 《代码随想录》先序迭代
+        if not root:
+            return root
+        stack = [root]
+        while stack:
+            node = stack.pop()
+            node.left, node.right = node.right, node.left
+            if node.right:
+                stack.append(node.right)
+            if node.left:
+                stack.append(node.left)
+        return root
+
+    def preorder(self, root: 'Node') -> List[int]:
+        """ 589.N叉树的前序遍历
+            简单
+            先序递归 """
+        res = []
+
+        def backtracking(node):
+            if not node:
+                return
+            res.append(node.val)
+            for c in node.children:
+                backtracking(c)
+
+        backtracking(root)
+        return res
+
+    def postorder(self, root: 'Node') -> List[int]:
+        """ 590.N叉树的后序遍历
+            简单
+            后序递归 """
+        res = []
+
+        def backtracking(node):
+            if not node:
+                return
+            for c in node.children:
+                backtracking(c)
+            res.append(node.val)
+
+        backtracking(root)
         return res
 
 if __name__ == "__main__":
