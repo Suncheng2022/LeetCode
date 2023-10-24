@@ -526,6 +526,58 @@ class Solution:
         backtracking(root)
         return res
 
+    def isSymmetric(self, root: Optional[TreeNode]) -> bool:
+        """ 101.对称二叉树
+            简单 """
+        # 递归解法 三部曲
+        # def backtracking(left, right):
+        #     # 处理 空 的情况
+        #     if left and not right:
+        #         return False
+        #     elif not left and right:
+        #         return False
+        #     elif not left and not right:        # 左右都为 空，返回True
+        #         return True
+        #     # 处理 左右节点不等 的情况
+        #     elif left.val != right.val:
+        #         return False
+        #     # 处理 左右均有节点 且 相等 的情况
+        #     out = backtracking(left.left, right.right)      # 比较 左节点、右节点 的外侧
+        #     inner = backtracking(left.right, right.left)    # 比较              的内侧
+        #     return out and inner
+        #
+        # return backtracking(root.left, root.right)
+
+        # 迭代法，但不是普通二叉树的那种迭代法
+        queue = [root.left, root.right]      # 使用队列实现本题的迭代法
+        while queue:
+            left, right = queue.pop(0), queue.pop(0)
+            if not (left or right):
+                continue
+            if not left or not right or left.val != right.val:
+                return False
+            if left.val == right.val:
+                queue.extend([left.left, right.right, left.right, right.left])
+        return True
+
+    def maxDepth(self, root: Optional[TreeNode]) -> int:
+        """ 104.二叉树的最大深度
+            简单 """
+        queue = [root]
+        res = []
+        while queue:
+            length = len(queue)
+            tmp = []
+            for _ in range(length):
+                node = queue.pop(0)
+                if not node:
+                    continue
+                tmp.append(node.val)
+                queue.extend([node.left, node.right])
+            if tmp:
+                res.append(tmp)
+        return len(res)
+
 if __name__ == "__main__":
     sl = Solution()
 
