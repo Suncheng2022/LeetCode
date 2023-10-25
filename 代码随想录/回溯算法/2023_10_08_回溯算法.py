@@ -21,21 +21,39 @@ class Solution:
         # backtracking(n, k, 1)
         # return res
 
-        # 剪枝
-        # 时间：O(n*2^n)   空间：O(n)
+        # 复习 递归三部曲
         path = []
         res = []
-        def backtracking(n, k, startInd):
+
+        def backtracking(startInd):
+            # 终止条件
             if len(path) == k:
                 res.append(path[:])
                 return
-            for i in range(startInd, n - (k - len(path)) + 1 + 1):
+            # 单层搜索
+            for i in range(startInd, n + 1):
                 path.append(i)
-                backtracking(n, k, i + 1)
+                backtracking(i + 1)
                 path.pop()
 
-        backtracking(n, k, 1)
+        backtracking(1)
         return res
+
+        # 剪枝
+        # 时间：O(n*2^n)   空间：O(n)
+        # path = []
+        # res = []
+        # def backtracking(n, k, startInd):
+        #     if len(path) == k:
+        #         res.append(path[:])
+        #         return
+        #     for i in range(startInd, n - (k - len(path)) + 1 + 1):
+        #         path.append(i)
+        #         backtracking(n, k, i + 1)
+        #         path.pop()
+        #
+        # backtracking(n, k, 1)
+        # return res
 
     def combinationSum3(self, k: int, n: int) -> List[List[int]]:
         """ 216.组合总和III
