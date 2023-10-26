@@ -3,7 +3,7 @@ from typing import List
 
 class Solution:
     def combinationSum3(self, k: int, n: int) -> List[List[int]]:
-        """ 216.数组总和III
+        """ 216.组合总和III
             回溯三部曲：
                 1.递归函数参数和返回值
                 2.终止条件
@@ -136,4 +136,87 @@ class Solution:
                 path.pop()
 
         backtracking(0)
+        return res
+
+    def restoreIpAddresses(self, s: str) -> List[str]:
+        """ 93.复原IP地址
+            切割问题 == 组合问题：
+                1.一个集合 使用startInd
+                2.多个集合 不使用startInd
+            终止条件相比切割稍变化了一点"""
+        path = []
+        res = []
+
+        def backtracking(startInd):
+            # 终止条件(不再是分割点到了字符串最后，而是分割为4段就终止)
+            if len(path) == 4:
+                res.append(".".join(path))
+                return
+            # 单层搜索
+            for i in range(startInd, len(s)):
+                if (len(s[startInd:i + 1]) > 1 and s[startInd] == '0') or (not 0 <= int(s[startInd:i + 1]) <= 255):
+                    continue
+                path.append(s[startInd:i + 1])
+                backtracking(i + 1)
+                path.pop()
+
+        backtracking(0)
+        return res
+
+    def subsets(self, nums: List[int]) -> List[List[int]]:
+        """ 78.子集 无重复元素
+            组合问题、分割问题——收集叶节点，子集问题——收集所有节点；子集 == 组合
+            组合问题：
+                1.对 一个集合 求组合，使用startInd
+                2.对 多个集合 求组合，不使用startInd
+                ->3.子集无序，所以不重复取，使用startInd
+            子集问题 vs 组合问题：
+                组合 收集 叶节点
+                子集 收集 所有节点
+            子集问题，不需要剪枝，就是要遍历所有节点 """
+        path = []
+        res = []
+
+        def backtracking(startInd):
+            # 终止条件
+            res.append(path[:])
+            # 单层搜索
+            for i in range(startInd, len(nums)):
+                path.append(nums[i])
+                backtracking(i + 1)
+                path.pop()
+
+        backtracking(0)
+        return res
+
+    def subsetsWithDup(self, nums: List[int]) -> List[List[int]]:
+        """ 90.子集II 有重复元素
+            子集问题 == 组合问题：
+                1.对 一个集合 求组合，使用startInd
+                2.对 多个集合 求组合，不使用startInd
+                -> 3.子集结果无序，因此不重复使用，使用startInd
+            子集问题 vs 组合问题：
+                组合问题 收集 叶节点
+                子集问题 收集 所有节点
+            子集问题 不需要剪枝 就是要遍历所有节点
+            去重，排序 + used 同层去重 """
+        path = []
+        res = []
+        used = [False] * len(nums)
+
+        def backtracking(startInd, used):
+            # 终止条件
+            res.append(path[:])
+            # 单层搜索
+            for i in range(startInd, len(nums)):
+                if i > 0 and nums[i - 1] == nums[i] and used[i - 1] == False:       # 同层去重
+                    continue
+                path.append(nums[i])
+                used[i] = True
+                backtracking(i + 1, used)
+                path.pop()
+                used[i] = False
+
+        nums.sort()
+        backtracking(0, used)
         return res
