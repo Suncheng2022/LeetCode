@@ -75,7 +75,7 @@ class Solution:
         return res
 
     def combinationSum2(self, candidates: List[int], target: int) -> List[List[int]]:
-        """ 40.组合总和II
+        """ 40.组合总和II 有重复元素
             组合问题：
                 1.对 一个集合 求组合，使用startInd
                 2.对 多个集合 求组合，不使用startInd
@@ -220,3 +220,107 @@ class Solution:
         nums.sort()
         backtracking(0, used)
         return res
+
+    def findSubsequences(self, nums: List[int]) -> List[List[int]]:
+        """ 491.递增子序列
+            难
+            有重复元素 不重复使用，则使用startInd
+            类似 子集问题，要遍历所有节点(不是收集所有节点)
+            去重，使用set对同层去重 """
+        path = []
+        res = []
+
+        def backtracking(startInd):
+            # 终止条件
+            if len(path) >= 2:
+                res.append(path[:])
+            # 单层搜索
+            seen = set()       # 使用set对本层去重，只负责本层，所以没有回溯
+            for i in range(startInd, len(nums)):
+                if (path and path[-1] > nums[i]) or nums[i] in seen:    # seen对本层去重
+                    continue
+                seen.add(nums[i])
+                path.append(nums[i])
+                backtracking(i + 1)
+                path.pop()
+
+        backtracking(0)
+        return res
+
+    def permute(self, nums: List[int]) -> List[List[int]]:
+        """ 46.全排列 无重复元素
+            排列问题 与 组合问题、切割问题、子集问题 最大的区别：
+                                    不使用startInd了。
+                                    因为 排列问题，有顺序[即[1,2]和[2,1]是两个集合，1使用了两次]，所以不使用startInd
+            去重 使用used数组，记录path里有哪些元素，因为每个排列中每个元素只能使用1次
+            """
+        path = []
+        res = []
+        used = [False] * len(nums)
+
+        def backtracking(used):
+            # 终止条件
+            if len(path) == len(nums):
+                res.append(path[:])
+                return
+            # 单层搜索
+            for i in range(len(nums)):      # 排列问题 与 组合问题、切割问题、子集问题 最大的不同就是 不使用startInd——因为元素1在[1,2]中使用了，还要在[2,1]中再使用
+                if used[i]:                 # 使用过了，path里面不能再使用了，跳过
+                    continue
+                path.append(nums[i])
+                used[i] = True
+                backtracking(used)
+                path.pop()
+                used[i] = False
+
+        backtracking(used)
+        return res
+
+    def permuteUnique(self, nums: List[int]) -> List[List[int]]:
+        """ 47.全排列II 含重复元素
+            排列问题 与 组合问题、切割问题、子集问题 最大的不同——不使用startInd 因为元素1在[1,2]中使用了，在[2,1]中还要再使用
+            去重 使用used数组，记录path里放了哪些元素 因为每个元素只能放进 path 1次
+                因为包含重复元素，所以还要同层去重 """
+        path = []
+        res = []
+        used = [False] * len(nums)
+
+        def backtracking(used):
+            # 终止条件
+            if len(path) == len(nums):
+                res.append(path[:])
+                return
+            # 单层搜索
+            for i in range(len(nums)):
+                if used[i]:
+                    continue
+                if i > 0 and nums[i - 1] == nums[i] and not used[i - 1]:
+                    continue
+                path.append(nums[i])
+                used[i] = True
+                backtracking(used)
+                path.pop()
+                used[i] = False
+
+        nums.sort()
+        backtracking(used)
+        return res
+
+
+"""
+复杂度：
+    组合问题
+        时间复杂度：O(nx2^n)  组合问题其实就是一种子集问题，所以组合问题最坏的情况也不会超过子集问题的时间复杂度
+        空间复杂度：O(n)  同子集问题
+
+    子集问题
+        时间复杂度：O(nx2^n) 每个元素状态无外乎 取/不取 所以O(2^n)；构造每组子集填进数组又需要O(n)
+        空间复杂度：O(n)  递归深度为n
+        
+    排列问题
+        时间复杂度：O(n!) ..., 第二层每一个分支都延伸n-1个分支，第三层每一个分支都延伸n-2个分支,..., 所以一直到叶子节点一共就是n x n-1! x n-2! ... 1=n!；
+                        每个叶子结点都会有一个构造全排列填进数组的操作，复杂度为O(n)。所以最终时间复杂度为O(n!xn)，简化为O(n!)
+        空间复杂度：O(n)  递归深度为n
+        
+    一般说回溯算法的复杂度，都是指数级别的时间复杂度，也算是概括吧！
+"""
