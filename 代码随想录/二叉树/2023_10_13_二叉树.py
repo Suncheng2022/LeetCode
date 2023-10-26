@@ -578,6 +578,48 @@ class Solution:
                 res.append(tmp)
         return len(res)
 
+    def maxDepth(self, root: 'Node') -> int:
+        """ 559.N叉树的最大深度
+            简单 """
+        queue = [root]
+        res = []
+        while queue:
+            length = len(queue)
+            tmp = []
+            for _ in range(length):
+                node = queue.pop(0)
+                if not node:
+                    continue
+                tmp.append(node.val)
+                queue.extend(node.children)
+            if tmp:
+                res.append(tmp)
+        return len(res)
+
+    def minDepth(self, root: Optional[TreeNode]) -> int:
+        """ 111.二叉树的最小深度
+            简单 """
+        if not root:
+            return 0
+        queue = [root]
+        res = []
+        while queue:
+            length = len(queue)
+            tmp = []
+            for _ in range(length):
+                node = queue.pop(0)
+                tmp.append(node.val)
+                if not (node.left or node.right):       # node没有左右孩子
+                    return len(res) + 1 if tmp else len(res)
+                if node.left:
+                    queue.append(node.left)
+                if node.right:
+                    queue.append(node.right)
+            if tmp:
+                res.append(tmp)
+        return len(res)
+
+
 if __name__ == "__main__":
     sl = Solution()
 
