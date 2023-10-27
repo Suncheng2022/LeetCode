@@ -619,6 +619,60 @@ class Solution:
                 res.append(tmp)
         return len(res)
 
+    def countNodes(self, root: Optional[TreeNode]) -> int:
+        """ 222.完全二叉树的节点个数 """
+        # 《代码随想录》递归写法 效率高很多
+        # 递归三部曲 1.递归函数的 参数、返回值 2.终止条件 3.单层搜索
+        def backtracking(node):
+            # 终止条件
+            if not node:
+                return 0
+            # 单层搜索
+            leftNum = backtracking(node.left)
+            rightNum = backtracking(node.right)
+            return leftNum + rightNum + 1
+
+        return backtracking(root)
+
+        # 自己写的 层序遍历 性能较差
+        # queue = [root]
+        # res = []
+        # while queue:
+        #     length = len(queue)
+        #     tmp = []
+        #     for _ in range(length):
+        #         node = queue.pop(0)
+        #         if not node:
+        #             continue
+        #         tmp.append(node.val)
+        #         queue.extend([node.left, node.right])
+        #     if tmp:
+        #         res.append(tmp)
+        # return sum([len(ls) for ls in res])
+
+    def isBalanced(self, root: Optional[TreeNode]) -> bool:
+        """ 110.平衡二叉树
+            简单 """
+        # 《代码随想录》 递归
+        def backtracking(node):
+            """ 返回树的高度；
+                或返回-1 """
+            # 终止条件
+            if not node:
+                return 0
+            leftNum = backtracking(node.left)
+            if leftNum == -1:
+                return -1
+            rightNum = backtracking(node.right)
+            if rightNum == -1:
+                return -1
+            if abs(leftNum - rightNum) > 1:
+                return -1
+            return 1 + max(leftNum, rightNum)
+
+        res = backtracking(root)
+        return True if res != -1 else False
+
 
 if __name__ == "__main__":
     sl = Solution()
