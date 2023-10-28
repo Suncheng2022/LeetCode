@@ -673,6 +673,30 @@ class Solution:
         res = backtracking(root)
         return True if res != -1 else False
 
+    def binaryTreePaths(self, root: Optional[TreeNode]) -> List[str]:
+        """ 257.二叉树的所有路径
+            简单 本题，首次二叉树递归/回溯  递归、回溯 本一家 """
+        # 《代码随想录》递归
+        path = []
+        res = []
+
+        def backtracking(node):
+            path.append(node.val)
+            # 终止条件
+            if not (node.left or node.right):      # node不为空，且没有孩子节点--即 叶子结点
+                res.append("->".join([str(c) for c in path]))
+                return
+            # 单层搜索
+            if node.left:
+                backtracking(node.left)
+                path.pop()
+            if node.right:
+                backtracking(node.right)
+                path.pop()
+
+        backtracking(root)
+        return res
+
 
 if __name__ == "__main__":
     sl = Solution()
