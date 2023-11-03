@@ -697,6 +697,61 @@ class Solution:
         backtracking(root)
         return res
 
+    def sumOfLeftLeaves(self, root: Optional[TreeNode]) -> int:
+        """ 404.左叶子之和
+            简单
+            难点在如何判断是左叶子 """
+        # 迭代法 递归不好理解
+        stack = [root]
+        res = 0
+        while stack:
+            node = stack.pop()
+            if node.left and not (node.left.left or node.left.right):
+                res += node.left.val
+            if node.right:
+                stack.append(node.right)
+            if node.left:
+                stack.append(node.left)
+        return res
+
+    def findBottomLeftValue(self, root: Optional[TreeNode]) -> int:
+        """ 513.找树左下角的值 """
+        queue = [root]
+        res = []
+        while queue:
+            length = len(queue)
+            tmp = []
+            for _ in range(length):
+                node = queue.pop(0)
+                if not node:
+                    continue
+                tmp.append(node)
+                queue.extend([node.left, node.right])
+            if tmp:
+                res.append(tmp)
+        return res[-1][0].val
+
+    def hasPathSum(self, root: Optional[TreeNode], targetSum: int) -> bool:
+        """ 112.路径总和 """
+        def backtracking(node, count):
+            # 终止条件
+            if not (node.left or node.right) and count == 0:        # 找到叶子节点，且路径和恰为目标和
+                return True
+            if not (node.left or node.right):                       # 找到叶子节点，但不符合题意
+                return False
+            # 单层搜索
+            if node.left:
+                if backtracking(node.left, count - node.left.val):
+                    return True
+            if node.right:
+                if backtracking(node.right, count - node.right.val):
+                    return True
+            return False
+
+        if not root:
+            return False
+        return backtracking(root, targetSum - root.val)
+
 
 if __name__ == "__main__":
     sl = Solution()
