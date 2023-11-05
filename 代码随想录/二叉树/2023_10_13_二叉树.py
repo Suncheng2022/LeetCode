@@ -733,24 +733,189 @@ class Solution:
 
     def hasPathSum(self, root: Optional[TreeNode], targetSum: int) -> bool:
         """ 112.路径总和 """
-        def backtracking(node, count):
-            # 终止条件
-            if not (node.left or node.right) and count == 0:        # 找到叶子节点，且路径和恰为目标和
-                return True
-            if not (node.left or node.right):                       # 找到叶子节点，但不符合题意
-                return False
-            # 单层搜索
-            if node.left:
-                if backtracking(node.left, count - node.left.val):
-                    return True
-            if node.right:
-                if backtracking(node.right, count - node.right.val):
-                    return True
-            return False
+        # def backtracking(node, count):
+        #     # 终止条件
+        #     if not (node.left or node.right) and count == 0:        # 找到叶子节点，且路径和恰为目标和
+        #         return True
+        #     if not (node.left or node.right):                       # 找到叶子节点，但不符合题意
+        #         return False
+        #     # 单层搜索
+        #     if node.left:
+        #         if backtracking(node.left, count - node.left.val):
+        #             return True
+        #     if node.right:
+        #         if backtracking(node.right, count - node.right.val):
+        #             return True
+        #     return False
+        #
+        # if not root:
+        #     return False
+        # return backtracking(root, targetSum - root.val)
 
+        # 再写一遍 递归
+        # def backtracking(node, count):
+        #     # 终止条件
+        #     if not (node.left or node.right) and count == 0:
+        #         return True
+        #     if not (node.left or node.right):
+        #         return False
+        #     # 单层搜索
+        #     if node.left:
+        #         if backtracking(node.left, count - node.left.val):
+        #             return True
+        #     if node.right:
+        #         if backtracking(node.right, count - node.right.val):
+        #             return True
+        #     return False
+        #
+        # if not root:
+        #     return False
+        # return backtracking(root, targetSum - root.val)
+
+        # 迭代 由先序遍历迭代修改而来
         if not root:
             return False
-        return backtracking(root, targetSum - root.val)
+        stack = [[root, root.val]]
+        while stack:
+            node, val = stack.pop()
+            if not (node.left or node.right) and val == targetSum:
+                return True
+            if node.right:
+                stack.append([node.right, val + node.right.val])
+            if node.left:
+                stack.append([node.left, val + node.left.val])
+        return False
+
+    def pathSum(self, root: Optional[TreeNode], targetSum: int) -> List[List[int]]:
+        """ 113.路径总和II """
+        # 递归
+        res = []
+        path = []
+
+        def backtracking(node, count):
+            if not (node.left or node.right) and count == 0:
+                res.append(path[:])
+                return
+            if node.left:
+                path.append(node.left.val)
+                backtracking(node.left, count - node.left.val)
+                path.pop()
+            if node.right:
+                path.append(node.right.val)
+                backtracking(node.right, count - node.right.val)
+                path.pop()
+
+        if not root:
+            return res
+        path.append(root.val)
+        backtracking(root, targetSum - root.val)
+        return res
+
+    def buildTree(self, inorder: List[int], postorder: List[int]) -> Optional[TreeNode]:
+        """ 106.从中序与后序遍历序列构造二叉树 """
+        # 直接改为递归
+        # if not (inorder and postorder):
+        #     return None
+        # inorderRootVal = postorder[-1]
+        # root = TreeNode(inorderRootVal)
+        #
+        # if len(inorder) == 1:
+        #     return root
+        #
+        # inorderRootInd = inorder.index(inorderRootVal)
+        # leftInorder = inorder[:inorderRootInd]
+        # rightInorder = inorder[inorderRootInd + 1:]
+        #
+        # leftPostorder = postorder[:len(leftInorder)]
+        # rightPostorder = postorder[len(leftPostorder):-1]
+        #
+        # root.left = self.buildTree(leftInorder, leftPostorder)
+        # root.right = self.buildTree(rightInorder, rightPostorder)
+        #
+        # return root
+
+        # 再写一遍
+        if not (inorder and postorder):
+            return None
+
+        rootVal = postorder[-1]
+        root = TreeNode(rootVal)
+
+        if len(postorder) == 1:
+            return root
+
+        rootInorderInd = inorder.index(rootVal)
+        leftInorder = inorder[:rootInorderInd]
+        rightInorder = inorder[rootInorderInd + 1:]
+
+        leftPostorder = postorder[:len(leftInorder)]
+        rightPostorder = postorder[len(leftInorder):-1]
+
+        root.left = self.buildTree(leftInorder, leftPostorder)
+        root.right = self.buildTree(rightInorder, rightPostorder)
+
+        return root
+
+    def constructMaximumBinaryTree(self, nums: List[int]) -> Optional[TreeNode]:
+        """ 654.最大二叉树
+            构造二叉树，一般前序遍历，先构造根节点、再构造左右 """
+        maxVal = max(nums)
+        maxInd = nums.index(maxVal)
+        root = TreeNode(maxVal)
+        if len(nums) == 1:
+            return root
+        if maxInd > 0:
+            root.left = self.constructMaximumBinaryTree(nums[:maxInd])
+        if maxInd < len(nums) - 1:
+            root.right = self.constructMaximumBinaryTree(nums[maxInd + 1:])
+        return root
+
+    def mergeTrees(self, root1: Optional[TreeNode], root2: Optional[TreeNode]) -> Optional[TreeNode]:
+        """ 617.合并二叉树 """
+        # 递归，不好懂
+        # if not root1:
+        #     return root2
+        # if not root2:
+        #     return root1
+        # root1.val += root2.val
+        # root1.left = self.mergeTrees(root1.left, root2.left)
+        # root1.right = self.mergeTrees(root1.right, root2.right)
+        # return root1
+
+        # 迭代 用队列模拟层序遍历
+        if not root1:
+            return root2
+        if not root2:
+            return root1
+        queue = [[root1, root2]]
+        while queue:
+            node1, node2 = queue.pop(0)
+            node1.val += node2.val
+            if node1.left and node2.left:
+                queue.append([node1.left, node2.left])
+            if node1.right and node2.right:
+                queue.append([node1.right, node2.right])
+            if not node1.left and node2.left:
+                node1.left = node2.left
+            if not node1.right and node2.right:
+                node1.right = node2.right
+        return root1
+
+    def searchBST(self, root: Optional[TreeNode], val: int) -> Optional[TreeNode]:
+        """ 700.二叉搜索树中的搜索 """
+        # 尝试普通递归
+        self.res = None
+
+        def backtracking(node):
+            if not node:
+                return
+            if node.val == val:
+                self.res = node
+            backtracking(node.left)
+            backtracking(node.right)
+
+        backtracking(root)
+        return self.res
 
 
 if __name__ == "__main__":
