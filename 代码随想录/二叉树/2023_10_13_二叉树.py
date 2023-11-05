@@ -904,18 +904,147 @@ class Solution:
     def searchBST(self, root: Optional[TreeNode], val: int) -> Optional[TreeNode]:
         """ 700.二叉搜索树中的搜索 """
         # 尝试普通递归
-        self.res = None
+        # self.res = None
+        #
+        # def backtracking(node):
+        #     if not node:
+        #         return
+        #     if node.val == val:
+        #         self.res = node
+        #     backtracking(node.left)
+        #     backtracking(node.right)
+        #
+        # backtracking(root)
+        # return self.res
+
+        # 《代码随想录》毕竟是BST嘛，要和普通二叉树有所区别
+        # def backtracking(node):
+        #     # 终止条件
+        #     if not node or node.val == val:
+        #         return node
+        #     # 单层搜索
+        #     if node.val > val:      # 则搜索 左子树
+        #         res = backtracking(node.left)
+        #     if node.val < val:
+        #         res = backtracking(node.right)
+        #     return res if res else None
+        #
+        # return backtracking(root)
+
+        # 《代码随想录》迭代法 感动到哭的简单
+        while root:
+            if root.val > val:
+                root = root.left
+            elif root.val < val:
+                root = root.right
+            else:
+                return root
+        return None
+
+    def isValidBST(self, root: Optional[TreeNode]) -> bool:
+        """ 98.验证二叉搜索树
+            BST的中序遍历递增，判断中序遍历是否递增即可 """
+        # 递归 中序遍历
+        # res = []
+        #
+        # def backtracking(node):
+        #     # 终止条件
+        #     if not node:
+        #         return
+        #     # 单层搜索
+        #     backtracking(node.left)
+        #     res.append(node.val)
+        #     backtracking(node.right)
+        #
+        # backtracking(root)
+        # for i in range(len(res) - 1):       # 这里和《代码随想录》中答案出奇地相同
+        #     if res[i] >= res[i + 1]:
+        #         return False
+        # return True
+
+        # 迭代 中序遍历，不复习 忘了吧
+        res = []
+        stack = []
+        cur = root
+        while cur or stack:
+            if cur:
+                stack.append(cur)
+                cur = cur.left
+            else:
+                cur = stack.pop()
+                if res and res[-1] >= cur.val:
+                    return False
+                res.append(cur.val)
+                cur = cur.right
+        return True
+
+    def getMinimumDifference(self, root: Optional[TreeNode]) -> int:
+        """ 530.二叉搜索树的最小绝对差 """
+        # 迭代法 【中序遍历 迭代法，不同于 前/后序遍历】
+        # res = []
+        # stack = []
+        # cur = root
+        # minSubVal = float('inf')
+        # while cur or stack:
+        #     if cur:
+        #         stack.append(cur)
+        #         cur = cur.left
+        #     else:
+        #         cur = stack.pop()
+        #         if res:
+        #             minSubVal = min(minSubVal, cur.val - res[-1])
+        #         res.append(cur.val)
+        #         cur = cur.right
+        # return minSubVal
+
+        # 递归 中序遍历，BST嘛
+        res = []
+        self.minSubVal = float('inf')
 
         def backtracking(node):
+            # 终止条件
             if not node:
                 return
-            if node.val == val:
-                self.res = node
+            # 单层搜索
             backtracking(node.left)
+            if res:
+                self.minSubVal = min(self.minSubVal, node.val - res[-1])
+            res.append(node.val)
             backtracking(node.right)
 
         backtracking(root)
-        return self.res
+        return self.minSubVal
+
+    def findMode(self, root: Optional[TreeNode]) -> List[int]:
+        """ 501.二叉搜索数中的众数
+            这道题BST出现重复元素了 """
+        # 迭代法 中序遍历 感觉不太流畅
+        # 没有考虑BST特性--中序递增
+        # from collections import Counter
+        #
+        # res = []
+        # stack = []
+        # cur = root
+        # while cur or stack:
+        #     if cur:
+        #         stack.append(cur)
+        #         cur = cur.left
+        #     else:
+        #         cur = stack.pop()
+        #         res.append(cur.val)
+        #         cur = cur.right
+        # v2c = Counter(res)
+        # v2c = [[k, v] for k, v in v2c.items()]
+        # v2c.sort(key=lambda x: x[1], reverse=True)
+        # res = [v2c[0][0]]
+        # for k, v in v2c[1:]:        # 和答案有点相似哦
+        #     if v < v2c[0][1]:
+        #         break
+        #     res.append(k)
+        # return res
+
+        # 看下答案的 '一次遍历'
+        pass
 
 
 if __name__ == "__main__":
