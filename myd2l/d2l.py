@@ -1,5 +1,5 @@
 import numpy as np
-
+import torch
 
 # 1.nms
 def num(dets, thresh):
@@ -213,3 +213,30 @@ def cal_iou02(bboxes1, bboxes2):
     # 计算iou
     ious = inter / (areas1 + areas2 - inter)    # [A, B, 1]
     return ious
+
+
+def bbox_iou(boxes1, boxes2):
+    """
+    文心一言
+    Calculate the Intersection over Union (IoU) of two sets of boxes.
+    Both sets of boxes are expected to be in (x1, y1, x2, y2) format.
+    Arguments:
+        boxes1 (tensor): A tensor of shape (N, 4) supplying N boxes1.
+        boxes2 (tensor): A tensor of shape (M, 4) supplying M boxes2.
+    Returns:
+        iou (tensor): A tensor of shape (N, M) representing pairwise iou scores for each element in boxes1 and boxes2.
+    """
+    # 计算交集坐标
+    lt = torch.max(boxes1[:, None, :2], boxes2[:, :2])  # [N,M,2]
+    rb = torch.min(boxes1[:, None, 2:], boxes2[:, 2:])  # [N,M,2]
+
+    # 计算交集面积
+    wh = (rb - lt).clamp(min=0)  # [N,M,2]
+    inter = wh[:, :, 0] * wh[:, :, 1]  # [N,M]
+
+    # 计算IoU
+    area1 = (boxes1[:, 2] - boxes1[:, 0]) * (boxes1[:, 3] - boxes1[:, 1])  # [N,]
+    area2 = (boxes2[:, 2] - boxes2[:, 0]) * (boxes2[:, 3] - boxes2[:, 1])  # [M,]
+    iou = inter / (area1[:, None] + area2 - inter)
+
+    return iou
