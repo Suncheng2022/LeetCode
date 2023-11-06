@@ -1043,8 +1043,57 @@ class Solution:
         #     res.append(k)
         # return res
 
-        # 看下答案的 '一次遍历'
-        pass
+        # 看下答案的 '一次遍历' 很麻烦，各种判断
+        # 号称是根据BST性质来的
+        self.pre = None
+        self.count = 0
+        self.maxCount = 0
+        self.res = []
+
+        def backtracking(node):
+            # 终止条件
+            if not node:
+                return
+            # 单层遍历
+            backtracking(node.left)
+            # 处理 中 节点
+            if not self.pre:
+                self.count = 1
+            elif self.pre.val == node.val:
+                self.count += 1
+            else:
+                self.count = 1
+            self.pre = node
+            if self.count == self.maxCount:
+                self.res.append(node.val)
+            elif self.count > self.maxCount:
+                self.maxCount = self.count
+                self.res = [node.val]
+            backtracking(node.right)
+
+        backtracking(root)
+        return self.res
+
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        """ 236.二叉树的最近公共祖先
+            不太懂，答案很不好懂 """
+        # 终止条件
+        if root == p or root == q or not root:      # 情况二
+            return root
+        # 单层搜索，后序遍历 左右中
+        # 遍历整棵树，用变量接住
+        left = self.lowestCommonAncestor(root.left, p, q)       # 递归返回值不为空，说明找到了p或q
+        right = self.lowestCommonAncestor(root.right, p, q)     # 同上，不可能左右子树找到同一节点，题目已说明无重复节点
+        if left and right:                          # 情况一
+            return root
+
+        if left and not right:
+            return left
+        elif not left and right:
+            return right
+        else:
+            return None
+
 
 
 if __name__ == "__main__":
