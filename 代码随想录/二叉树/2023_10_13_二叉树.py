@@ -1094,7 +1094,148 @@ class Solution:
         else:
             return None
 
+    def lowestCommonAncestor_BST(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        """ 235.二叉搜索树的最近公共祖先
+            BST，则利用其有序的特点；同 236.二叉树的最近公共祖先 相似 """
+        # 终止条件
+        # if not root:
+        #     return root
+        # # 单层搜索  顺序无所谓，因为不需要特别处理 中 节点
+        # if root.val > p.val and root.val > q.val:
+        #     left = self.lowestCommonAncestor_BST(root.left, p, q)
+        #     if left:
+        #         return left
+        # elif root.val < p.val and root.val < q.val:
+        #     right = self.lowestCommonAncestor_BST(root.right, p, q)
+        #     if right:
+        #         return right
+        # else:
+        #     return root
 
+        # 迭代法
+        while root:
+            if root.val > p.val and root.val > q.val:
+                root = root.left
+            elif root.val < p.val and root.val < q.val:
+                root = root.right
+            else:
+                return root
+
+    def insertIntoBST(self, root: Optional[TreeNode], val: int) -> Optional[TreeNode]:
+        """ 701.二叉搜索树中的插入操作 """
+        # 终止条件
+        # if not root:            # 遍历到空节点，插入并返回给上一层，以完成父子节点赋值操作
+        #     return TreeNode(val)
+        # # 单层搜索
+        # if root.val < val:      # val大，就用root的右子树去接
+        #     root.right = self.insertIntoBST(root.right, val)
+        # elif root.val > val:    # val小，就用root的左子树去接
+        #     root.left = self.insertIntoBST(root.left, val)
+        # return root
+
+        # 迭代法
+        if not root:
+            return TreeNode(val)
+        cur = root
+        parent = root
+        while cur:
+            parent = cur
+            if cur.val < val:
+                cur = cur.right
+            elif cur.val > val:
+                cur = cur.left
+        node = TreeNode(val)
+        if parent.val > val:
+            parent.left = node
+        else:
+            parent.right = node
+        return root
+
+    def deleteNode(self, root: Optional[TreeNode], key: int) -> Optional[TreeNode]:
+        """ 450.删除二叉搜索树中的节点 """
+        # if not root:        # 遍历到空节点，返回空
+        #     return None
+        # if root.val == key:
+        #     # 判断顺序需要注意，怕乱也可以写多个if判断
+        #     if not (root.left or root.right):       # 情况一：删除的是叶子节点
+        #         return None
+        #     elif not root.right:                    # 情况二：有左孩子
+        #         return root.left
+        #     elif not root.left:                     # 情况三：有右孩子
+        #         return root.right
+        #     else:                                   # 情况四：有左、右孩子
+        #         left_of_right = root.right
+        #         while left_of_right.left:
+        #             left_of_right = left_of_right.left
+        #         left_of_right.left = root.left
+        #         return root.right
+        # if root.val > key:
+        #     root.left = self.deleteNode(root.left, key)         # 承接 删除后补位上来的节点
+        # elif root.val < key:
+        #     root.right = self.deleteNode(root.right, key)       # 同上，承接
+        # return root
+
+        # 再写一遍 递归
+        # 终止条件
+        if not root:
+            return None
+        if root.val == key:
+            if not (root.left or root.right):       # 情况一：叶子节点
+                return None
+            elif not root.left:                     # 情况二：没有左孩子，意味着可能有右孩子，那就返回右孩子 空就空吧；这里必须判 是否空，要考虑if判断顺序
+                return root.right
+            elif not root.right:                    # 情况三：没有右孩子
+                return root.left
+            else:                                   # 情况四：有左、右孩子. 把左孩子挂到右孩子的最左
+                left_of_right = root.right
+                while left_of_right.left:
+                    left_of_right = left_of_right.left
+                left_of_right.left = root.left
+                return root.right
+        # 单层搜索
+        if root.val < key:                          # key大，用右子树来承接
+            root.right = self.deleteNode(root.right, key)
+        elif root.val > key:                        # key小，用左子树来承接
+            root.left = self.deleteNode(root.left, key)
+        return root
+
+    def trimBST(self, root: Optional[TreeNode], low: int, high: int) -> Optional[TreeNode]:
+        """ 669.修剪二叉搜索树 """
+        if not root:
+            return None
+        if root.val < low:
+            return self.trimBST(root.right, low, high)      # 寻找符合[low,high]闭区间的节点
+        elif root.val > high:
+            return self.trimBST(root.left, low, high)       # 同上
+        root.left = self.trimBST(root.left, low, high)
+        root.right = self.trimBST(root.right, low, high)
+        return root
+
+    def sortedArrayToBST(self, nums: List[int]) -> Optional[TreeNode]:
+        """ 108.将有序数组转换为二叉搜索树 """
+        def backtrakcing(leftInd, rightInd):
+            if leftInd > rightInd:
+                return None
+            midInd = (leftInd + rightInd) // 2
+            root = TreeNode(nums[midInd])
+            root.left = backtrakcing(leftInd, midInd - 1)
+            root.right = backtrakcing(midInd + 1, rightInd)
+            return root
+        return backtrakcing(0, len(nums) - 1)
+
+    def convertBST(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+        """ 538.把二叉搜索树转换为累加树 """
+        self.pre = 0
+
+        def backtracking(node):
+            if not node:
+                return
+            backtracking(node.right)
+            node.val += self.pre
+            self.pre = node.val
+            backtracking(node.left)
+        backtracking(root)
+        return root
 
 if __name__ == "__main__":
     sl = Solution()
