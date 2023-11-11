@@ -442,7 +442,113 @@ class Solution:
         backtracking(root)
         return res
 
-    """--->再看8.对称二叉树"""
+    def isSymmetric(self, root: Optional[TreeNode]) -> bool:
+        """ 101.对称二叉树
+            感觉比较难的。使用后续遍历，要比较的是左右2个子树，而不只是左右2个节点 """
+        # 《代码随想录》递归
+        # def backtracking(left, right):      # 参数：左、右2个子树 返回值：bool
+        #     # 终止条件
+        #     # 处理 空 的情况
+        #     if not left and right:          # 左空
+        #         return False
+        #     elif left and not right:        # 右空
+        #         return False
+        #     elif not (left or right):       # 左、右空
+        #         return True
+        #     # 上面处理了所有 空 的情况，下面就都 不空 了
+        #     elif left.val != right.val:     # 值不等
+        #         return False
+        #     else:                           # 值相等
+        #         # 结合看两个递归的 第一个参数——左子树的遍历顺序 左右中
+        #         #               第二个参数——右子树的遍历顺序 右左中
+        #         outside = backtracking(left.left, right.right)      # 比较外侧节点
+        #         inside = backtracking(left.right, right.left)       # 比较内侧节点
+        #         return outside and inside
+        #
+        # return backtracking(root.left, root.right)
+
+        # 《代码随想录》迭代法
+        # 这可不是层序遍历！
+        if not root:
+            return True
+        queue = [root.left, root.right]
+        while queue:
+            left = queue.pop(0)
+            right = queue.pop(0)
+            # 判断条件与递归时相同
+            # 处理 空 的情况
+            if not (left or right):         # 均 空，不是直接返回True，而是要继续判断
+                continue
+            elif not left or not right:     # 一个空，那不对称
+                return False
+            elif left.val != right.val:     # 没有空，但值不等
+                return False
+            else:                           # 没有空，值等
+                queue.extend([left.left, right.right, left.right, right.left])
+        return True
+
+    def isSameTree(self, p: Optional[TreeNode], q: Optional[TreeNode]) -> bool:
+        """ 100.相同的树
+            解题思路同上 101.对称二叉树 """
+        # 递归法
+        def backtracking(first, second):
+            # 终止条件
+            if not (first or second):           # 均空
+                return True
+            elif not (first and second):        # 一个空
+                return False
+            elif first.val != second.val:       # 都不空，值不等
+                return False
+            else:                               # 都不空，值等，继续往后
+                left_half = backtracking(first.left, second.left)
+                right_half = backtracking(first.right, second.right)
+                return left_half and right_half
+
+        return backtracking(p, q)
+
+        # 迭代法
+        # if not (p or q):
+        #     return True
+        # elif not (p and q):
+        #     return False
+        # queue = [p, q]
+        # while queue:
+        #     first = queue.pop(0)
+        #     second = queue.pop(0)
+        #     # 判断条件同递归时
+        #     if not (first or second):         # 均空
+        #         continue
+        #     elif not (first and second):      # 一个空
+        #         return False
+        #     elif first.val != second.val:     # 都不空，但值不等
+        #         return False
+        #     else:                             # 都不空，值等
+        #         queue.extend([first.left, second.left, first.right, second.right])
+        # return True
+
+    def isSubtree(self, root: Optional[TreeNode], subRoot: Optional[TreeNode]) -> bool:
+        """ 572.另一棵树的子树
+            参考 100.相同的树
+            答案：https://leetcode.cn/problems/subtree-of-another-tree/solutions/235634/dui-cheng-mei-pan-duan-zi-shu-vs-pan-duan-xiang-de/"""
+        def backtracking(first, second):
+            """ 100.相同的树 """
+            # 终止条件
+            if not (first or second):       # 均空
+                return True
+            elif not (first and second):    # 一个空
+                return False
+            elif first.val != second.val:   # 都不空，值不等
+                return False
+            else:                           # 都不空，值等
+                left_of_both = backtracking(first.left, second.left)
+                right_of_both = backtracking(first.right, second.right)
+                return left_of_both and right_of_both
+
+        if not (root or subRoot):
+            return True
+        elif not (root and subRoot):
+            return False
+        return backtracking(root, subRoot) or self.isSubtree(root.left, subRoot) or self.isSubtree(root.right, subRoot)
 
 
 if __name__ == "__main__":
