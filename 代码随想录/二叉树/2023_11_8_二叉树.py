@@ -550,6 +550,143 @@ class Solution:
             return False
         return backtracking(root, subRoot) or self.isSubtree(root.left, subRoot) or self.isSubtree(root.right, subRoot)
 
+    def maxDepth(self, root: Optional[TreeNode]) -> int:
+        """ 104.二叉树的最大深度 """
+        # 《代码随想录》层序遍历
+        # 比自己写要简洁很多
+        # if not root:
+        #     return 0
+        # queue = [root]
+        # maxDepth = 0
+        # while queue:
+        #     length = len(queue)
+        #     maxDepth += 1
+        #     for _ in range(length):
+        #         node = queue.pop(0)
+        #         if node.left:
+        #             queue.append(node.left)
+        #         if node.right:
+        #             queue.append(node.right)
+        # return maxDepth
+
+        # 《代码随想录》后序递归遍历
+        # 前序递归 求 深度
+        # 后序递归 求 高度
+        # 根节点的高度 就是 二叉树的深度，所以用后序遍历求根节点的高度
+        # def backtracking(node):
+        #     """ 后序递归 求 节点的高度 """
+        #     # 终止条件
+        #     if not node:
+        #         return 0
+        #     # 单层递归
+        #     left_height = backtracking(node.left)
+        #     right_height = backtracking(node.right)
+        #     return max(left_height, right_height) + 1       # 返回以当前节点node为根节点的树的高度
+        #
+        # return backtracking(root)
+
+        # 《代码随想录》前序递归遍历，充分体现回溯
+        # 自己可能不太好想出来
+        res = 0
+
+        def backtracking(node, depth):
+            nonlocal res
+            res = max(res, depth)
+            # 终止条件
+            if not (node.left or node.right):
+                return      # 递归过程中已经记录了最大深度res，所以不用返回
+            # 单层递归逻辑
+            if node.left:
+                depth += 1
+                backtracking(node.left, depth)
+                depth -= 1
+            if node.right:
+                depth += 1
+                backtracking(node.right, depth)
+                depth -= 1
+            return
+        if not root:
+            return 0
+        backtracking(root, 1)
+        return res
+
+    def maxDepth(self, root: 'Node') -> int:
+        """ 559.N叉树的最大深度
+            首推 后序递归遍历 """
+        # 104.二叉树的最大深度 后序递归遍历，感觉这个是最简单的
+        # def backtracking(node):
+        #     """ 后序递归遍历求当前节点的高度 """
+        #     # 终止条件
+        #     if not node:
+        #         return 0
+        #     # 单层递归
+        #     every_height = []
+        #     for child in node.children:
+        #         every_height.append(backtracking(child))
+        #     return max(every_height) + 1 if every_height else 1
+        #
+        # if not root:
+        #     return 0
+        # return backtracking(root)
+
+        # 层序遍历
+        # 权当加深印象吧
+        if not root:
+            return 0
+        queue = [root]
+        maxDepth = 0
+        while queue:
+            length = len(queue)
+            maxDepth += 1
+            for _ in range(length):
+                node = queue.pop(0)
+                for child in node.children:
+                    if child:
+                        queue.append(child)
+        return maxDepth
+
+    def minDepth(self, root: Optional[TreeNode]) -> int:
+        """ 111.二叉树的最小深度
+            首推《代码随想录》递归后序遍历 """
+        # 层序遍历
+        # if not root:
+        #     return 0
+        # queue = [root]
+        # minDepth = 0
+        # while queue:
+        #     length = len(queue)
+        #     minDepth += 1
+        #     for _ in range(length):
+        #         node = queue.pop(0)
+        #         if not (node.left or node.right):
+        #             return minDepth
+        #         if node.left:
+        #             queue.append(node.left)
+        #         if node.right:
+        #             queue.append(node.right)
+        # return minDepth
+
+        # 递归后序遍历，遇到叶子节点返回
+        # 《代码随想录》实现略有差别，会更简单
+        # def backtracking(node):
+        #     # 终止条件
+        #     if not node:
+        #         return 0
+        #     if not (node.left or node.right):
+        #         return 1
+        #     # 单层递归
+        #     left_height = backtracking(node.left)
+        #     right_height = backtracking(node.right)
+        #     if node.left and node.right:
+        #         return min(left_height, right_height) + 1
+        #     elif not (node.left and node.right):
+        #         return left_height + 1 if node.left else right_height + 1
+        #
+        # return backtracking(root)
+
+        # 《代码随想录》前序递归遍历
+        pass
+
 
 if __name__ == "__main__":
     pass
