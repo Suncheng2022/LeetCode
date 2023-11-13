@@ -685,7 +685,124 @@ class Solution:
         # return backtracking(root)
 
         # 《代码随想录》前序递归遍历
-        pass
+        # 不太推荐 前序递归，不太好理解，从公式角度来看也不太好记
+        minDepth = float('inf')
+
+        def backtrakcing(node, depth):
+            """ 前序递归遍历 求 最小深度 """
+            # 终止条件
+            if not node:
+                return
+            # 单层递归
+            if not (node.left or node.right):       # 当前节点是叶子节点
+                nonlocal minDepth
+                minDepth = min(minDepth, depth)
+            if node.left:
+                backtrakcing(node.left, depth + 1)
+            if node.right:
+                backtrakcing(node.right, depth + 1)
+
+        if not root:
+            return 0
+        backtrakcing(root, 1)
+        return minDepth
+
+    def countNodes(self, root: Optional[TreeNode]) -> int:
+        """ 222.完全二叉树的节点个数 """
+        # 层序遍历
+        # if not root:
+        #     return 0
+        # queue = [root]
+        # counts = 0
+        # while queue:
+        #     length = len(queue)
+        #     for _ in range(length):
+        #         node = queue.pop(0)
+        #         counts += 1
+        #         if node.left:
+        #             queue.append(node.left)
+        #         if node.right:
+        #             queue.append(node.right)
+        # return counts
+
+        # 前序递归遍历
+        # counts = 0
+        #
+        # def backtracking(node):
+        #     # 终止条件
+        #     if not node:
+        #         return
+        #     # 单层递归
+        #     nonlocal counts
+        #     counts += 1
+        #     backtracking(node.left)
+        #     backtracking(node.right)
+        #
+        # backtracking(root)
+        # return counts
+
+        # 后序递归遍历
+        # 参考 104.二叉树的最大深度 的后序递归
+        def backtracking(node):
+            """ 返回 以当前节点node为根节点的树 的节点数量 """
+            # 终止条件
+            if not node:
+                return 0
+            # 单层递归
+            left_counts = backtracking(node.left)
+            right_counts = backtracking(node.right)
+            return left_counts + right_counts + 1
+
+        return backtracking(root)
+
+    def isBalanced(self, root: Optional[TreeNode]) -> bool:
+        """ 110.平衡二叉树
+            与 104.二叉树的最大深度 不完全相同：
+                104.二叉树的最大深度：仅仅求node为根节点 树的最大深度
+                110.平衡二叉树：若递归过程中发现不是平衡二叉树了，返回树的高度也没意义了，用-1表示已经不是平衡二叉树了 """
+        def backtracking(node):
+            """ 基于 104.二叉树的最大深度，递归过程中若发现已经不是平衡二叉树了 则返回-1 """
+            # 终止条件
+            if not node:
+                return 0
+            # 单层递归
+            left_h = backtracking(node.left)
+            right_h = backtracking(node.right)
+            if -1 in [left_h, right_h]:
+                return -1
+            if abs(left_h - right_h) > 1:       # 此时已经发现不是平衡二叉树了，返回树的高度也没意义了，返回-1代表不是平衡二叉树就行了
+                return -1
+            return max(left_h, right_h) + 1
+
+        return True if backtracking(root) != -1 else False
+
+    def binaryTreePaths(self, root: Optional[TreeNode]) -> List[str]:
+        """ 257.二叉树的所有路径
+            本题要找所有路径，前序遍历最合适，方便父节点指向子节点
+            二叉树 第一次使用回溯 """
+        # 前序递归
+        # 代码可以再精简一些，下次吧
+        res = []
+        path = []
+
+        def backtracking(node):
+            # 终止条件
+            # 不用考虑空节点，因为后面控制空节点不进入递归
+            if not (node.left or node.right):
+                path.append(node.val)
+                res.append("->".join([str(n) for n in path]))
+                return
+            # 单层递归
+            path.append(node.val)
+            if node.left:
+                backtracking(node.left)
+                path.pop()
+            if node.right:
+                backtracking(node.right)
+                path.pop()
+
+        backtracking(root)
+        return res
 
 
 if __name__ == "__main__":
