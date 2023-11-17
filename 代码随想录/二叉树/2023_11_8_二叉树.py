@@ -804,6 +804,133 @@ class Solution:
         backtracking(root)
         return res
 
+    def sumOfLeftLeaves(self, root: Optional[TreeNode]) -> int:
+        """ 404.左叶子之和
+            就不能用层序遍历，因为要通过 当前节点的父节点 才能判断 当前节点 是不是左叶子 """
+        # 《代码随想录》后序递归遍历
+        # 因为要通过递归函数的返回值累加求取左叶子之和(似乎用到递归函数的返回值 就是 后序递归？)
+        # def backtracking(node):
+        #     """ 以当前节点node为根节点的树 的 左叶子之和 """
+        #     # 终止条件
+        #     # 只有当前节点node是父节点，才有可能判断出左叶子
+        #     if not node:
+        #         return 0
+        #     elif not (node.left or node.right):
+        #         return 0
+        #     # 单层递归
+        #     left_res = backtracking(node.left)      # 以node.left为根节点的树的左叶子之和；node.left可能是左叶子，下面判断
+        #     if node.left and not (node.left.left or node.left.right):
+        #         left_res = node.left.val
+        #     right_res = backtracking(node.right)    # 以node.right为根节点的树的左叶子之和；node.right不可能是左叶子
+        #     return left_res + right_res
+        #
+        # return backtracking(root)
+
+        # 《代码随想录》迭代，前中后均可，判断条件相同
+        # 前序迭代
+        stack = [root]
+        res = 0
+        while stack:
+            node = stack.pop()
+            # 判断条件相同
+            if not node:
+                continue
+            elif not (node.left or node.right):
+                continue
+            if node.left and not (node.left.left or node.left.right):
+                res += node.left.val
+            stack.extend([node.right, node.left])
+        return res
+
+    def findBottomLeftValue(self, root: Optional[TreeNode]) -> int:
+        """ 513.找树左下角的值 """
+        # 迭代最简单
+        # queue = [root]
+        # while queue:
+        #     length = len(queue)
+        #     for i in range(length):
+        #         node = queue.pop(0)
+        #         if i == 0:
+        #             res = node.val
+        #         if node.left:
+        #             queue.append(node.left)
+        #         if node.right:
+        #             queue.append(node.right)
+        # return res
+
+        # 《代码随想录》前序递归，当然感觉不是太好理解，又当然下面自己写的，竟然过了
+        maxDepth = float('-inf')
+        res = 0
+
+        def backtracking(node, depth):
+            # 终止条件
+            if not node:
+                return 0
+            # 单层递归
+            nonlocal maxDepth
+            nonlocal res
+            if depth > maxDepth:
+                maxDepth = depth
+                res = node.val
+            backtracking(node.left, depth + 1)
+            backtracking(node.right, depth + 1)
+        backtracking(root, 1)
+        return res
+
+    def hasPathSum(self, root: Optional[TreeNode], targetSum: int) -> bool:
+        """ 112.路径总和
+            参考 257.二叉树的所有路径--二叉树第1次使用回溯
+            递归函数什么时候需要返回值：
+                1.递归遍历整棵树 且 不需要处理返回值，递归函数就不要返回值
+                2.递归遍历整棵树 且 需要处理返回值，递归函数就需要返回值
+                3.搜索一条符合条件的路径，则需要返回值，因为找到需要及时返回 """
+        # 《代码随想录》找一条符合条件的路径，递归函数需要返回值，找到立刻返回
+        def backtracking(node, count):
+            """" 从以node为根节点的树上找，count初始为targetSum """
+            # 终止条件
+            if not (node.left or node.right) and count == 0:
+                return True
+            elif not (node.left or node.right):
+                return False
+            # 单层递归
+            if node.left:
+                if backtracking(node.left, count - node.left.val):      # 隐藏的回溯
+                    return True     # 找到符合条件的路径，及时返回
+            if node.right:
+                if backtracking(node.right, count - node.right.val):    # 隐藏的回溯
+                    return True     # 找到符合条件的路径，及时返回
+            return False
+        if not root:
+            return False
+        return backtracking(root, targetSum)
+
+
+        # 前序递归遍历，求所有路径。自己写的虽然过了，感觉比较麻烦
+        # res = False
+        # path = []
+        #
+        # def backtracking(node):
+        #     # 终止条件
+        #     if not (node.left or node.right):
+        #         path.append(node.val)
+        #         if sum(path) == targetSum:
+        #             nonlocal res
+        #             res = True
+        #         return
+        #     # 单层递归
+        #     path.append(node.val)
+        #     if node.left:
+        #         backtracking(node.left)
+        #         path.pop()
+        #     if node.right:
+        #         backtracking(node.right)
+        #         path.pop()
+        #
+        # if not root:
+        #     return False
+        # backtracking(root)
+        # return res
+
 
 if __name__ == "__main__":
     pass
