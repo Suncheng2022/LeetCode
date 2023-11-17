@@ -931,6 +931,40 @@ class Solution:
         # backtracking(root)
         # return res
 
+    def buildTree(self, inorder: List[int], postorder: List[int]) -> Optional[TreeNode]:
+        """ 106.从中序与后序遍历序列构造二叉树 """
+        if not postorder:
+            return None
+        rootVal = postorder[-1]
+        root = TreeNode(rootVal)
+        root_inorder_ind = inorder.index(rootVal)
+        root.left = self.buildTree(inorder[:root_inorder_ind][:], postorder[:root_inorder_ind][:])
+        root.right = self.buildTree(inorder[root_inorder_ind + 1:], postorder[root_inorder_ind:-1][:])
+        return root
+
+    def buildTree(self, preorder: List[int], inorder: List[int]) -> Optional[TreeNode]:
+        """ 105.从前序与中序遍历序列构造二叉树 """
+        if not inorder:
+            return None
+        rootVal = preorder[0]
+        root = TreeNode(rootVal)
+        root_inorder_ind = inorder.index(rootVal)
+        root.left = self.buildTree(preorder[1:root_inorder_ind + 1][:], inorder[:root_inorder_ind])
+        root.right = self.buildTree(preorder[root_inorder_ind + 1:][:], inorder[root_inorder_ind + 1:][:])
+        return root
+
+    def constructMaximumBinaryTree(self, nums: List[int]) -> Optional[TreeNode]:
+        """ 654.最大二叉树 """
+        if not nums:
+            return None
+        rootVal = max(nums)
+        root = TreeNode(rootVal)
+        rootValInd = nums.index(rootVal)
+        root.left = self.constructMaximumBinaryTree(nums[:rootValInd])
+        root.right = self.constructMaximumBinaryTree(nums[rootValInd + 1:])
+        return root
+
+    # 再看20.二叉树周末总结
 
 if __name__ == "__main__":
     pass
