@@ -964,7 +964,161 @@ class Solution:
         root.right = self.constructMaximumBinaryTree(nums[rootValInd + 1:])
         return root
 
-    # 再看20.二叉树周末总结
+    def mergeTrees(self, root1: Optional[TreeNode], root2: Optional[TreeNode]) -> Optional[TreeNode]:
+        """ 617.合并二叉树 """
+        # 《代码随想录》递归，前中后序递归都可以
+        # def backtracking(node1, node2):
+        #     if not node1:
+        #         return node2
+        #     elif not node2:
+        #         return node1
+        #     # 上面判断是否有空，执行到这里就是都不空
+        #     # 体现前序递归遍历
+        #     node1.val += node2.val
+        #     node1.left = backtracking(node1.left, node2.left)
+        #     node1.right = backtracking(node1.right, node2.right)
+        #     return node1
+        #
+        # return backtracking(root1, root2)
+
+        # 《代码随想录》迭代法，同时遍历2棵树
+        if not root1:
+            return root2
+        elif not root2:
+            return root1
+        queue = [[root1, root2]]            # 不空的节点才进队列
+        while queue:
+            node1, node2 = queue.pop(0)     # 队列取出的肯定不空
+            node1.val += node2.val
+            # 2棵树的左、右节点均不空，同时入队列
+            if node1.left and node2.left:
+                queue.append([node1.left, node2.left])
+            if node1.right and node2.right:
+                queue.append([node1.right, node2.right])
+            # 若node1空、node2不空，node2直接给node1；node1不空、node2空的就不处理了，最后返回node1嘛
+            if not node1.left and node2.left:
+                node1.left = node2.left
+            if not node1.right and node2.right:
+                node1.right = node2.right
+        return root1
+
+    def searchBST(self, root: Optional[TreeNode], val: int) -> Optional[TreeNode]:
+        """ 700.二叉搜索树中的搜索 """
+        # 《代码随想录》迭代法
+        while root:
+            if root.val == val:
+                return root
+            elif root.val > val:
+                root = root.left
+            else:
+                root = root.right
+        return None     # 返回root也行，毕竟到这里就是空了
+
+
+        # 《代码随想录》递归 使用BST的特性
+        # def backtracking(node):
+        #     # 终止条件
+        #     if not node or node.val == val:
+        #         return node
+        #     # 单层递归
+        #     if node.val > val:      # 则去左子树找
+        #         return backtracking(node.left)
+        #     else:                   # 则去右子树找
+        #         return backtracking(node.right)
+        #
+        # return backtracking(root)
+
+        # 递归 自己写的，没有使用BST的特性
+        # def backtracking(node):
+        #     # 终止条件
+        #     if not node:
+        #         return None
+        #     elif node.val == val:
+        #         return node
+        #     # 单层递归
+        #     left = backtracking(node.left)
+        #     right = backtracking(node.right)
+        #     return left if left else right
+        #
+        # return backtracking(root)
+
+    def isValidBST(self, root: Optional[TreeNode]) -> bool:
+        """ 98.验证二叉搜索树
+            BST中序遍历严格递增 """
+        # 迭代法
+        # stack = []
+        # cur = root
+        # res = []
+        # while cur or stack:
+        #     if cur:
+        #         stack.append(cur)
+        #         cur = cur.left
+        #     else:
+        #         node = stack.pop()
+        #         if res and res[-1] >= node.val:
+        #             return False
+        #         res.append(node.val)
+        #         cur = node.right
+        # return True
+
+        # 中序递归遍历
+        res = []
+
+        def backtracking(node):
+            # 终止条件
+            if not node:
+                return
+            # 单层递归
+            backtracking(node.left)
+            res.append(node.val)
+            backtracking(node.right)
+
+        backtracking(root)
+        for i in range(1, len(res)):
+            if res[i - 1] >= res[i]:
+                return False
+        return True
+
+    def getMinimumDifference(self, root: Optional[TreeNode]) -> int:
+        """ 530.二叉搜索树的最小绝对差 """
+        # 《代码随想录》BST中序递归
+        # res = []
+        # minSubVal = float('inf')
+        #
+        # def backtracking(node):
+        #     # 终止条件
+        #     if not node:
+        #         return
+        #     # 单层递归
+        #     backtracking(node.left)
+        #     if res:
+        #         nonlocal minSubVal
+        #         minSubVal = min(minSubVal, node.val - res[-1])
+        #     res.append(node.val)
+        #     backtracking(node.right)
+        #
+        # backtracking(root)
+        # return minSubVal
+
+        # 《代码随想录》BST中序迭代法
+        # 尝试用下临时变量，而不是记录所有值
+        stack = []
+        cur = root
+        pre = None          # 只记录前一个节点，而不是记录所有已访问的节点
+        minSubVal = float('inf')
+        while cur or stack:
+            if cur:
+                stack.append(cur)
+                cur = cur.left
+            else:
+                node = stack.pop()
+                if pre:
+                    minSubVal = min(minSubVal, node.val - pre.val)
+                pre = node
+                cur = node.right
+        return minSubVal
+
+    # 25.
 
 if __name__ == "__main__":
     pass
