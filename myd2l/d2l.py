@@ -240,3 +240,69 @@ def bbox_iou(boxes1, boxes2):
     iou = inter / (area1[:, None] + area2 - inter)
 
     return iou
+
+def is_intersect_triangle(triangle1, triangle2):
+    """ 2023.11.20 判断2个三角形是否重叠 """
+    # 以下为大概思路 旷视一面
+    def orientation(p1, p2, p3):
+        """ 判断p3在p1p2的左/右侧
+            原理：判断 某点 在直线的左/右侧
+            p1 (x1,y1)
+            p2 (x2,y2)
+            p3 (x3,y3)
+        平面上三点的面积量 S(p1,p2,p3) = (x1-x3)*(y2-y3)-(y1-y3)*(x2-x3)，
+                        S(p1,p2,p3) > 0 则p3在矢量p1p2左侧
+                        S(p1,p2,p3) < 0 则p3在矢量p1p2右侧
+                        S(p1,p2,p3) = 0 则p3在直线p1p2上 """
+        s = (p1[0] - p3[0]) * (p2[1] - p3[1]) - (p1[1] - p3[1]) * (p2[0] - p3[0])
+        if s == 0:
+            return 0                    # 返回0，表示共线
+        return 1 if s > 0 else 2        # 返回1 在左侧；返回2 在右侧
+
+
+    def on_segment(p, q, r):
+        """ orientation()只能判断3个点的相对位置关系，能判断出共线 但不能判断是否在线段上，因为线段是有长度的呀，
+            所以需要on_segment()限定一下，确定是在区域中，二者共同确定：某点 在 线段上 """
+        return min(p[0], r[0]) <= q[0] <= max(p[0], r[0])   \
+                and                                         \
+                min(p[1], r[1]) <= q[1] <= max(p[1], r[1])
+
+    def do_intersect(p1, q1, p2, q2):
+        """ 判断线段p1q1和线段p2q2是否相交 """
+        # p2、q2在直线p1q1的哪一侧
+        o1 = orientation(p1, q1, p2)
+        o2 = orientation(p1, q1, q2)
+        # p1、q1在直线p2q2的哪一侧
+        o3 = orientation(p2, q2, p1)
+        o4 = orientation(p2, q2, q1)
+
+        # 判断是否相交
+        if o1 != o2 and o3 != o4:       # p2 q2分布在p1q1两端，p1 q1分布在p2q2两端，所以相交
+            return True
+        if o1 == 0 and on_segment(p1, p2, q1):      # 如果 p1 q1 p2 共线，且p2的坐标范围在p1、q1之内，则相交
+            return True
+        elif o2 == 0 and on_segment(p1, q2, q1):    # 如果 p1 q1 q2 共线，且q2的坐标范围在p1、q1之内，则相交
+            return True
+        elif o3 == 0 and on_segment(p2, p1, q2):    # 如果 p2 q2 p1 共线，且p1的坐标范围在p2、q2之内，则相交
+            return True
+        elif o4 == 0 and on_segment(p2, q1, q2):    # 如果 p2 q2 q1 共线，且q1的坐标范围在p2、q2之内，则相交
+            return True
+        # 以上情况均不符合，那就不相交
+        return False
+
+    # if条件这只判断了triangle1的一条边与triangle2的点之间是否相交；如果不够鲁棒就让triangle1的所有边和triangle2所有边计算是否相交
+    if do_intersect(triangle1[0], triangle1[1], triangle2[0], triangle2[1]) or \
+            do_intersect(triangle1[0], triangle1[1], triangle2[0], triangle2[2]) or \
+            do_intersect(triangle1[0], triangle1[1], triangle2[1], triangle2[2]):
+        print(f'相交')
+    else:
+        print(f'不相交')
+
+
+if __name__ == "__main__":
+    # 例子
+    triangle1 = [(0, 0), (1, 0), (0, 1)]
+    # triangle2 = [(0, 0), (1, 0), (1, 1)]
+    triangle2 = [(2, 0), (1.2, 0), (1, 1)]
+    is_intersect_triangle(triangle1, triangle2)
+
