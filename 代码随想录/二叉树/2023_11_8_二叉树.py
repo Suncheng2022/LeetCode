@@ -1118,7 +1118,91 @@ class Solution:
                 cur = node.right
         return minSubVal
 
-    # 25.
+    def findMode(self, root: Optional[TreeNode]) -> List[int]:
+        """ 501.二叉搜索数中的众数 """
+        # from collections import defaultdict
+        #
+        # # 《代码随想录》递归
+        # val2counts = defaultdict(int)
+        # def backtracking(node):
+        #     # 终止条件
+        #     if not node:
+        #         return
+        #     val2counts[node.val] += 1
+        #     # 单层递归
+        #     backtracking(node.left)
+        #     backtracking(node.right)
+        #
+        # backtracking(root)
+        # maxCount = max(val2counts.keys())
+        # res = [k for k, v in val2counts.items() if v == maxCount]
+        # return res
+
+        # 《代码随想录》递归 利用BST中序遍历升序
+        # res = []
+        # pre = None      # 指示前一个访问的节点
+        # # cur = None      # 指示当前访问节点
+        # count = 0       # 当前元素出现次数
+        # maxCount = 0
+        #
+        # def backtracking(node):
+        #     # 终止条件
+        #     if not node:
+        #         return
+        #     # 单层递归
+        #     backtracking(node.left)
+        #     nonlocal pre, count, maxCount
+        #     if not pre:             # pre空，节点首次出现
+        #         count = 1
+        #     elif pre.val == node.val:
+        #         count += 1
+        #     elif pre.val != node.val:
+        #         count = 1
+        #     pre = node
+        #     # 收集节点
+        #     if count == maxCount:
+        #         res.append(node.val)
+        #     elif count > maxCount:
+        #         maxCount = count
+        #         res.clear()
+        #         res.append(node.val)
+        #     backtracking(node.right)
+        #
+        # backtracking(root)
+        # return res
+
+        # 《代码随想录》迭代法-->不要想当然层序遍历
+        # 中序遍历 迭代法；中间节点的处理逻辑一模一样
+        stack = []
+        cur = root
+        pre = None
+        count = 0
+        maxCount = 0
+        res = []
+        while stack or cur:
+            if cur:
+                stack.append(cur)
+                cur = cur.left
+            else:
+                cur = stack.pop()
+                if not pre:             # pre空，意味着节点首次出现
+                    count = 1
+                elif pre.val == cur.val:
+                    count += 1
+                elif pre.val != cur.val:
+                    count = 1
+                pre = cur
+                # 收集节点
+                if count == maxCount:
+                    res.append(cur.val)
+                elif count > maxCount:
+                    maxCount = count
+                    res.clear()
+                    res.append(cur.val)
+
+                cur = cur.right         # 继续中序遍历
+        return res
+
 
 if __name__ == "__main__":
     pass
