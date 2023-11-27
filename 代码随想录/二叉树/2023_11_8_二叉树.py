@@ -1134,7 +1134,7 @@ class Solution:
         #     backtracking(node.right)
         #
         # backtracking(root)
-        # maxCount = max(val2counts.keys())
+        # maxCount = max(val2counts.keys())         # 看周总结时看到这里代码，很可能是 .values()
         # res = [k for k, v in val2counts.items() if v == maxCount]
         # return res
 
@@ -1203,6 +1203,82 @@ class Solution:
                 cur = cur.right         # 继续中序遍历
         return res
 
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        """ 236.二叉树的最近公共祖先
+            找公共祖先，能自底向上最好，回溯天然就是自底向上，回溯后续 左右中 更加符合用左右节点返回值处理中间节点的逻辑 """
+        # 因为返回值刚好需要TreeNode，直接利用题目代码作回溯递归函数
+        # 终止条件
+        # if not root or root in [p, q]:      # 子树中遇到p或q就返回，遇到空就是终止条件也返回
+        #     return root
+        # # 单层递归
+        # # 因为要递归整棵树(原因看题解)，所以用left、right接住递归结果
+        # left = self.lowestCommonAncestor(root.left, p, q)
+        # right = self.lowestCommonAncestor(root.right, p, q)
+        # # 中间节点处理逻辑：无论是左子树还是右子树找到的p或q，都向上返回；都没找到则返回空
+        # if left and right:      # 左右返回都不空，就是左右都找到了，当前节点root就是最近公共祖先
+        #     return root
+        # if left and not right:
+        #     return left
+        # elif not left and right:
+        #     return right
+        # elif not (left or right):
+        #     return None
+
+        # 再来一遍
+        # 找公共祖先，想到自底向上，回溯天然是自底向上，回溯后序遍历左右中 则更符合不过了
+        # 返回值也是TreeNode，因此直接使用题目函数作递归函数
+        # 终止条件
+        if not root or root in [p, q]:      # 遇到空节点返回；找到p/q返回
+            return root
+        # 单层递归 后序遍历，左右中
+        # 因为遍历整棵树，所以用left、right接住递归结果用以继续处理
+        left = self.lowestCommonAncestor(root.left, p, q)
+        right = self.lowestCommonAncestor(root.right, p, q)
+        # 处理中节点
+        if left and right:      # 左右子树都找到了p/q
+            return root
+        # 将不空的结果向上返回
+        if left or not right:
+            return left
+        elif not left or right:
+            return right
+        elif not (left or right):
+            return None
+
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        """ 235.二叉搜索树的最近公共祖先
+            一定利用BST特性：左子树节点值<根节点值<右子树节点值
+            二叉树递归返回值：
+                1.搜索一条路径，找到直接返回
+                2.搜索整棵树，接受左右子树处理结果，然后处理返回 """
+        # 《代码随想录》递归，前中后序递归均可，因为不需要处理中间节点，找到就行了
+        # def backtracking(node):
+        #     # 终止条件
+        #     if not node:
+        #         return node
+        #     # 单层递归
+        #     if node.val > max(p.val, q.val):        # 则去 左子树 找
+        #         # 这里直接把递归返回值 left 返回，因为只要找到符合的值就行，下同
+        #         left = backtracking(node.left)
+        #         if left:                            # 找到就行了
+        #             return left
+        #     if node.val < min(p.val, q.val):        # 则去 右子树 找
+        #         right = backtracking(node.right)
+        #         if right:                           # 找到就行了
+        #             return right
+        #     return node                             # 那就是 node.val 介于二者之间，直接返回
+        #
+        # return backtracking(root)
+
+        # 《代码随想录》迭代法，逻辑类似递归
+        while root:
+            if root.val > max(p.val, q.val):
+                root = root.left
+            elif root.val < min(p.val, q.val):
+                root = root.right
+            else:                           # root.val介于二者之间，找到了，直接返回
+                return root
+        return None                         # 没找到
 
 if __name__ == "__main__":
     pass
