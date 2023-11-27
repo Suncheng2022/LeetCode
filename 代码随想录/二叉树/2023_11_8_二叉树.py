@@ -1280,6 +1280,25 @@ class Solution:
                 return root
         return None                         # 没找到
 
+    def insertIntoBST(self, root: Optional[TreeNode], val: int) -> Optional[TreeNode]:
+        """ 701.二叉搜索树中的插入操作 """
+        if not root:
+            return TreeNode(val)
+        cur = root
+        # pre = None
+        while cur:
+            pre = cur
+            if cur.val > val:
+                cur = cur.left
+            elif cur.val < val:
+                cur = cur.right
+            if not cur:
+                if pre.val < val:
+                    pre.right = TreeNode(val)
+                else:
+                    pre.left = TreeNode(val)
+        return root
+
 if __name__ == "__main__":
     pass
 
