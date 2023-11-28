@@ -1282,22 +1282,79 @@ class Solution:
 
     def insertIntoBST(self, root: Optional[TreeNode], val: int) -> Optional[TreeNode]:
         """ 701.二叉搜索树中的插入操作 """
+        # if not root:
+        #     return TreeNode(val)
+        # cur = root
+        # # pre = None
+        # while cur:
+        #     pre = cur
+        #     if cur.val > val:
+        #         cur = cur.left
+        #     elif cur.val < val:
+        #         cur = cur.right
+        #     if not cur:
+        #         if pre.val < val:
+        #             pre.right = TreeNode(val)
+        #         else:
+        #             pre.left = TreeNode(val)
+        # return root
+
+        # 《代码随想录》递归
+        # 有返回值，方便建立插入节点与父节点关系
+        # 终止条件
+        # if not root:                # 遇到空节点，就是要插入了；新建节点返回给上一层，建立父子关系
+        #     return TreeNode(val)
+        # # 单层递归
+        # # 遍历整棵树是对BST的侮辱，BST有搜索方向
+        # if root.val > val:
+        #     root.left = self.insertIntoBST(root.left, val)
+        # elif root.val < val:
+        #     root.right = self.insertIntoBST(root.right, val)
+        # return root
+
+        # 《代码随想录》迭代，还是答案更简洁
         if not root:
             return TreeNode(val)
         cur = root
-        # pre = None
-        while cur:
-            pre = cur
+        parent = None       # 记录当前访问节点的父节点
+        while cur:          # while结束时cur为空，正是要插入节点的位置
+            parent = cur    # 下面就要更新cur了
             if cur.val > val:
                 cur = cur.left
-            elif cur.val < val:
+            else:
                 cur = cur.right
-            if not cur:
-                if pre.val < val:
-                    pre.right = TreeNode(val)
-                else:
-                    pre.left = TreeNode(val)
+        if parent.val > val:
+            parent.left = TreeNode(val)
+        else:
+            parent.right = TreeNode(val)
         return root
+
+    def deleteNode(self, root: Optional[TreeNode], key: int) -> Optional[TreeNode]:
+        """ 450.删除二叉搜索树中的节点 """
+        # 《代码随想录》递归，返回值补位根节点，看操作
+        # 终止条件
+        if not root:                # 遇到空节点，就是没找到要删除的节点，直接返回
+            return root
+        if root.val == key:         # 遇到要删除节点，返回补位根节点
+            if not (root.left or root.right):
+                return None
+            elif not root.left:
+                return root.right
+            elif not root.right:
+                return root.left
+            elif root.left and root.right:
+                left_of_right = root.right
+                while left_of_right.left:
+                    left_of_right = left_of_right.left
+                left_of_right.left = root.left
+                return root.right
+        # 单层递归
+        if root.val < key:
+            root.right = self.deleteNode(root.right, key)
+        if root.val > key:
+            root.left = self.deleteNode(root.left, key)
+        return root             # 没有找到要删除的节点，把本身返回给上一层，上层递归来接收
+
 
 if __name__ == "__main__":
     pass
