@@ -1355,6 +1355,71 @@ class Solution:
             root.left = self.deleteNode(root.left, key)
         return root             # 没有找到要删除的节点，把本身返回给上一层，上层递归来接收
 
+    def trimBST(self, root: Optional[TreeNode], low: int, high: int) -> Optional[TreeNode]:
+        """ 669.修剪二叉搜索树 """
+        # 终止条件
+        if not root:
+            return root
+        # 修剪
+        if root.val < low:          # root.val < low，意味着root.left全不符合条件要全剪掉，所以只从root.right上寻找符合条件的
+            return self.trimBST(root.right, low, high)
+        elif root.val > high:       # 分析同上
+            return self.trimBST(root.left, low, high)
+        # 单层递归
+        root.left = self.trimBST(root.left, low, high)          # 修剪左子树
+        root.right = self.trimBST(root.right, low, high)        # 修剪右子树
+        return root
+
+    def sortedArrayToBST(self, nums: List[int]) -> Optional[TreeNode]:
+        """ 108.将有序数组转化为二叉搜索树 """
+        # 《代码随想录》递归
+        def backtracking(startInd, endInd):
+            """ startInd、endInd的左闭右闭区间 """
+            # 终止条件
+            if startInd > endInd:       # 数组非法区间，无法构造节点了，返回 空
+                return None
+            # 构造节点及其左、右孩子
+            mid = (startInd + endInd) // 2
+            root = TreeNode(nums[mid])
+            root.left = backtracking(startInd, mid - 1)
+            root.right = backtracking(mid + 1, endInd)
+            return root
+        return backtracking(0, len(nums) - 1)
+
+    def convertBST(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+        """ 538.把二叉搜索树转化为累加树 """
+        # 自己写的，牛逼！
+        # cur = root
+        # stack = []
+        # pre = None
+        # while cur or stack:
+        #     if cur:
+        #         stack.append(cur)
+        #         cur = cur.right
+        #     else:
+        #         cur = stack.pop()
+        #         if pre:
+        #             cur.val += pre.val
+        #         pre = cur
+        #         cur = cur.left
+        # return root
+
+        # 《代码随想录》递归，BST嘛，不要忘记有序--依然是右中左遍历顺序
+        preVal = 0      # 初始化为0，不用判断是不是第一次使用pre了
+
+        def backtracking(node):
+            # 终止条件
+            if not node:
+                return None
+            # 单层递归  右 中 左
+            backtracking(node.right)
+            nonlocal preVal
+            node.val += preVal
+            preVal = node.val
+            backtracking(node.left)
+
+        backtracking(root)
+        return root
 
 if __name__ == "__main__":
     pass
