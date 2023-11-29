@@ -101,6 +101,39 @@ class Solution:
                 cur = cur.right
         return res
 
+    def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:
+        """ 102.二叉树的层序遍历
+            同时可做出来：
+                107.二叉树的层序遍历II
+                199.二叉树的右视图
+                637.二叉树的层平均值
+                429.N叉树的层序遍历
+                515.在每个树行中找最大值
+                116.填充每个节点的下一个右侧节点指针，稍稍绕一下
+                117.填充每个节点的下一个右侧节点指针II
+                104.二叉树的最大深度
+                111.二叉树的最小深度，稍微有点难度 """
+        # 《代码随想录》层序遍历 一个打十个
+        if not root:
+            return []
+        queue = [root]
+        res = []
+        while queue:
+            length = len(queue)
+            tmp = []
+            for _ in range(length):
+                node = queue.pop(0)
+                tmp.append(node.val)
+                if node.left:
+                    queue.append(node.left)
+                if node.right:
+                    queue.append(node.right)
+            if tmp:
+                res.append(tmp)
+        return res
+
+
+
 
 if __name__ == "__main__":
     pass
