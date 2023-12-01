@@ -185,6 +185,7 @@ class Solution:
         backtracking(root)
         return res
 
+    # ------------------------- 以后从这里开始 -------------------------------------
     def isSymmetric(self, root: Optional[TreeNode]) -> bool:
         """ 101.对称二叉树
             同时遍历2棵树 """
@@ -279,6 +280,70 @@ class Solution:
             if node.left:
                 stack.append(node.left)
         return False
+
+    def maxDepth(self, root: Optional[TreeNode]) -> int:
+        """ 104.二叉树的最大深度 """
+        # 《代码随想录》递归 后序遍历求高度，根节点高度即二叉树的最大深度
+        # def backtracking(node):
+        #     """ 返回以node为根节点的二叉树的高度 """
+        #     # 终止条件
+        #     if not node:        # 遇到空节点，高度为0
+        #         return 0
+        #     # 单层递归  后序，左右中
+        #     left_height = backtracking(node.left)
+        #     right_height = backtracking(node.right)
+        #     return 1 + max(left_height, right_height)
+        #
+        # return backtracking(root)
+
+        # 《代码随想录》递归 前序遍历，前序求的是深度，从根节点开始的最大深度即为所求
+        maxDepth = 0
+
+        def backtracking(node, depth):
+            """ 当前节点node为止，深度depth是多少；
+                当前节点node能往下继续遍历，深度就+1 注意回溯操作 完美 """
+            nonlocal maxDepth
+            maxDepth = max(maxDepth, depth)
+            # 终止条件
+            if not (node.left or node.right):
+                return
+            # 单层递归
+            if node.left:
+                depth += 1
+                backtracking(node.left, depth)
+                depth -= 1
+            if node.right:
+                depth += 1
+                backtracking(node.right, depth)
+                depth -= 1
+
+        if not root:
+            return 0
+
+        backtracking(root, 1)
+        return maxDepth
+
+    def maxDepth(self, root: 'Node') -> int:
+        """ 559.N叉树的最大深度 """
+        # 递归 先序遍历 试试
+        maxDepth = 0
+
+        def backtracking(node, depth):
+            """ 当前节点的深度是depth，要注意回溯 """
+            # 终止条件
+            nonlocal maxDepth
+            maxDepth = max(maxDepth, depth)
+            # 单层递归
+            for child in node.children:
+                if child:
+                    depth += 1
+                    backtracking(child, depth)
+                    depth -= 1
+
+        if not root:
+            return 0
+        backtracking(root, 1)
+        return maxDepth
 
 if __name__ == "__main__":
     pass
