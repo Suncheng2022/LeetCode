@@ -345,6 +345,124 @@ class Solution:
         backtracking(root, 1)
         return maxDepth
 
+    def minDepth(self, root: Optional[TreeNode]) -> int:
+        """ 111.二叉树的最小深度 """
+        # 层序遍历
+        # if not root:
+        #     return 0
+        # queue = [root]
+        # minDepth = 0
+        # while queue:
+        #     length = len(queue)
+        #     minDepth += 1
+        #     for _ in range(length):
+        #         node = queue.pop(0)
+        #         if not (node.left or node.right):
+        #             return minDepth
+        #         if node.left:
+        #             queue.append(node.left)
+        #         if node.right:
+        #             queue.append(node.right)
+        # return minDepth
+
+        #《代码随想录》递归后序遍历
+        def backtracking(node):
+            # 终止条件
+            if not node:
+                return 0
+            # 单层递归
+            left_res = backtracking(node.left)
+            right_res = backtracking(node.right)
+            if node.left and not node.right:
+                return 1 + left_res
+            elif not node.left and node.right:
+                return 1 + right_res
+            return 1 + min(left_res, right_res)
+
+        return backtracking(root)
+
+        # 《代码随想录》递归先序遍历
+        # 自己尝试实现，失败了，还是得答案
+        # minDepth = float('inf')
+        #
+        # def backtracking(node, depth):
+        #     # 终止条件, 省略
+        #     if not (node.left or node.right):
+        #         nonlocal minDepth
+        #         minDepth = min(minDepth, depth)
+        #         return
+        #     # 单层递归
+        #     if node.left:
+        #         backtracking(node.left, depth + 1)      # 体现回溯
+        #     if node.right:
+        #         backtracking(node.right, depth + 1)
+        #
+        # if not root:
+        #     return 0
+        # backtracking(root, 1)
+        # return minDepth if minDepth != float('inf') else 0
+
+    def countNodes(self, root: Optional[TreeNode]) -> int:
+        """ 222.完全二叉树的节点个数 """
+        # 《代码随想录》递归后序遍历 利用完全二叉树
+        def backtracking(node):
+            # 终止条件 要判断当前节点node为根的树是不是满二叉树，并返回节点数量
+            if not node:
+                return 0
+            left, right = node.left, node.right
+            depth_of_left, depth_of_right = 0, 0
+            while left:             # 一直往左子树深入，看看深度为多少
+                depth_of_left += 1
+                left = left.left
+            while right:            # 一直往右子树深入，看看深度为多少
+                depth_of_right += 1
+                right = right.right
+            if depth_of_left == depth_of_right:
+                return 2 ** (depth_of_left + 1) - 1       # 深度为depth的满二叉树节点数量的计算公式
+            # 单层递归
+            num_of_left = backtracking(node.left)
+            num_of_right = backtracking(node.right)
+            return 1 + num_of_left + num_of_right
+
+        return backtracking(root)
+
+        # 《代码随想录》递归后序遍历 普通二叉树
+        # def backtracking(node):
+        #     """ 截止到当前节点node所在位置，节点数量有多少 """
+        #     # 终止条件
+        #     if not node:
+        #         return 0
+        #     # 单层递归
+        #     left_num = backtracking(node.left)
+        #     right_num = backtracking(node.right)
+        #     return 1 + max(left_num, right_num)
+        #
+        # if not root:
+        #     return 0
+        # return backtracking(root)
+
+        # 递归先序遍历 自己写的
+        # res = 0
+        #
+        # def backtracking(node):
+        #     # 终止条件
+        #     if not node:
+        #         return
+        #     # 单层递归
+        #     nonlocal res
+        #     res += 1
+        #     backtracking(node.left)
+        #     backtracking(node.right)
+        #
+        # backtracking(root)
+        # return res
+
+    def isBalanced(self, root: Optional[TreeNode]) -> bool:
+        """ 110.平衡二叉树 """
+        # 《代码随想录》后序递归遍历求左右子树的高度
+        pass
+
+
 if __name__ == "__main__":
     pass
 
