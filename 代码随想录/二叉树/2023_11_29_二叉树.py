@@ -524,6 +524,39 @@ class Solution:
         backtracking(root)
         return res
 
+    def sumOfLeftLeaves(self, root: Optional[TreeNode]) -> int:
+        """ 404.左叶子之和 """
+        # 《代码随想录》迭代法，前中后序均可
+        # 迭代前序遍历
+        stack = [root]
+        res = 0
+        while stack:
+            node = stack.pop()
+            if node.left and not (node.left.left or node.left.right):
+                res += node.left.val
+            if node.left:
+                stack.append(node.left)
+            if node.right:
+                stack.append(node.right)
+        return res
+
+        # 《代码随想录》并参考11.8记录 递归后序遍历
+        # def backtracking(node):
+        #     """ 以node为根节点的树 的 左叶子节点之和 """
+        #     # 终止条件
+        #     if not node:
+        #         return 0
+        #     elif not (node.left or node.right):
+        #         return 0
+        #     # 单层递归
+        #     leftVal = backtracking(node.left)
+        #     if node.left and not (node.left.left or node.left.right):       # 当前节点node的左节点 可能就是 左叶子
+        #         leftVal = node.left.val
+        #     rightVal = backtracking(node.right)
+        #     return leftVal + rightVal
+        #
+        # return backtracking(root)
+
 
 if __name__ == "__main__":
     pass
