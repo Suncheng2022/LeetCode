@@ -458,9 +458,71 @@ class Solution:
         # return res
 
     def isBalanced(self, root: Optional[TreeNode]) -> bool:
-        """ 110.平衡二叉树 """
-        # 《代码随想录》后序递归遍历求左右子树的高度
-        pass
+        """ 110.平衡二叉树
+            求深度适用前序遍历，求高度适用后序遍历 """
+        # 《代码随想录》后序递归遍历 求 左右子树的高度
+        # def backtracking(node):
+        #     """ 返回以当前节点node为根节点的子树的高度 -1表示已经不是平衡二叉树了 """
+        #     # 终止条件
+        #     if not node:
+        #         return 0
+        #     # 单层递归 后序遍历
+        #     left_height = backtracking(node.left)
+        #     if left_height == -1:
+        #         return -1
+        #     right_height = backtracking(node.right)
+        #     if right_height == -1:
+        #         return -1
+        #     if abs(left_height - right_height) <= 1:
+        #         return 1 + max(left_height, right_height)
+        #     else:
+        #         return -1
+        #
+        # return False if backtracking(root) == -1 else True
+
+        # 《代码随想录》再写一遍 后序递归遍历，求左、右子树高度嘛
+        def backtracking(node):
+            """ 返回以node为根节点的子树的高度 -1表示已经不是二叉平衡树了 """
+            # 终止条件
+            if not node:
+                return 0
+            # 单层递归 后序遍历
+            left_height = backtracking(node.left)
+            if left_height == -1:       # 当前节点node的左子树已经不是平衡二叉树了，则当前节点node的子树也不是了
+                return -1
+            right_height = backtracking(node.right)
+            if right_height == -1:      # 当前节点node的右子树已经不是二叉平衡树了，则当前节点node的子树也不是了
+                return -1
+            if abs(left_height - right_height) <= 1:        # 若左右子树高度相差<=1，是二叉平衡树，返回二叉平衡树的高度
+                return 1 + max(left_height, right_height)
+            else:
+                return -1                                   # 若左右子树高度相差>1，不是二叉平衡树，返回-1告诉上一层
+
+        return True if backtracking(root) != -1 else False
+
+    def binaryTreePaths(self, root: Optional[TreeNode]) -> List[str]:
+        """ 257.二叉树的所有路径
+            二叉树中第一次使用回溯 """
+        # 《代码随想录》求路径，前序遍历比较方便，方便记录父子节点关系
+        res = []
+        path = []
+
+        def backtracking(node):
+            path.append(node.val)                   # 中，放在这，因为要确保所有节点都能进到path
+            # 终止条件
+            if not (node.left or node.right):       # 遇到叶节点终止
+                res.append("->".join([str(val) for val in path]))
+                return
+            # 单层递归
+            if node.left:
+                backtracking(node.left)
+                path.pop()      # 求所有路径，必须回溯，这样才能回退一个路径、进入下一个路径
+            if node.right:
+                backtracking(node.right)
+                path.pop()      # 同上
+
+        backtracking(root)
+        return res
 
 
 if __name__ == "__main__":
