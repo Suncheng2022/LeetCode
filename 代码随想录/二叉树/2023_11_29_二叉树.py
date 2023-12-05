@@ -528,17 +528,17 @@ class Solution:
         """ 404.左叶子之和 """
         # 《代码随想录》迭代法，前中后序均可
         # 迭代前序遍历
-        stack = [root]
-        res = 0
-        while stack:
-            node = stack.pop()
-            if node.left and not (node.left.left or node.left.right):
-                res += node.left.val
-            if node.left:
-                stack.append(node.left)
-            if node.right:
-                stack.append(node.right)
-        return res
+        # stack = [root]
+        # res = 0
+        # while stack:
+        #     node = stack.pop()
+        #     if node.left and not (node.left.left or node.left.right):
+        #         res += node.left.val
+        #     if node.left:
+        #         stack.append(node.left)
+        #     if node.right:
+        #         stack.append(node.right)
+        # return res
 
         # 《代码随想录》并参考11.8记录 递归后序遍历
         # def backtracking(node):
@@ -556,6 +556,72 @@ class Solution:
         #     return leftVal + rightVal
         #
         # return backtracking(root)
+
+        # 再写一遍 迭代遍历，前中后序均可
+        stack = [root]          # 题目说明至少1个节点
+        res = 0
+        while stack:
+            node = stack.pop()
+            if node.left and not (node.left.left or node.left.right):
+                res += node.left.val
+            if node.right:      # 虽是前序遍历，本题入栈顺序也无所谓啦
+                stack.append(node.right)
+            if node.left:
+                stack.append(node.left)
+        return res
+
+        # 再写一遍 递归后序遍历
+        # def backtracking(node):
+        #     # 终止条件
+        #     if not node:
+        #         return 0
+        #     elif not (node.left or node.right):     # 只有node为父节点，才可能判断出左叶子结点
+        #         return 0
+        #     # 单层递归
+        #     left_val = backtracking(node.left)
+        #     if node.left and not (node.left.left or node.left.right):       # node.left刚好是左叶子结点。node.right不可能是左叶子结点的。
+        #         left_val = node.left.val
+        #     right_val = backtracking(node.right)
+        #     return left_val + right_val
+        #
+        # return backtracking(root)
+
+    def findBottomLeftValue(self, root: Optional[TreeNode]) -> int:
+        """ 513.找树左下角的值 """
+        # 无脑 层序遍历
+        # queue = [root]      # 题目说明至少1个节点
+        # while queue:
+        #     length = len(queue)
+        #     tmp = []
+        #     for _ in range(length):
+        #         node = queue.pop(0)
+        #         tmp.append(node.val)
+        #         if node.left:
+        #             queue.append(node.left)
+        #         if node.right:
+        #             queue.append(node.right)
+        # return tmp[0]
+
+        # 《代码随想录》递归，遍历顺序似乎都可以
+        maxDepth = 0
+        res = None
+
+        def backtracking(node, depth):
+            # 终止条件 遇到孩子节点终止
+            if not (node.left or node.right):
+                nonlocal maxDepth, res
+                if depth > maxDepth:
+                    maxDepth = depth
+                    res = node
+                return
+            # 单层递归
+            if node.left:                               # 递归函数终止条件没有判空，所以不空才能进入递归。
+                backtracking(node.left, depth + 1)      # 体现回溯
+            if node.right:
+                backtracking(node.right, depth + 1)
+
+        backtracking(root, 1)
+        return res.val
 
 
 if __name__ == "__main__":
