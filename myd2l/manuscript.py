@@ -95,4 +95,59 @@ def NMS(bboxes, confs, IOU_THRESHOLD):
         orders = orders[left]
     return res
 
-# 以上方法感觉实现还不错，保留着吧
+# ------------------------------ 以上方法感觉实现还不错，保留着吧 ----------------------------------
+
+# 以下重新写一遍 判断三角形是否重叠/相交
+def orientation(p1, p2, p3):
+    """ 判断p3在直线p1、p2的哪一侧，或共线
+        p1: [x1,y1]
+        p2: [x2,y2]
+        p3: [x3,y3] """
+    x1, y1 = p1
+    x2, y2 = p2
+    x3, y3 = p3
+    # 平面上三点的面积量
+    # S > 0 点在直线左侧
+    # S = 0 点在直线上
+    # S < 0 点在直线右侧
+    S = (x1 - x3) * (y2 - y3) - (y1 - y3) * (x2 - x3)
+    if S == 0:
+        return 0                        # 0表示共线
+    return 1 if S > 0 else 2            # 1表示p3在直线p1p2左边，2表示右边
+
+def on_segement(p, r, q):
+    """ 与orientation()结合使用-->判断r是否在 线段pq 上。
+        orientation()只能判断点在哪侧或共线，若共线再结合on_segement()就能判断 点 是否在 线段 上 """
+    if min(p[0], q[0]) <= r[0] <= max(p[0], q[0]) \
+        and \
+        min(p[1], q[1]) <= r[1] <= max(p[1], q[1]):
+        return True         # 返回True，再结合orientation()就能判断 点 是否在 线段 上
+    return False
+
+def on_intersection(p1, p2, p3, p4):
+    """ 判断2条线段 p1p2、p3p4 是否相交 """
+    o1 = orientation(p1, p2, p3)
+    o2 = orientation(p1, p2, p4)
+    o3 = orientation(p3, p4, p1)
+    o4 = orientation(p3, p4, p2)
+
+    if o1 == 0 and on_segement(p1, p3, p2):     # p3在线段p1p2上，即相交，返回True
+        return True
+    elif o2 == 0 and on_segement(p1, p4, p2):   # 同上
+        return True
+    elif o3 == 0 and on_segement(p3, p1, p4):   # 同上
+        return True
+    elif o4 == 0 and on_segement(p3, p2, p4):   # 同上
+        return True
+    elif o1 != o2 and o3 != o4:                 # 注意，是and，or的话是不能判断出 线段 是否相交的
+        return True
+    return False                                # 以上均不符合，则p1p2、p3p4线段不相交
+
+
+"""
+p1, p2, p3 = triangle1
+p4, p5, p6 = triangle2
+if on_intersection(p1, p2, p4, p5) or on_intersection(p1, p2, p5, p6) or on_intersection(p1, p2, p4, p6):
+    return True
+"""
+
