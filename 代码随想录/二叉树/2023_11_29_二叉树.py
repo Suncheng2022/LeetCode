@@ -532,7 +532,8 @@ class Solution:
         return res
 
     def sumOfLeftLeaves(self, root: Optional[TreeNode]) -> int:
-        """ 404.左叶子之和 """
+        """ 404.左叶子之和
+            尝试过写 递归先序遍历，写不出来，因为传入的node只能用来判断子节点是否为左叶子，不能实现左右递归 """
         # 《代码随想录》迭代法，前中后序均可
         # 迭代前序遍历
         # stack = [root]
@@ -670,25 +671,123 @@ class Solution:
     def hasPathSum(self, root: Optional[TreeNode], targetSum: int) -> bool:
         """ 112.路径总和 """
         # 《代码随想录》递归先序遍历，因为不处理中节点，先中后均可
-        def backtracking(node, count):
-            """ 遍历到当前节点node 还需count值[已经减去了当前node.val] """
+        # def backtracking(node, count):
+        #     """ 遍历到当前节点node 还需count值[已经减去了当前node.val] """
+        #     # 终止条件
+        #     if not (node.left or node.right) and count == 0:
+        #         return True
+        #     elif not (node.left or node.right):
+        #         return False
+        #     # 单层递归
+        #     if node.left:
+        #         if backtracking(node.left, count - node.left.val):      # 体现回溯
+        #             return True
+        #     if node.right:
+        #         if backtracking(node.right, count - node.right.val):    # 体现回溯
+        #             return True
+        #     return False
+        #
+        # if not root:
+        #     return False
+        # return backtracking(root, targetSum - root.val)
+
+        # 自己写个递归 牛逼！
+        def backtracking(node, path):
             # 终止条件
-            if not (node.left or node.right) and count == 0:
+            if not (node.left or node.right) and sum(path) == targetSum:
                 return True
-            elif not (node.left or node.right):
-                return False
             # 单层递归
             if node.left:
-                if backtracking(node.left, count - node.left.val):      # 体现回溯
+                if backtracking(node.left, path + [node.left.val]):
                     return True
             if node.right:
-                if backtracking(node.right, count - node.right.val):    # 体现回溯
+                if backtracking(node.right, path + [node.right.val]):
                     return True
             return False
 
         if not root:
             return False
-        return backtracking(root, targetSum - root.val)
+        return backtracking(root, [root.val])
+
+        # 《代码随想录》迭代先序遍历
+        # if not root:
+        #     return False
+        # stack = [[root, root.val]]
+        # while stack:
+        #     node, total = stack.pop()
+        #     if total == targetSum and not (node.left or node.right):
+        #         return True
+        #     if node.right:
+        #         stack.append([node.right, total + node.right.val])
+        #     if node.left:
+        #         stack.append([node.left, total + node.left.val])
+        # return False
+
+    def pathSum(self, root: Optional[TreeNode], targetSum: int) -> List[List[int]]:
+        """ 113.路径总和II """
+        # 递归先序遍历
+        res = []
+
+        def backtracking(node, path):
+            """ 遍历截止到node，还需count值
+                path已包含node.val """
+            # 终止条件
+            if not (node.left or node.right) and sum(path) == targetSum:
+                res.append(path[:])
+                return
+            # 单层递归
+            if node.left:       # 这里也可以写到终止条件
+                backtracking(node.left, path + [node.left.val])
+            if node.right:
+                backtracking(node.right, path + [node.right.val])
+
+        if not root:
+            return []
+        backtracking(root, [root.val])
+        return res
+
+    def buildTree(self, inorder: List[int], postorder: List[int]) -> Optional[TreeNode]:
+        """ 106.从中序与后序遍历序列构造二叉树 """
+        # 递归
+        def backtracking(inorder, postorder):
+            if not (len(inorder)):
+                return
+            root = TreeNode(postorder[-1])
+            root_inorder_ind = inorder.index(postorder[-1])
+            root.left = backtracking(inorder[:root_inorder_ind], postorder[:root_inorder_ind])
+            root.right = backtracking(inorder[root_inorder_ind + 1:], postorder[root_inorder_ind:-1])
+            return root
+
+        return backtracking(inorder, postorder)
+
+    def buildTree(self, preorder: List[int], inorder: List[int]) -> Optional[TreeNode]:
+        """ 105.从前序与中序遍历序列构造二叉树
+            认真分析索引就能过 加油！"""
+        # 递归
+        def backtracking(preorder, inorder):
+            # 终止条件
+            if not preorder:
+                return          # 其实就是None
+            root = TreeNode(preorder[0])
+            root_inorder_ind = inorder.index(preorder[0])
+            root.left = backtracking(preorder[1:root_inorder_ind + 1], inorder[:root_inorder_ind])
+            root.right = backtracking(preorder[root_inorder_ind + 1:], inorder[root_inorder_ind + 1:])
+            return root
+        return backtracking(preorder, inorder)
+
+    def constructMaximumBinaryTree(self, nums: List[int]) -> Optional[TreeNode]:
+        """ 654.最大二叉树 """
+        # 顺便，就用题目当递归函数吧
+        # 终止条件
+        if not nums:
+            return
+        # 单层递归
+        root = TreeNode(max(nums))
+        root_ind = nums.index(max(nums))
+        root.left = self.constructMaximumBinaryTree(nums[:root_ind])
+        root.right = self.constructMaximumBinaryTree(nums[root_ind + 1:])
+        return root
+
 
 if __name__ == "__main__":
     pass
