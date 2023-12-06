@@ -16,6 +16,13 @@ class Node:
         self.children = children
 
 
+# Definition for singly-linked list.
+class ListNode:
+    def __init__(self, x):
+        self.val = x
+        self.next = None
+
+
 class Solution:
     def preorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
         """ 144.二叉树的前序遍历 """
@@ -603,26 +610,85 @@ class Solution:
         # return tmp[0]
 
         # 《代码随想录》递归，遍历顺序似乎都可以
+        # maxDepth = 0
+        # res = None
+        #
+        # def backtracking(node, depth):
+        #     # 终止条件 遇到孩子节点终止
+        #     if not (node.left or node.right):
+        #         nonlocal maxDepth, res
+        #         if depth > maxDepth:
+        #             maxDepth = depth
+        #             res = node
+        #         return
+        #     # 单层递归
+        #     if node.left:                               # 递归函数终止条件没有判空，所以不空才能进入递归。
+        #         backtracking(node.left, depth + 1)      # 体现回溯
+        #     if node.right:
+        #         backtracking(node.right, depth + 1)
+        #
+        # backtracking(root, 1)
+        # return res.val
+
+        # 再写一遍 递归先序遍历
         maxDepth = 0
         res = None
 
         def backtracking(node, depth):
-            # 终止条件 遇到孩子节点终止
+            """ 当前节点node所在深度为depth """
+            # 终止条件。没判空节点，因为下面控制了只有非空节点才能进递归
             if not (node.left or node.right):
                 nonlocal maxDepth, res
                 if depth > maxDepth:
-                    maxDepth = depth
+                    maxDepth = max(maxDepth, depth)
                     res = node
                 return
             # 单层递归
-            if node.left:                               # 递归函数终止条件没有判空，所以不空才能进入递归。
-                backtracking(node.left, depth + 1)      # 体现回溯
+            if node.left:
+                backtracking(node.left, depth + 1)          # 体现回溯
             if node.right:
                 backtracking(node.right, depth + 1)
 
         backtracking(root, 1)
         return res.val
 
+    def hasCycle(self, head: Optional[ListNode]) -> bool:
+        """ 141.环形链表 """
+        # 参考提交记录 快慢指针
+        slow = fast = head
+        while fast:
+            slow = slow.next
+            fast = fast.next
+            if fast:
+                fast = fast.next
+            if fast == slow:        # 如果有环，最终会相遇
+                break
+        if not fast:
+            return False
+        return True
+
+    def hasPathSum(self, root: Optional[TreeNode], targetSum: int) -> bool:
+        """ 112.路径总和 """
+        # 《代码随想录》递归先序遍历，因为不处理中节点，先中后均可
+        def backtracking(node, count):
+            """ 遍历到当前节点node 还需count值[已经减去了当前node.val] """
+            # 终止条件
+            if not (node.left or node.right) and count == 0:
+                return True
+            elif not (node.left or node.right):
+                return False
+            # 单层递归
+            if node.left:
+                if backtracking(node.left, count - node.left.val):      # 体现回溯
+                    return True
+            if node.right:
+                if backtracking(node.right, count - node.right.val):    # 体现回溯
+                    return True
+            return False
+
+        if not root:
+            return False
+        return backtracking(root, targetSum - root.val)
 
 if __name__ == "__main__":
     pass
