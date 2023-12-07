@@ -210,7 +210,39 @@ class Solution:
         #         stack.extend([[left.left, right.right], [left.right, right.left]])
         # return True
 
+        # 迭代 再写一遍
+        # 操作两棵树，一般迭代法使用层序遍历比较好理解
+        # queue = [[root.left, root.right]]
+        # while queue:
+        #     left, right = queue.pop(0)
+        #     if not (left or right):
+        #         continue
+        #     elif not (left and right):
+        #         return False
+        #     elif left.val != right.val:
+        #         return False
+        #     else:                           # 均有值，且值相等
+        #         queue.extend([[left.left, right.right], [left.right, right.left]])
+        # return True
+
         # 递归 先序遍历；《代码随想录》称之为“后序遍历”
+        # def backtracking(left, right):
+        #     # 终止条件
+        #     if not (left or right):
+        #         return True
+        #     elif not (left and right):
+        #         return False
+        #     elif left.val != right.val:
+        #         return False
+        #     else:
+        #         # 单层递归，只有2节点均不空且值相等时才进入递归
+        #         outside_res = backtracking(left.left, right.right)      # 这两行第1个参数--左右中；第2个参数--右左中。故《代码随想录》称之为“后序遍历”
+        #         inner_res = backtracking(left.right, right.left)
+        #         return outside_res and inner_res
+        #
+        # return backtracking(root.left, root.right)
+
+        # 再写一遍 递归
         def backtracking(left, right):
             # 终止条件
             if not (left or right):
@@ -220,10 +252,9 @@ class Solution:
             elif left.val != right.val:
                 return False
             else:
-                # 单层递归，只有2节点均不空且值相等时才进入递归
-                outside_res = backtracking(left.left, right.right)      # 这两行第1个参数--左右中；第2个参数--右左中。故《代码随想录》称之为“后序遍历”
+                outer_res = backtracking(left.left, right.right)
                 inner_res = backtracking(left.right, right.left)
-                return outside_res and inner_res
+                return outer_res and inner_res
 
         return backtracking(root.left, root.right)
 
@@ -787,6 +818,111 @@ class Solution:
         root.left = self.constructMaximumBinaryTree(nums[:root_ind])
         root.right = self.constructMaximumBinaryTree(nums[root_ind + 1:])
         return root
+
+    def mergeTrees(self, root1: Optional[TreeNode], root2: Optional[TreeNode]) -> Optional[TreeNode]:
+        """ 617.合并二叉树
+            一般操作两棵树，迭代法使用层序遍历 """
+        # 《代码随想录》递归前序遍历  自己竟然没做出来...
+        def backtracking(node1, node2):
+            # 终止条件
+            if not node1:
+                return node2
+            elif not node2:
+                return node1
+            # 单层递归
+            node1.val += node2.val
+            node1.left = backtracking(node1.left, node2.left)
+            node1.right = backtracking(node1.right, node2.right)
+            return node1
+
+        return backtracking(root1, root2)
+
+        # 《代码随想录》迭代法 可参考 101.对称二叉树
+        # if not root1:
+        #     return root2
+        # elif not root2:
+        #     return root1
+        # queue = [[root1, root2]]
+        # while queue:
+        #     node1, node2 = queue.pop(0)
+        #     node1.val += node2.val
+        #     if node1.left and node2.left:
+        #         queue.append([node1.left, node2.left])
+        #     if node1.right and node2.right:
+        #         queue.append([node1.right, node2.right])
+        #
+        #     if not node1.left and node2.left:
+        #         node1.left = node2.left
+        #     if not node1.right and node2.right:
+        #         node1.right = node2.right
+        # return root1
+
+    def searchBST(self, root: Optional[TreeNode], val: int) -> Optional[TreeNode]:
+        """ 700.二叉搜索树中的搜索
+            BST，就不要忘记有序，搜索是有方向滴 """
+        # 自己写出了和答案一样的，牛！简单到痛哭流涕
+        # while root:
+        #     if root.val > val:
+        #         root = root.left
+        #     elif root.val < val:
+        #         root = root.right
+        #     else:
+        #         return root
+        # return None
+
+        # 递归 上来不会写BST的递归搜索，那就想一下普通二叉树的递归搜索
+        def backtracking(node):
+            # 终止条件
+            if not node:
+                return
+            if node.val == val:
+                return node
+            # 单层递归
+            if node.val > val:
+                return backtracking(node.left)
+            elif node.val < val:
+                return backtracking(node.right)
+
+        return backtracking(root)
+
+    def isValidBST(self, root: Optional[TreeNode]) -> bool:
+        """ 98.验证二叉搜索树
+            竟然没想到，判断中序是否递增呀 """
+        # 迭代中序遍历
+        # stack = []
+        # cur = root
+        # res = []
+        # while cur or stack:
+        #     if cur:
+        #         stack.append(cur)
+        #         cur = cur.left
+        #     else:
+        #         cur = stack.pop()
+        #         if res and res[-1] >= cur.val:
+        #             return False
+        #         res.append(cur.val)
+        #         cur = cur.right
+        # return True
+
+        # 《代码随想录》递归中序遍历，这自己是一点没能想出来
+        max_val = float('-inf')
+
+        def backtracking(node):
+            """ 当前遍历到node节点时，是否仍为BST """
+            # 终止条件
+            if not node:
+                return True
+            # 单层递归 中序遍历
+            left = backtracking(node.left)
+            nonlocal max_val
+            if node.val <= max_val:     # BST中序遍历严格递增
+                return False
+            else:
+                max_val = node.val
+            right = backtracking(node.right)
+            return left and right
+
+        return backtracking(root)
 
 
 if __name__ == "__main__":
