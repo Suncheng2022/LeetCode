@@ -924,6 +924,109 @@ class Solution:
 
         return backtracking(root)
 
+    def getMinimumDifference(self, root: Optional[TreeNode]) -> int:
+        """ 530.二叉搜索树的最小绝对差
+            BST中序遍历严格递增 """
+        # 迭代中序遍历
+        # pre记录node而不是node.val，否则pre=0时 if进不去，会计算错误
+        # cur = root
+        # stack = []
+        # pre = None
+        # minVal = float('inf')
+        # while cur or stack:
+        #     if cur:
+        #         stack.append(cur)
+        #         cur = cur.left
+        #     else:
+        #         node = stack.pop()
+        #         if pre:
+        #             minVal = min(minVal, node.val - pre.val)
+        #         pre = node
+        #         cur = node.right
+        # return minVal
+
+        # 递归中序遍历
+        pre = None      # 记录上一个访问的节点
+        res = float('inf')
+
+        def backtracking(node):
+            # 终止条件
+            if not node:
+                return
+            # 单层递归
+            backtracking(node.left)
+            nonlocal pre, res
+            if pre:
+                res = min(res, node.val - pre.val)
+            pre = node
+            backtracking(node.right)
+
+        backtracking(root)
+        return res
+
+    def findMode(self, root: Optional[TreeNode]) -> List[int]:
+        """ 501.二叉搜索数中的众数
+            BST中序遍历严格，则众数肯定连续出现 """
+        # 迭代中序遍历
+        # stack = []
+        # cur = root
+        # count = 0
+        # maxCount = 0
+        # res = []
+        # pre = None
+        # while cur or stack:
+        #     if cur:
+        #         stack.append(cur)
+        #         cur = cur.left
+        #     else:
+        #         cur = stack.pop()
+        #         if pre and pre.val == cur.val:
+        #             count += 1
+        #         else:
+        #             count = 1
+        #         pre = cur
+        #         if count == maxCount:
+        #             res.append(cur.val)
+        #         elif count > maxCount:
+        #             maxCount = count
+        #             res.clear()
+        #             res.append(cur.val)
+        #         cur = cur.right
+        # return res
+
+        # 递归中序遍历
+        count = 0
+        maxCount = 0
+        pre = None          # 记录上一个访问的节点，这样才能计数
+        res = []
+
+        def backtracking(node):
+            # 终止条件
+            if not node:
+                return
+            # 单层递归
+            backtracking(node.left)
+            nonlocal count, maxCount, pre
+            # 计数，同样的节点出现了多少次
+            if not pre:
+                count = 1
+            elif pre.val != node.val:
+                count = 1
+            else:
+                count += 1
+            pre = node
+            # 是否添加到res中
+            if count == maxCount:
+                res.append(node.val)
+            elif count > maxCount:
+                maxCount = count
+                res.clear()
+                res.append(node.val)
+            backtracking(node.right)
+
+        backtracking(root)
+        return res
+
 
 if __name__ == "__main__":
     pass
