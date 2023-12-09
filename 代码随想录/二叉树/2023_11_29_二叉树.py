@@ -823,19 +823,35 @@ class Solution:
         """ 617.合并二叉树
             一般操作两棵树，迭代法使用层序遍历 """
         # 《代码随想录》递归前序遍历  自己竟然没做出来...
-        def backtracking(node1, node2):
-            # 终止条件
-            if not node1:
-                return node2
-            elif not node2:
-                return node1
-            # 单层递归
-            node1.val += node2.val
-            node1.left = backtracking(node1.left, node2.left)
-            node1.right = backtracking(node1.right, node2.right)
-            return node1
+        # def backtracking(node1, node2):
+        #     # 终止条件
+        #     if not node1:
+        #         return node2
+        #     elif not node2:
+        #         return node1
+        #     # 单层递归
+        #     node1.val += node2.val
+        #     node1.left = backtracking(node1.left, node2.left)
+        #     node1.right = backtracking(node1.right, node2.right)
+        #     return node1
+        #
+        # return backtracking(root1, root2)
 
-        return backtracking(root1, root2)
+        # 再写一遍 复习 递归先序遍历
+        # def backtracking(node1, node2):
+        #     """ 将 以node1为根节点的子树、以node2为根节点的子树 合并到以node1为根节点的子树上 """
+        #     # 终止条件 处理有 空节点 的情况，包括两个都为空时
+        #     if not node1:
+        #         return node2
+        #     elif not node2:
+        #         return node1
+        #     # 单层递归  上面处理了关于 空节点 的情况，所以这里不考虑空了
+        #     node1.val += node2.val
+        #     node1.left = backtracking(node1.left, node2.left)
+        #     node1.right = backtracking(node1.right, node2.right)
+        #     return node1        # 首尾呼应，返回 合并到以node1为根节点后的子树
+        #
+        # return backtracking(root1, root2)
 
         # 《代码随想录》迭代法 可参考 101.对称二叉树
         # if not root1:
@@ -856,6 +872,31 @@ class Solution:
         #     if not node1.right and node2.right:
         #         node1.right = node2.right
         # return root1
+
+        # 再写一遍 同时操作两棵树通常使用层序遍历 还是看了答案
+        # 处理 空 的情况
+        if not root1:
+            return root2
+        elif not root2:
+            return root1
+        # 进入队列的认为不空了；后面 空节点 不入队列
+        queue = [[root1, root2]]
+        while queue:
+            length = len(queue)
+            for _ in range(length):
+                node1, node2 = queue.pop(0)
+                node1.val += node2.val
+                if node1.left and node2.left:       # 空节点不入队列
+                    queue.append([node1.left, node2.left])
+                if node1.right and node2.right:     # 空节点不入队列
+                    queue.append([node1.right, node2.right])
+
+                if not node1.left and node2.left:   # 处理 空 相关的，只处理node1空的情况，因为往node1上合并嘛
+                    node1.left = node2.left
+                if not node1.right and node2.right:
+                    node1.right = node2.right
+        return root1
+
 
     def searchBST(self, root: Optional[TreeNode], val: int) -> Optional[TreeNode]:
         """ 700.二叉搜索树中的搜索
@@ -905,22 +946,41 @@ class Solution:
         # return True
 
         # 《代码随想录》递归中序遍历，这自己是一点没能想出来
-        max_val = float('-inf')
+        # max_val = float('-inf')
+        #
+        # def backtracking(node):
+        #     """ 当前遍历到node节点时，是否仍为BST """
+        #     # 终止条件
+        #     if not node:
+        #         return True
+        #     # 单层递归 中序遍历
+        #     left = backtracking(node.left)
+        #     nonlocal max_val
+        #     if node.val <= max_val:     # BST中序遍历严格递增
+        #         return False
+        #     else:
+        #         max_val = node.val
+        #     right = backtracking(node.right)
+        #     return left and right
+        #
+        # return backtracking(root)
+
+        # 再写一遍 递归中序遍历 判断 是否BST
+        pre = None              # 前一个访问的节点
 
         def backtracking(node):
-            """ 当前遍历到node节点时，是否仍为BST """
+            """ 判断以node为根节点的子树是不是BST """
             # 终止条件
-            if not node:
+            if not node:        # 空节点也是BST
                 return True
-            # 单层递归 中序遍历
-            left = backtracking(node.left)
-            nonlocal max_val
-            if node.val <= max_val:     # BST中序遍历严格递增
+            # 单层递归
+            left_res = backtracking(node.left)
+            nonlocal pre
+            if pre and pre.val >= node.val:
                 return False
-            else:
-                max_val = node.val
-            right = backtracking(node.right)
-            return left and right
+            pre = node
+            right_res = backtracking(node.right)
+            return left_res and right_res           # 判断node的 左子树、右子树 是不是BST
 
         return backtracking(root)
 
@@ -1026,6 +1086,48 @@ class Solution:
 
         backtracking(root)
         return res
+
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        """ 236.二叉树的最近公共祖先
+            能想到自底向上-->递归后序遍历 """
+        # 想到递归后序遍历 还是得《代码随想录》
+        # def backtracking(node):
+        #     """ 当前遍历节点node为根节点的子树是否找到 p或q，并向上返回：空 代表 没找到，不空 代表 找到 """
+        #     # 终止条件
+        #     if node in [p, q] or not node:      # if node in [p, q]对应情况二，node正是p或q，直接向上返回；not node为终止条件
+        #         return node
+        #     # 单层递归
+        #     left_res = backtracking(node.left)
+        #     right_res = backtracking(node.right)
+        #     if not left_res:
+        #         return right_res
+        #     elif not right_res:
+        #         return left_res
+        #     elif left_res and right_res:
+        #         return node
+        #
+        # return backtracking(root)
+
+        # 再写一遍《代码随想录》
+        def backtracking(node):
+            """ 以node为根节点的子树 是否找到了p或q
+                找到p或q就将其返回，找不到返回None代表没找到 """
+            # 终止条件
+            if not node:            # 空节点，肯定没找到
+                return None
+            elif node in [p, q]:    # 对应题解情况二，当前节点就是p或q，直接将其返回
+                return node
+            # 单层递归 后序遍历嘛
+            left_res = backtracking(node.left)
+            right_res = backtracking(node.right)
+            if not (left_res and right_res):            # 若node的左右子树只有一支有返回值，则向上返回
+                return left_res if left_res else right_res
+            elif left_res and right_res:                # 若node的左右子树都有返回值，说明左右都找到了，那node就是公共祖先；因为是自底向上找的，所以 最近的/深度最大的 公共节点肯定会先找到，然后一步一步往上返回
+                return node
+            elif not (left_res or right_res):           # 若node的左右子树都没有返回值，说明左右都没找到，意思就是node不是p或q的祖先节点，所以 返回空
+                return None
+
+        return backtracking(root)
 
 
 if __name__ == "__main__":
