@@ -1129,6 +1129,91 @@ class Solution:
 
         return backtracking(root)
 
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        """ 235.二叉搜索树的最近公共祖先 """
+        # 回忆昨天 236.二叉树的最近公共祖先 递归后序遍历--找公共祖先自然想到自下而上，回溯递归，后序左右中
+        # def backtracking(node):
+        #     """ 以node为根节点的子树的左右节点是否找到p或q，找到则返回上层告知找到，否则返回空 """
+        #     # 终止条件
+        #     if not node or node in [p, q]:      # node为空，返回 空 告知上层没找到；node就是p或q，将本身返回上层告知找到了
+        #         return node
+        #     # 单层递归
+        #     left_res = backtracking(node.left)
+        #     right_res = backtracking(node.right)
+        #     if not left_res:                    # 左子树没有返回结果，就把右子树返回结果返回（也可能二者都没有结果）
+        #         return right_res
+        #     elif not right_res:                 # 右子树没有返回结果，就把左子树返回结果返回（也可能二者都没有结果）
+        #         return left_res
+        #     elif left_res and right_res:        # 左右子树都有返回结果，就是左右子树分别找到了p、q，则node就是最近公共祖先
+        #         return node
+        #
+        # return backtracking(root)
+
+        # 《代码随想录》利用BST特性，搜索方向 递归顺序均可，因为中节点不需要处理
+        # def backtracking(node):
+        #     """ 以node为根节点的子树上是否找到 祖先节点 """
+        #     # 终止条件
+        #     if not node:
+        #         return None
+        #     # 单层递归
+        #     if node.val < min(p.val, q.val):        # 如果当前节点node.val比p和q的值都小，则向右去找，找到就返回，本题就是寻找一条边
+        #         right = backtracking(node.right)
+        #         if right:
+        #             return right
+        #     if node.val > max(p.val, q.val):        # 同上
+        #         left = backtracking(node.left)
+        #         if left:
+        #             return left
+        #     if min(p.val, q.val) <= node.val <= max(p.val, q.val):
+        #         return node
+        # return backtracking(root)
+
+        # 迭代法 BST搜索的有序性
+        while root:
+            if root.val > max(p.val, q.val):
+                root = root.left
+            elif root.val < min(p.val, q.val):
+                root = root.right
+            elif min(p.val, q.val) <= root.val <= max(p.val, q.val):
+                return root
+        return None
+
+    def insertIntoBST(self, root: Optional[TreeNode], val: int) -> Optional[TreeNode]:
+        """ 701.二叉搜索树中的插入操作 """
+        # if not root:
+        #     return TreeNode(val)
+        # cur = root
+        # while cur:
+        #     pre = cur
+        #     if cur.val < val:
+        #         cur = cur.right
+        #     elif cur.val > val:
+        #         cur = cur.left
+        #     if not cur:
+        #         newNode = TreeNode(val)
+        #         if pre.val > val:
+        #             pre.left = newNode
+        #         else:
+        #             pre.right = newNode
+        #         break
+        # return root
+
+        # 《代码随想录》递归
+        def backtracking(node):
+            """ 插入到 以node为根节点 的子树上，并返回根节点--通过向上返回来建立父子节点关系 """
+            # 终止条件
+            if not node:                # BST，遇到空节点了，就是要插入了
+                return TreeNode(val)
+            # 单层递归
+            if node.val > val:
+                node.left = backtracking(node.left)
+            elif node.val < val:
+                node.right = backtracking(node.right)
+            return node
+
+        return backtracking(root)
+
+
 
 if __name__ == "__main__":
     pass
