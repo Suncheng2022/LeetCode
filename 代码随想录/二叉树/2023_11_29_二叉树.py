@@ -1213,7 +1213,102 @@ class Solution:
 
         return backtracking(root)
 
+    def deleteNode(self, root: Optional[TreeNode], key: int) -> Optional[TreeNode]:
+        """ 450.删除二叉搜索树中的节点 """
+        # 递归后序遍历 通过返回值建立父子关系
+        # 自己写的，实现得好复杂--其实本来就很复杂，自己能写出来也可以
+        # def backtracking(node):
+        #     """ node是否为要删除的节点，是：向上层返回删除后结构 不是：返回本身 """
+        #     # 终止条件
+        #     if not node:
+        #         return
+        #     # 单层递归
+        #     node.left = backtracking(node.left)
+        #     node.right = backtracking(node.right)
+        #     if node.val == key:
+        #         if not node.right:
+        #             node.right = node.left
+        #             return node.right
+        #         left_of_right = node.right
+        #         while left_of_right.left:
+        #             left_of_right = left_of_right.left
+        #         left_of_right.left = node.left
+        #         return node.right
+        #     else:
+        #         return node
+        #
+        # return backtracking(root)
 
+        # 《代码随想录》递归 通过返回值确定新的父子关系，达到删除节点的目的
+        def backtracking(node):
+            """ node是否为要删除的节点，向上返回删除后的结构 分析情况1~5 """
+            # 终止条件
+            if not node:                                # 情况一：没找到要删除的节点
+                return None
+            if node.val == key:
+                if not (node.left or node.right):       # 情况二：node为叶子节点
+                    return None
+                elif not node.left and node.right:      # 情况三：node只有右孩子节点
+                    return node.right
+                elif node.left and not node.right:      # 情况四：node只有左孩子节点
+                    return node.left
+                elif node.left and node.right:          # 情况五：node有左右孩子节点
+                    left_of_right = node.right
+                    while left_of_right.left:
+                        left_of_right = left_of_right.left
+                    left_of_right.left = node.left
+                    return node.right
+            # 单层递归
+            node.left = backtracking(node.left)
+            node.right = backtracking(node.right)
+            return node
+
+        return backtracking(root)
+
+    def trimBST(self, root: Optional[TreeNode], low: int, high: int) -> Optional[TreeNode]:
+        """ 669.修剪二叉搜索树 """
+        # 递归 通过向上返回达到修剪的目的
+        # 普通二叉树 的修剪，没有利用BST特性！
+        # def backtracking(node):
+        #     # 终止条件
+        #     if not node:                        # 没找到要删除的节点
+        #         return
+        #     # 单层递归 后序遍历才行，前序不行
+        #     node.left = backtracking(node.left)
+        #     node.right = backtracking(node.right)
+        #     if not low <= node.val <= high:     # 找到要删除的节点
+        #         if not (node.left or node.right):
+        #             return None
+        #         elif not node.left and node.right:
+        #             return node.right
+        #         elif node.left and not node.right:
+        #             return node.left
+        #         elif node.left and node.right:
+        #             tmp = node.right
+        #             while tmp.left:
+        #                 tmp = tmp.left
+        #             tmp.left = node.left
+        #             return node.right
+        #     return node
+        #
+        # return backtracking(root)
+
+        # 《代码随想录》递归 利用BST特性
+        def backtracking(node):
+            """ 返回以node为根节点的子树 删除后的 新根节点 """
+            # 终止条件
+            if not node:
+                return
+            # 单层递归
+            if node.val < low:              # 当前节点node.val<low，则node及左孩子节点都不能要了
+                return backtracking(node.right)
+            if node.val > high:             # 同上
+                return backtracking(node.left)
+            node.left = backtracking(node.left)
+            node.right = backtracking(node.right)
+            return node
+
+        return backtracking(root)
 
 if __name__ == "__main__":
     pass
