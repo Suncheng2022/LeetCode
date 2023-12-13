@@ -1310,6 +1310,59 @@ class Solution:
 
         return backtracking(root)
 
+    def sortedArrayToBST(self, nums: List[int]) -> Optional[TreeNode]:
+        """ 108.将有序数组转化为二叉搜索树 """
+        # 《代码随想录》有序数组构建BST，取中间的做根节点，随便取也没意义
+        def backtracking(start, end):
+            # 终止条件
+            if start > end:
+                return None
+            elif start == end:      # 这里其实不用写
+                return TreeNode(nums[start])
+            # 单层递归
+            mid = (start + end) // 2
+            node = TreeNode(nums[mid])
+            node.left = backtracking(start, mid - 1)
+            node.right = backtracking(mid + 1, end)
+            return node
+
+        return backtracking(0, len(nums) - 1)
+
+    def convertBST(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+        """ 538.把二叉搜索树转化为累加树 """
+        # 右中左递归遍历 自己写的！
+        # pre = None
+        #
+        # def backtracking(node):
+        #     # 终止条件
+        #     if not node:
+        #         return
+        #     # 单层递归 右中左
+        #     backtracking(node.right)
+        #     nonlocal pre
+        #     if pre:
+        #         node.val += pre.val
+        #     pre = node
+        #     backtracking(node.left)
+        #
+        # backtracking(root)
+        # return root
+
+        # 迭代法 那就是中序遍历模板题了
+        cur = root
+        stack = []
+        preVal = 0
+        while cur or stack:
+            if cur:
+                stack.append(cur)
+                cur = cur.right         # 注意本题是 右中左
+            else:
+                node = stack.pop()
+                node.val += preVal
+                preVal = node.val
+                cur = node.left         # 注意本题是 右中左
+        return root
+
 if __name__ == "__main__":
     pass
 
