@@ -1,6 +1,8 @@
 import torch
 import numpy as np
 
+from torch import nn
+
 
 def IoU_batch(bboxes1, bboxes2):
     """ 批量计算IoU.
@@ -151,3 +153,31 @@ if on_intersection(p1, p2, p4, p5) or on_intersection(p1, p2, p5, p6) or on_inte
     return True
 """
 
+
+class MultiHeadAttention(nn.Module):
+    """ 多头自注意力第三方实现，大概思路是没问题的 """
+    def __init__(self, embed_dim, num_heads):
+        super().__init__()
+        assert embed_dim % num_heads == 0
+
+        self.embed_dim = embed_dim
+        self.num_heads = num_heads
+        self.head_dim = self.embed_dim // self.num_heads
+
+        self.qkv_proj = nn.Linear(in_features=self.embed_dim, out_features=3 * self.embed_dim)
+        self.out_proj = nn.Linear(in_features=self.embed_dim, out_features=self.embed_dim)
+
+    def forward(self, x):
+        """ 假设 x:[s,b,d] """
+        seq_length, batch_size = x.shape[:2]
+        qkv = self.qkv_proj(x)                          # [s,b,3*d]
+        q, k, v = qkv.chunk(3, dim=-1)                  # [s,b,d]
+        q = q.contiguous().view(seq_length, batch_size * self.num_heads, self.head_dim).permute(1, 0, 2)    # [b*h,s,h_d]
+        k = k.contiguous().view(seq_length, batch_size * self.num_heads, self.head_dim).permute(1, 0, 2)    # [b*h,s,h_d]
+        v = v.contiguous().view(seq_length, batch_size * self.num_heads, self.head_dim).permute(1, 0, 2)    # [b*h,s,h_d]
+
+        attn = (q @ k.permute(0, 2, 1) / torch.sqrt(self.head_dim)).softmax(dim=-1)                         # [b*h,s,s]
+        v = attn @ v                                                                                        # [b*h,s,h_d]
+        v = v.permute(1, 0, 2).contiguous().view(seq_length, batch_size, -1)                                # [s,b,d]
+        v = self.out_proj(v)
+        return v
