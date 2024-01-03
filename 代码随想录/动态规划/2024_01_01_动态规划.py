@@ -177,6 +177,30 @@ class Solution:
                 dp[j] = max(dp[j], dp[j - weights[i]] + values[i])
         return dp[-1]       # 35
 
+    def canPartition(self, nums: List[int]) -> bool:
+        """ 416.分割等和子集 """
+        if sum(nums) % 2:
+            return False
+        target = sum(nums) // 2
+        dp = [0] * (target + 1)         # dp[i] 容量为i能装下的物品最大的重量
+        dp[0] = 0
+        for i in range(len(nums)):
+            for j in range(target, nums[i] - 1, -1):
+                dp[j] = max(dp[j], dp[j - nums[i]] + nums[i])
+        return dp[-1] == target
+
+    def lastStoneWeightII(self, stones: List[int]) -> int:
+        """ 1049.最后一块石头的重量II
+            容量为sum(stones)//2的背包最多能放多少物品 """
+        target = sum(stones) // 2
+        dp = [0] * (target + 1)         # dp[i] 容量为i的背包能装下多大重量的物品
+        dp[0] = 0
+        for i in range(len(stones)):
+            for j in range(target, stones[i] - 1, -1):
+                dp[j] = max(dp[j], dp[j - stones[i]] + stones[i])
+        return sum(stones) - 2 * dp[-1]
+
+
 """
 动规五部曲：
     1.明确dp下标及dp[i]的含义
