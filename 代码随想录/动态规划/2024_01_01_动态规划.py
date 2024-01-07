@@ -405,6 +405,137 @@ class Solution:
 
         return max(backtracking(root))
 
+    def maxProfit(self, prices: List[int]) -> int:
+        """ 121.买卖股票的最佳时机
+            一次买卖 """
+        # 没有体现方法论
+        # minPrice = float('inf')
+        # for price in prices:
+        #     if price < minPrice:
+        #         minPrice = price
+        #         res = price - minPrice
+        # return res
+
+        # 还是得《代码随想录》
+        # 2种状态 不持有/持有
+        n = len(prices)
+        dp = [[0, 0] for _ in range(n)]         # dp[i][j] 第i天 不持有/持有 状态时，所获得最大利润
+        dp[0] = [0, -prices[0]]
+        for i in range(1, n):
+            dp[i][0] = max(dp[i - 1][0], dp[i - 1][1] + prices[i])      # 计算 不持有
+            dp[i][1] = max(dp[i - 1][1], -prices[i])                    # 计算 持有，注意 一次买卖
+        return dp[-1][0]
+
+    def maxProfit(self, prices: List[int]) -> int:
+        """ 122.买卖股票的最佳时机II
+            多次买卖 """
+        n = len(prices)
+        dp = [[0, 0] for _ in range(n)]         # dp[i][j] 第i天 不持有/持有 状态时，所获得最大利润
+        dp[0] = [0, -prices[0]]
+        for i in range(1, n):
+            dp[i][0] = max(dp[i - 1][0], dp[i - 1][1] + prices[i])      # 计算 不持有
+            dp[i][1] = max(dp[i - 1][1], dp[i - 1][0] - prices[i])      # 计算 持有，注意 多次买卖 买之前有盈余了
+        return dp[-1][0]
+
+    def maxProfit(self, prices: List[int]) -> int:
+        """ 123.买卖股票的最佳时机III
+            两次买卖
+                状态0：无操作
+                状态1：第一次持有
+                状态2：第一次不持有
+                状态3：第二次持有
+                状态4：第二次不持有 """
+        n = len(prices)
+        dp = [[0] * 5 for _ in range(n)]        # 5个状态
+        dp[0] = [0, -prices[0], 0, -prices[0], 0]
+        for i in range(1, n):
+            dp[i][1] = max(dp[i - 1][1], dp[i - 1][0] - prices[i])
+            dp[i][2] = max(dp[i - 1][2], dp[i - 1][1] + prices[i])
+            dp[i][3] = max(dp[i - 1][3], dp[i - 1][2] - prices[i])
+            dp[i][4] = max(dp[i - 1][4], dp[i - 1][3] + prices[i])
+        return max(dp[-1])
+
+    def maxProfit(self, k: int, prices: List[int]) -> int:
+        """ 188.买卖股票的最佳时机IV
+            k次买卖 """
+        n = len(prices)
+        dp = [[0] * (2 * k + 1) for _ in range(n)]
+        for i in range(2 * k + 1):
+            if i % 2:                                   # 奇数 持有
+                dp[0][i] = -prices[0]
+        for i in range(1, n):
+            for j in range(1, 2 * k + 1):
+                if j % 2:                               # 计算 持有
+                    dp[i][j] = max(dp[i - 1][j], dp[i - 1][j - 1] - prices[i])
+                else:                                   # 计算 不持有
+                    dp[i][j] = max(dp[i - 1][j], dp[i - 1][j - 1] + prices[i])
+        return dp[-1][-1]
+
+    def maxProfit(self, prices: List[int]) -> int:
+        """ 309.买卖股票的最佳时机含冷冻期
+            状态0：持有
+            状态1：不持有，在冷冻期
+            状态2：不持有 """
+        n = len(prices)
+        dp = [[0, 0, 0] for _ in range(n)]
+        dp[0] = [-prices[0], 0, 0]
+        for i in range(1, n):
+            dp[i][0] = max(dp[i - 1][0], dp[i - 1][2] - prices[i])
+            dp[i][1] = dp[i - 1][0] + prices[i]
+            dp[i][2] = max(dp[i - 1][2], dp[i - 1][1])
+        return max(dp[-1])
+
+    def maxProfit(self, prices: List[int], fee: int) -> int:
+        """ 714.买买股票的最佳时机含手续费
+            多次买卖 """
+        n = len(prices)
+        dp = [[0, 0] for _ in range(n)]             # dp[i][j] 索引第i天j状态所获最大利润；[不持有，持有]
+        dp[0] = [0, -prices[0]]
+        for i in range(1, n):
+            dp[i][0] = max(dp[i - 1][0], dp[i - 1][1] + prices[i] - fee)
+            dp[i][1] = max(dp[i - 1][1], dp[i - 1][0] - prices[i])
+        return dp[-1][0]
+
+    def lengthOfLIS(self, nums: List[int]) -> int:
+        """ 300.最长递增子序列 """
+        n = len(nums)
+        dp = [1] * n                                # 截止到索引第i个元素 的 最长递增子序列长度；长度至少是1，元素本身
+        for i in range(1, n):
+            for j in range(i):
+                if nums[j] < nums[i]:
+                    dp[i] = max(dp[i], dp[j] + 1)
+        return max(dp)
+
+    def findLengthOfLCIS(self, nums: List[int]) -> int:
+        """ 674.最长连续递增序列 """
+        n = len(nums)
+        dp = [1] * n                                # dp[i] 截止到索引第i个元素，最长连续递增子序列的长度
+        for i in range(1, n):
+            if nums[i - 1] < nums[i]:
+                dp[i] = dp[i - 1] + 1
+        return max(dp)
+
+    def findLength(self, nums1: List[int], nums2: List[int]) -> int:
+        """ 718.最长重复子数组 难
+            必看《代码随想录》
+            '子数组'意味着'连续' """
+        m = len(nums1)
+        n = len(nums2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]          # dp[i][j] 以nums1[i-1]为结尾、nums2[j-1]为结尾的 最长重复子数组的长度
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if nums1[i - 1] == nums2[j - 1]:            # 以nums1[i-1]、nums2[j-1]为结尾的子数组——即dp[i][j]的含义
+                    dp[i][j] = dp[i - 1][j - 1] + 1
+        return max([max(ls) for ls in dp])
+
+    def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+        """ 1143.最长公共子序列 """
+        m = len(text1)
+        n = len(text2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]          # dp[i][j] 以text1[i-1]、text2[j-1]结尾的 最长公共子序列长度
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                pass
 
 """
 动规五部曲：
