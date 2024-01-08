@@ -556,6 +556,43 @@ class Solution:
                     dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
         return max([max(ls) for ls in dp])
 
+    def maxSubArray(self, nums: List[int]) -> int:
+        """ 53.最大子数组和
+            '子数组'意味着'连续'
+            注意：本题dp的定义 """
+        n = len(nums)
+        dp = [0] * n                                    # dp[i] 以nums[i]为结尾的 最大子数组和
+        dp[0] = nums[0]
+        for i in range(1, n):
+            dp[i] = max(nums[i], dp[i - 1] + nums[i])     # 递推公式体现了'连续'
+        return max(dp)
+
+    def isSubsequence(self, s: str, t: str) -> bool:
+        """ 392.判断子序列
+            即 1143.最长公共子序列 """
+        # m = len(s)
+        # n = len(t)
+        # dp = [[0] * (n + 1) for _ in range(m + 1)]      # dp[i][j] 以s[i-1]结尾、t[j-1]结尾的 最长公共子序列长度
+        # for i in range(1, m + 1):
+        #     for j in range(1, n + 1):
+        #         if s[i - 1] == t[j - 1]:
+        #             dp[i][j] = dp[i - 1][j - 1] + 1
+        #         else:
+        #             dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+        # return dp[-1][-1] == m
+
+        # 《代码随想录》讲的更精确、完美
+        m = len(s)
+        n = len(t)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if s[i - 1] == t[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + 1
+                else:
+                    dp[i][j] = dp[i][j - 1]             # 如果不等，删t的字母即可，因为题目是判断s是否为t的子序列
+        return dp[-1][-1] == m
+
 
 """
 动规五部曲：
