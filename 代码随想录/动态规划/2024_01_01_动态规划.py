@@ -593,6 +593,60 @@ class Solution:
                     dp[i][j] = dp[i][j - 1]             # 如果不等，删t的字母即可，因为题目是判断s是否为t的子序列
         return dp[-1][-1] == m
 
+    def numDistinct(self, s: str, t: str) -> int:
+        """ 115.不同的子序列 很难 """
+        m = len(s)
+        n = len(t)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]      # dp[i][j] 以t[j-1]结尾的子序列 在 以s[i-1]结尾的子序列 中出现的次数
+        # 初始化dp
+        for i in range(1, m + 1):
+            dp[i][0] = 1                                # 根据dp定义dp[i][0]也是1；以s[i-1]结尾的子序列 删除所有元素即可出现一次 空
+        for j in range(1, n + 1):
+            dp[0][j] = 0                                # 空 无论如何也不会包含 不空，所以出现0次
+        dp[0][0] = 1                                    # 空 出现 空，可以出现1次
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if s[i - 1] == t[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + dp[i - 1][j]
+                else:
+                    dp[i][j] = dp[i - 1][j]
+        return dp[-1][-1]
+
+    def minDistance(self, word1: str, word2: str) -> int:
+        """ 583.两个字符串的删除操作
+            115.不同的子序列 只能删一个字符串的字符，本题都能删 """
+        m = len(word1)
+        n = len(word2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]      # dp[i][j] 以word1[i-1]结尾、以word2[j-1]结尾 的字符串，一共删除多少次能相同
+        for i in range(1, m + 1):
+            dp[i][0] = i
+        for j in range(1, n + 1):
+            dp[0][j] = j
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if word1[i - 1] == word2[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1]
+                else:
+                    dp[i][j] = min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + 2)
+        return dp[-1][-1]
+
+    def minDistance(self, word1: str, word2: str) -> int:
+        """ 72.编辑距离 """
+        m = len(word1)
+        n = len(word2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]      # dp[i][j] 从头截止到word1[i-1]结尾的子串 变成 从头截止到word2[j-1]结尾的子串 需要最少的操作数
+        for i in range(1, m + 1):
+            dp[i][0] = i
+        for j in range(1, n + 1):
+            dp[0][j] = j
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if word1[i - 1] == word2[j - 1]:        # 相等 不需要操作
+                    dp[i][j] = dp[i - 1][j - 1]
+                else:                                   # 不相等 增、删、替换
+                    dp[i][j] = min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + 1)
+        return dp[-1][-1]
+
 
 """
 动规五部曲：
