@@ -9,6 +9,13 @@ class TreeNode:
         self.right = right
 
 
+# Definition for singly-linked list.
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+
 class Solution:
     def fib(self, n: int) -> int:
         """ 509.斐波那契数 """
@@ -647,7 +654,155 @@ class Solution:
                     dp[i][j] = min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + 1)
         return dp[-1][-1]
 
+    # ---------------- 重写 编辑距离 --------------------
+    def isSubsequence(self, s: str, t: str) -> bool:
+        """ 392.判断子序列
+            判断s是否为t的子序列，不等的时候 只能删t """
+        # 判断s是否为t的子序列
+        m = len(s)
+        n = len(t)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]    # dp[i][j] 从头开始到以s[i-1]结尾、从头开始到以t[j-1]结尾的 公共子序列长度
+        # 初始化dp 思考dp定义，首行、首列都是0
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if s[i - 1] == t[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + 1
+                else:
+                    dp[i][j] = dp[i][j - 1]           # 判断s是否为t的子序列，所以只能删t
+        return dp[-1][-1] == m
 
+    def numDistinct(self, s: str, t: str) -> int:
+        """ 115.不同的子序列
+            s的子序列中 t出现的次数，所以只能删s
+            等：用它来匹配、不用它来匹配
+            不等：不用它来匹配 """
+        m = len(s)
+        n = len(t)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]          # dp[i][j] 从头到以s[i-1]结尾的子序列中 从头到t[j-1]结尾的子序列 出现的次数
+        # 初始化，首列dp[i][0]=1，你想想是不；也可以这么想，删s能得到几次t
+        # 初始化，首行dp[0][j]=0 s是空，再怎么删也得不到j的不空的子序列
+        for i in range(m + 1):
+            dp[i][0] = 1                                    # s子序列全删除，能到 空，所以1次
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if s[i - 1] == t[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + dp[i - 1][j]      # 相等，用/不用 s[i-1]来匹配
+                else:
+                    dp[i][j] = dp[i - 1][j]                         # 不相等   不用 s[i-1]来匹配
+        return max([ls[-1] for ls in dp])
+
+    def minDistance(self, word1: str, word2: str) -> int:
+        """ 583.两个字符串的删除操作
+            两个字符都可以删除 """
+        m = len(word1)
+        n = len(word2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]          # 以word1[i-1]结尾 与 以word2[j-1]结尾 相等需要删除的次数
+        # 初始化
+        dp[0][0] = 0
+        for i in range(1, m + 1):
+            dp[i][0] = i
+        for j in range(1, n + 1):
+            dp[0][j] = j
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if word1[i - 1] == word2[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1]
+                else:
+                    dp[i][j] = min(dp[i - 1][j] + 1, dp[i][j - 1] + 1)      # word1[i - 1] != word2[j - 1] dp[i - 1][j]或dp[i][j - 1]再删1个 得到dp[i-1][j-1]
+        return dp[-1][-1]
+
+    def minDistance(self, word1: str, word2: str) -> int:
+        """ 72.编辑距离
+            绝杀！ """
+        m = len(word1)
+        n = len(word2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]          # 以word1[i-1]结尾、以word2[j-1]结尾 变为相同需要 增、删、改 总次数
+        dp[0][0] = 0
+        for i in range(1, m + 1):
+            dp[i][0] = i
+        for j in range(1, n + 1):
+            dp[0][j] = j
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if word1[i - 1] == word2[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1]
+                else:
+                    dp[i][j] = min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + 1)        # 最终的状态都是 word1[i - 1] == word2[j - 1] 嘛
+        return dp[-1][-1]
+
+    def swapPairs(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        """ 24.两两交换链表中的节点
+            吉利研究院一面 拉垮呀，这题竟然没做出来
+            精髓：cur迅速指向第一个未处理节点
+                 pre迅速指向最后一个已处理节点 """
+        # 本题还是比较难的，现场没有coding出来也正常
+        if not head or not head.next:           # 边界条件，处理0或1个节点的情况
+            return head
+        cur = head
+        stack = [cur, cur.next]
+        cur = cur.next.next                     # 迅速指向 第一个尚未处理的节点
+
+        head = stack.pop()
+        head.next = stack.pop()
+        pre = head.next                         # 迅速指向 最后一个已处理的节点
+
+        while cur and cur.next:
+            stack.extend([cur, cur.next])
+            cur = cur.next.next
+
+            pre.next = stack.pop()
+            pre.next.next = stack.pop()
+            pre = pre.next.next
+        if cur and not cur.next:
+            pre.next = cur
+            pre = pre.next
+        pre.next = None
+        return head
+
+    def countSubstrings(self, s: str) -> int:
+        """ 647.回文子串
+            见 《代码随想录》 """
+        # n = len(s)
+        # dp = [[0] * n for _ in range(n)]        # dp[i][j] 闭区间[i,j]是否回文
+        # for i in range(n - 1, -1, -1):          # 根据递推公式，从下往上、从左往右遍历
+        #     for j in range(i, n):
+        #         if s[i] == s[j]:
+        #             if j - i <= 1:
+        #                 dp[i][j] = True
+        #             elif dp[i + 1][j - 1]:
+        #                 dp[i][j] = True
+        # return sum([sum(ls) for ls in dp])
+
+        # 双指针，当年做过，不过还是倾向于动态规划
+        # def extend(i, j):
+        #     res = 0
+        #     while 0 <= i <= j < len(s) and s[i] == s[j]:
+        #         res += 1
+        #         i -= 1
+        #         j += 1
+        #     return res
+        #
+        # res = 0
+        # for i in range(len(s)):
+        #     res += extend(i, i)
+        #     if i < len(s) - 1:
+        #         res += extend(i, i + 1)
+        # return res
+
+        # 双指针 简化一下
+        def extend(i, j):
+            res = 0
+            while 0 <= i <= j < len(s) and s[i] == s[j]:
+                res += 1
+                i -= 1
+                j += 1
+            return res
+
+        res = 0
+        for i in range(len(s)):
+            res += extend(i, i)
+            res += extend(i, i + 1)
+        return res
 """
 动规五部曲：
     1.明确dp下标及dp[i]的含义
