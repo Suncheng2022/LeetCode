@@ -803,6 +803,24 @@ class Solution:
             res += extend(i, i)
             res += extend(i, i + 1)
         return res
+
+    def longestPalindromeSubseq(self, s: str) -> int:
+        """ 516.最长回文子序列
+            子序列-不连续
+            子串-连续 """
+        n = len(s)
+        dp = [[0] * n for _ in range(n)]      # dp[i][j] 闭区间[i,j] 最长回文子序列 的长度
+        for i in range(n):
+            dp[i][i] = 1
+        for i in range(n - 1, -1, -1):
+            for j in range(i + 1, n):         # 计算不到i==j的情况，所以跳过
+                if s[i] == s[j]:              # 《代码随想录》所说 “从递推公式：dp[i][j] = dp[i + 1][j - 1] + 2; 可以看出 递推公式是计算不到 i 和j相同时候的情况”，因为只计算了dp右上三角，i==j时无法计算出正确结果，所以要提前初始化
+                    dp[i][j] = dp[i + 1][j - 1] + 2
+                else:
+                    dp[i][j] = max(dp[i][j - 1], dp[i + 1][j])
+        return max(max(ls) for ls in dp)
+
+
 """
 动规五部曲：
     1.明确dp下标及dp[i]的含义
