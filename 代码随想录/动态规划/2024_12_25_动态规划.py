@@ -249,9 +249,105 @@ class Solution:
             for j in range(target, stones[i] - 1, -1):
                 dp[j] = max(dp[j], dp[j - stones[i]] + stones[i])
         return sum(stones) - dp[-1] * 2
+    
+    def findTargetSumWays(self, nums: List[int], target: int) -> int:
+        """ 494.目标和 \n 
+            之前背包都是最多能装多少, 本题开始涉及装满有几种方式-->组合问题 """
+        # left - right = target
+        # left + right = sum,   由两个公式得出left = (target + sum) / 2, 题目变成了取出和为left的元素有几种方式
+
+        # 一维dp: 既然是一维dp了, 初始化也就只要考虑行的初始化
+        # 空间:O(sum(nums)) 时间:O(n * sum(nums))
+        _sum = sum(nums)
+        if abs(target) > _sum:
+            return 0
+        if (target + _sum) % 2:
+            return 0
+        left = (target + _sum) // 2
+        dp = [0] * (left + 1)
+        dp[0] = 1
+        for i in range(0, len(nums)):       # 遍历物品必须从0开始了, 否则报错
+            for j in range(left, nums[i] - 1, -1):
+                dp[j] += dp[j - nums[i]]
+        return dp[-1]
+    
+        # 一维dp: 和答案略有出入, 可以AC. 感觉答案更简单些
+        _sum = sum(nums)
+        if abs(target) > _sum:
+            return 0
+        if (target + _sum) % 2:
+            return 0
+        left = (target + _sum) // 2
+        dp = [0] * (left + 1)           # 装满容量为j的背包有多少种方式
+        # 初始化(其实也要考虑二维dp的首行首列初始化)
+        if nums[0] <= left:
+            dp[nums[0]] = 1
+        dp[0] = 1
+        if nums[0] == 0:
+            dp[0] = 2
+        for i in range(1, len(nums)):
+            for j in range(left, nums[i] - 1, -1):
+                dp[j] += dp[j - nums[i]]
+        return dp[-1]
+
+        # 空间:O(len(nums) * sum(nums)) 时间:O(len(nums) * sum(nums))
+        _sum = sum(nums)
+        if abs(target) > _sum:      # 必须判断, 否则有case无法通过
+            return 0
+        if (target + _sum) % 2:
+            return 0
+        left = (target + _sum) // 2
+        dp = [[0] * (left + 1) for _ in range(len(nums))]   # 从0-i物品中挑选物品装满容量为j的背包有dp[i][j]种方式
+
+        # 初始化首行
+        if nums[0] <= left:
+            dp[0][nums[0]] = 1
+        dp[0][0] = 1        # 保证dp[0][0]为1. 这个初始化必须放到这里, 因为首列初始化可能会覆盖更新
+        # 初始化首列
+        zero_num = 0
+        for i in range(len(nums)):
+            if nums[i] == 0:
+                zero_num += 1
+            dp[i][0] = 2 ** zero_num
+
+        # 开始遍历, 二维dp 先遍历物品或背包均可
+        for i in range(1, len(nums)):
+            for j in range(0, left + 1):        # 遍历背包容量从0或1开始都可以, 试过了
+                if j >= nums[i]:
+                    dp[i][j] = dp[i - 1][j] + dp[i - 1][j - nums[i]]        # 不放nums[i] + 放nums[i]
+                elif j < nums[i]:
+                    dp[i][j] = dp[i - 1][j]                                 # 放不下nums[i]
+        return dp[-1][-1]
+
+    def findMaxForm(self, strs: List[str], m: int, n: int) -> int:
+        """ 474.一和零 \n
+            01背包 一维dp """
+        from collections import Counter
+
+        # 空间:O(m * n) 时间:O(len(s) * m * n)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]        # strs中最多有 i个0 j个1 的子集大小为dp[i][j]. i, j即背包的两个维度
+        for s in strs:          # 先遍历物品
+            zero_num = Counter(s)['0']
+            one_num  = Counter(s)['1']
+            for i in range(m, zero_num - 1, -1):
+                for j in range(n, one_num - 1, -1):
+                    dp[i][j] = max(dp[i][j], dp[i - zero_num][j - one_num] + 1)
+        return dp[-1][-1]
+    
+    def complete_bag(self):
+        """ 完全背包_理论基础 \n
+            完全背包与01背包唯一区别: 遍历背包顺序 """
+        weights = [1, 3, 4]
+        values = [15, 20, 30]
+        bagweight = 4
+
+        dp = [0] * (bagweight + 1)      # 容量为j的背包所能装下物品的最大价值为dp[j]
+        for i in range(0, len(weights)):
+            for j in range(weights[i], bagweight + 1):  # 完全背包, 遍历背包必须正序
+                dp[j] = max(dp[j], dp[j - weights[i]] + values[i])
+        return dp[-1]
 
 if __name__ == '__main__':
     sl = Solution()
 
-    stones = [31,26,33,21,40]
-    print(sl.lastStoneWeightII(stones))
+    print(sl.complete_bag())
