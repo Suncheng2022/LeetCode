@@ -347,7 +347,48 @@ class Solution:
                 dp[j] = max(dp[j], dp[j - weights[i]] + values[i])
         return dp[-1]
 
+    def change(self, amount: int, coins: List[int]) -> int:
+        """ 518.零钱兑换II \n
+            组合没有顺序, 排列才有顺序 """
+        # 本题思路: 完全背包
+        #          组合问题
+        # 空间:O(n) 时间:O(n * m)
+        dp = [0] * (amount + 1)         # 装满容量为j的背包的硬币组合数为dp[j]
+        dp[0] = 1
+        for i in range(len(coins)):
+            for j in range(coins[i], amount + 1):
+                dp[j] += dp[j - coins[i]]
+        return dp[-1]
+    
+    def combinationSum4(self, nums: List[int], target: int) -> int:
+        """ 377.组合总和IV """
+        # 完全背包: 1.物品数量无限 2.先遍历物品 再遍历背包, 内层遍历顺序正序
+        # 组合问题: 递推公式dp[j] += dp[j - nums[i]]
+        #   排列问题: 那for循环就有讲究了, 先遍历背包 再遍历容量. 因为: 若外层为遍历物品则只能得到[1, 3], 不会得到[3, 1], 而排列是有顺序的
+        # 空间:O(target) 时间:O(target * len(nums))
+        dp = [0] * (target + 1)         # 装满容量为j的背包有dp[j]种组合方式
+        dp[0] = 1
+        for i in range(target + 1):
+            for j in range(len(nums)):
+                if nums[j] <= i:
+                    dp[i] += dp[i - nums[j]]
+        return dp[-1]
+    
+    def climb_(self, n, m):
+        """ 爬楼梯(进阶版) \n
+            一共n个台阶, 每次至多爬m个台阶 """
+        # 完全背包
+        # 排列问题
+        dp = [0] * (n + 1)
+        dp[0] = 1
+        for i in range(n + 1):          # 先遍历背包
+            for j in range(1, m + 1):   # 再遍历物品
+                if j <= i:
+                    dp[i] += dp[i - j]
+        return dp[-1]
+
 if __name__ == '__main__':
     sl = Solution()
-
-    print(sl.complete_bag())
+    nums = [9]
+    target = 3
+    print(sl.combinationSum4(nums, target))
