@@ -387,8 +387,54 @@ class Solution:
                     dp[i] += dp[i - j]
         return dp[-1]
 
+    def coinChange(self, coins: List[int], amount: int) -> int:
+        """ 322.零钱兑换 """
+        # 完全背包: 
+        #       1.外层遍历物品, 内层遍历背包
+        #       2.内层遍历正序, 因为可重复放入
+        # 组合问题: 
+        #       1.递推公式 dp[j] += dp[j - nums[i]]
+        # 空间:O(len(amount)) 时间:O(len(coins) * amount)
+        dp = [float('inf')] * (amount + 1)         # 能凑成金额j的最少硬币个数为dp[j]
+        dp[0] = 0
+        for i in range(len(coins)):
+            for j in range(coins[i], amount + 1):
+                dp[j] = min(dp[j], dp[j - coins[i]] + 1)
+        return dp[-1] if dp[-1] != float('inf') else -1
+
+    def numSquares(self, n: int) -> int:
+        """ 279.完全平方数 """
+        # 完全背包--物品数量不限
+        # 组合问题
+        # 时间复杂度:O(n * sqrt(n)) 空间复杂度:O(n)
+        dp = [float('inf')] * (n + 1)      # 装满容量为j的背包需要完全平方数的最少个数dp[j]
+        dp[0] = 0                          # 纯为推导 没意义(自己做的时候能想到吗)
+        for i in range(1, n + 1):               # 遍历物品
+            for j in range(i ** 2, n + 1):      # 遍历背包
+                dp[j] = min(dp[j], dp[j - i ** 2] + 1)
+        return dp[-1]
+
+    def wordBreak(self, s: str, wordDict: List[str]) -> bool:
+        """ 139.单词拆分 """
+        # 完全背包--物品数量不限:
+        #               1.外层遍历物品, 内层遍历背包
+        #               2.内层遍历可以正序, 因为可重复放入
+        # 排列问题--要顺序:
+        #               1.外层遍历背包, 内层遍历物品 (若外层遍历物品, 只能得到[1, 3], 永远得不到[3, 1]这种排列)
+        #               2.递推公式dp[j] += dp[j - nums[i]]
+        # 单词拆分的递推公式需要认真想一下哈, 不要生搬硬套
+        # 时间复杂度:O(n ^ 2) 空间复杂度:O(n)
+        dp = [False] * (len(s) + 1)         # 一定要区分dp与s的索引, 二者的意义不同. 前j个字母能否用wordDict来表示/容量为j的背包是否能装满
+        dp[0] = True            # 纯为递推
+        for i in range(1, len(s) + 1):      # 遍历背包
+            for j in range(i):              # 遍历物品
+                if s[j:i] in wordDict and dp[j]:    # 若前j个字母能被wordDict表示, (s[j:i]表示前j个后续的一段)且s[j:i]又在wordDict中, 即前i个字母能被表示, dp[i] = True
+                    dp[i] = True
+        return dp[-1]
+
 if __name__ == '__main__':
     sl = Solution()
-    nums = [9]
-    target = 3
-    print(sl.combinationSum4(nums, target))
+
+    s = "applepenapple"
+    wordDict = ["apple", "pen"]
+    print(sl.wordBreak(s, wordDict))
