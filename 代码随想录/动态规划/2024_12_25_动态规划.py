@@ -7,8 +7,14 @@
         4.确定遍历顺序
         5.手动推导
 """
-from typing import List
+from typing import List, Optional
 
+# Definition for a binary tree node.
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
 
 class Solution:
     def fib(self, n: int) -> int:
@@ -431,10 +437,73 @@ class Solution:
                 if s[j:i] in wordDict and dp[j]:    # 若前j个字母能被wordDict表示, (s[j:i]表示前j个后续的一段)且s[j:i]又在wordDict中, 即前i个字母能被表示, dp[i] = True
                     dp[i] = True
         return dp[-1]
+    
+    def rob(self, nums: List[int]) -> int:
+        """ 198.打家劫舍 """
+        # 时间复杂度:O(n) 空间复杂度:O(n)
+        n = len(nums)
+        if n == 1:
+            return nums[0]
+        dp = [0] * n
+        dp[0] = nums[0]
+        dp[1] = max(nums[:2])
+        for i in range(2, n):
+            dp[i] = max(dp[i - 1], dp[i - 2] + nums[i])
+        return dp[-1]
+    
+    def robII(self, nums: List[int]) -> int:
+        """ 231.打家劫舍II \n
+            成环 """
+        # 时间复杂度:O(n) 空间复杂度:O(n)
+        def rob(nums, start, end):
+            """ 198.打家劫舍 """
+            print(f'---- 调用此rob')
+            nums = nums[start:end + 1]
+            n = len(nums)
+            if n == 1:
+                return nums[0]
+            dp = [0] * n
+            dp[0] = nums[0]
+            dp[1] = max(nums[:2])
+            for i in range(2, n):
+                dp[i] = max(dp[i - 1], dp[i - 2] + nums[i])
+            return dp[-1]
+        
+        n = len(nums)
+        if n == 1:
+            return nums[0]
+        res1 = rob(nums, 0, n - 2)
+        res2 = rob(nums, 1, n - 1)
+        return max(res1, res2)
+    
+    def robIII(self, root: Optional[TreeNode]) -> int:
+        """ 337.打家劫舍III """
+        # 要复习二叉树!
+        # 时间复杂度:O(n) 空间复杂度:O(logn)
+        def rob_(root):
+            if not root:
+                return [0, 0]
+            left =  rob_(root.left)
+            right = rob_(root.right)
+            return [max(left) + max(right), root.val + left[0] + right[0]]
+
+        res = rob_(root)
+        return max(res)
+    
+    def maxProfit(self, prices: List[int]) -> int:
+        """ 121.买卖股票的最佳时机 \n
+            买卖一次 """
+        # 时间:O(n) 空间:O(n)
+        n = len(prices)
+        dp = [[0] * 2 for _ in range(n)]        # dp[i][0]表示持有 dp[i][1]表示不持有
+        dp[0] = [-prices[0], 0]
+        for i in range(1, n):
+            dp[i][0] = max(dp[i - 1][0], -prices[i])
+            dp[i][1] = max(dp[i - 1][1], prices[i] + dp[i - 1][0])
+        return max(dp[-1])
 
 if __name__ == '__main__':
     sl = Solution()
 
-    s = "applepenapple"
-    wordDict = ["apple", "pen"]
-    print(sl.wordBreak(s, wordDict))
+    prices = [7,6,4,3,1]
+    print(sl.maxProfit(prices))
