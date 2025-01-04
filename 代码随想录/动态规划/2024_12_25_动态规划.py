@@ -501,9 +501,58 @@ class Solution:
             dp[i][0] = max(dp[i - 1][0], -prices[i])
             dp[i][1] = max(dp[i - 1][1], prices[i] + dp[i - 1][0])
         return max(dp[-1])
+    
+    def maxProfitII(self, prices: List[int]) -> int:
+        """ 122.买卖股票的最佳时机II \n
+            多次买卖 """
+        # 时间:O(n) 空间:O(n)
+        n = len(prices)
+        dp = [[0] * 2 for _ in range(n)]        # dp[i][0] 持有, dp[i][1] 不持有
+        dp[0] = [-prices[0], 0]
+        for i in range(1, n):
+            dp[i][0] = max(dp[i - 1][0], dp[i - 1][1] - prices[i])
+            dp[i][1] = max(dp[i - 1][1], dp[i - 1][0] + prices[i])
+        return dp[-1][1]
+    
+    def maxProfitIII(self, prices: List[int]) -> int:
+        """ 123.买卖股票的最佳时机III \n
+            两次买卖 """
+        # dp[i][0]: 无操作
+        # dp[i][1]: 第一次持有
+        # dp[i][2]: 第一次不持有
+        # dp[i][3]: 第二次持有
+        # dp[i][4]: 第二次不持有
+        # 时间:O(n) 空间:O(n)
+        n = len(prices)
+        dp = [[0] * 5 for _ in range(n)]
+        dp[0] = [0, -prices[0], 0, -prices[0], 0]
+        for i in range(1, n):
+            dp[i][1] = max(dp[i - 1][1], dp[i - 1][0] - prices[i])
+            dp[i][2] = max(dp[i - 1][2], dp[i - 1][1] + prices[i])
+            dp[i][3] = max(dp[i - 1][3], dp[i - 1][2] - prices[i])
+            dp[i][4] = max(dp[i - 1][4], dp[i - 1][3] + prices[i])
+        return max(dp[-1])
+    
+    def maxProfitIV(self, k: int, prices: List[int]) -> int:
+        """ 188.买卖股票的最佳时机IV \n
+            买卖k次 """
+        # 时间:O(n * k) 空间:O(n * k)
+        n = len(prices)
+        dp = [[0] * (2 * k + 1) for _ in range(n)]
+        for i in range(2 * k + 1):
+            if i % 2 != 0:
+                dp[0][i] = -prices[0]
+        for i in range(1, n):
+            for j in range(1, 2 * k + 1):
+                if j % 2 == 0:          # 偶数, 不持有
+                    dp[i][j] = max(dp[i - 1][j], dp[i - 1][j - 1] + prices[i])
+                else:                   # 奇数, 持有
+                    dp[i][j] = max(dp[i - 1][j], dp[i - 1][j - 1] - prices[i])
+        return max(dp[-1])
 
 if __name__ == '__main__':
     sl = Solution()
 
-    prices = [7,6,4,3,1]
-    print(sl.maxProfit(prices))
+    k = 2
+    prices = [3,2,6,5,0,3]
+    print(sl.maxProfitIV(k, prices))
