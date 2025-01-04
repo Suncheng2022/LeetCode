@@ -549,10 +549,281 @@ class Solution:
                 else:                   # 奇数, 持有
                     dp[i][j] = max(dp[i - 1][j], dp[i - 1][j - 1] - prices[i])
         return max(dp[-1])
+    
+    def maxProfit_freezing(self, prices: List[int]) -> int:
+        """ 309.买卖股票的最佳时机含冷冻期 \n
+            四种状态, 很细致:
+                状态一: 持有. 保持持有 或 今日买入
+                状态二: 不持有. 保持不持有
+                状态三: 不持有. 今日卖出, 这是冷冻期的一个新状态, 因为冷冻期的前一个状态必须确定是'今日卖出', 而不能是模糊的'不持有'
+                状态四: 冷冻期. """
+        # 时间:O(n) 空间:O(n)
+        # n = len(prices)
+        # dp = [[0] * 4 for _ in range(n)]
+        # dp[0] = [-prices[0], 0, 0, 0]
+        # for i in range(1, n):
+        #     dp[i][0] = max(dp[i - 1][0], dp[i - 1][1] - prices[i], dp[i - 1][3] - prices[i])
+        #     dp[i][1] = max(dp[i - 1][1], dp[i - 1][3])
+        #     dp[i][2] = dp[i - 1][0] + prices[i]
+        #     dp[i][3] = dp[i - 1][2]
+        # return max(dp[-1])
+
+        """
+        周总结上的讲解. 感觉不太好理解
+        三种状态:
+            状态一: 持有
+            状态二: 不持有(能购买), 不在冷冻期
+            状态三: 不持有(不能购买), 在冷冻期
+        """
+        # n = len(prices)
+        # dp = [[0] * 3 for _ in range(n)]
+        # dp[0] = [-prices[0], 0, 0]
+        # for i in range(1, n):
+        #     dp[i][0] = max(dp[i - 1][0], dp[i - 1][1] - prices[i])
+        #     dp[i][1] = max(dp[i - 1][1], dp[i - 1][2])
+        #     dp[i][2] = dp[i - 1][0] + prices[i]
+        # return max(dp[-1])
+
+        # 重做一遍四种状态的
+        """
+        四种状态, 还是这个好理解!
+            状态一: 持有. 保持持有 或 今天买入
+            状态二: 不持有. 保持不持有
+            状态三: 不持有. 今天卖出, 因为'冷冻期'的上一个状态只有'今天卖出', 所以特别设定这个状态
+            状态四: 冷冻期
+        """
+        n = len(prices)
+        dp = [[0] * 4 for _ in range(n)]
+        dp[0] = [-prices[0], 0, 0, 0]
+        for i in range(1, n):
+            dp[i][0] = max(dp[i - 1][0], dp[i - 1][1] - prices[i], dp[i - 1][3] - prices[i])
+            dp[i][1] = max(dp[i - 1][1], dp[i - 1][3])
+            dp[i][2] = dp[i - 1][0] + prices[i]
+            dp[i][3] = dp[i - 1][2]
+        return max(dp[-1])
+
+    def maxProfit_fee(self, prices: List[int], fee: int) -> int:
+        """ 714.买卖股票的最佳时机含手续费 \n
+            多次买卖 """
+        # 时间:O(n) 空间:O(n)
+        n = len(prices)
+        dp = [[0] * 2 for _ in range(n)]        # dp[i][j]表示第i天第j种状态所剩最大金额
+        dp[0] = [-prices[0], 0]
+        for i in range(1, n):
+            dp[i][0] = max(dp[i - 1][0], dp[i - 1][1] - prices[i])
+            dp[i][1] = max(dp[i - 1][1], dp[i - 1][0] + prices[i] - fee)
+        return max(dp[-1])
+
+    def lengthOfLIS(self, nums: List[int]) -> int:
+        """ 300.最长递增子序列 \n
+            这题很重要--不连续的情况如何处理 """
+        # 时间:O(n^2) 空间:O(n)
+        n = len(nums)
+        dp = [1] * n            # 以nums[i]为结尾的子序列最大长度为dp[i]
+        for i in range(1, n):
+            for j in range(i):  # 这个for循环里面是递推公式!
+                if nums[j] < nums[i]:
+                    dp[i] = max(dp[i], dp[j] + 1)
+        return max(dp)
+    
+    def findLengthOfLCIS(self, nums: List[int]) -> int:
+        """ 674.最长连续递增序列 """
+        # 时间:O(n) 空间:O(n)
+        n = len(nums)
+        dp = [1] * n            # 以nums[i]结尾的连续递增子序列最大长度为dp[i]
+        for i in range(1, n):
+            if nums[i] > nums[i - 1]:
+                dp[i] = dp[i - 1] + 1
+        return max(dp)
+
+    def findLength(self, nums1: List[int], nums2: List[int]) -> int:
+        """ 718.最长重复子数组 """
+        # 答案讲解, dp定义与我稍有不同, 但代码更简单
+        # m, n = len(nums1), len(nums2)
+        # dp = [[0] * (n + 1) for _ in range(m + 1)]            # 以nums1[i - 1]结尾 和 以nums2[j - 1]结尾的最长重复子数组长度为dp[i][j]. 如此定义, 那么遍历从i=1 j=1开始; 那么i=0 j=0就代表空了, dp自然为0
+        # for i in range(1, m + 1):
+        #     for j in range(1, n + 1):
+        #         if nums1[i - 1] == nums2[j - 1]:
+        #             dp[i][j] = dp[i - 1][j - 1] + 1
+        # return max(max(s) for s in dp)
+
+        # 答案讲解 滚动数组. 感谢GPT
+        m, n = len(nums1), len(nums2)
+        dp = [0] * (n + 1)      # 只保留一行 意义不变
+        res = 0                 # 但要记录遍历过程产生的最大值, 因为最大值不一定出现在dp[i][j]的最后一行, 明白了吧
+        for i in range(1, m + 1):
+            for j in range(n, 0, -1):
+                if nums1[i - 1] == nums2[j - 1]:
+                    dp[j] = dp[j - 1] + 1           # 用上一行的结果覆盖更新当前行, 即用dp[i - 1][j]覆盖更新dp[i][j]
+                    res = max(res, dp[j])
+                else:
+                    dp[j] = 0
+        return res
+
+        # By Myself! ^_^
+        # 我这样定义dp, 比讲解稍微麻烦, 需要单独初始化
+        # 时间:O(m * n) 空间:O(m * n)
+        # m, n = len(nums1), len(nums2)
+        # dp = [[0] * n for _ in range(m)]        # 以nums1[i]结尾 和 以nums[j]结尾的最长重复子数组长度是dp[i][j]
+        # for i in range(n):                      # 初始化第一行
+        #     if nums1[0] == nums2[i]:
+        #         dp[0][i] = 1
+        # for j in range(m):                      # 初始化第一列
+        #     if nums2[0] == nums1[j]:
+        #         dp[j][0] = 1
+        # for i in range(1, m):
+        #     for j in range(1, n):
+        #         if nums1[i] == nums2[j]:
+        #             dp[i][j] = dp[i - 1][j - 1] + 1
+        # return max(max(line) for line in dp)
+
+    def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+        """ 1143.最长公共子序列 """
+        # 718.最长重复子数组 有'连续'的概念, 本题不要求连续
+        # 递推公式自己没有想正确, 有点不好理解
+        # 时间:O(m * n) 空间:O(m * n)
+        m, n = len(text1), len(text2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]      # 定义同718.题, 以text1[i - 1]结尾 和 以text2[j - 1]结尾的最长公共子序列的长度为dp[i][j]
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if text1[i - 1] == text2[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + 1
+                else:
+                    dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+        return max(max(s) for s in dp)
+
+        # 不搞一维dp了, 珍惜时间
+    
+    def maxUncrossedLines(self, nums1: List[int], nums2: List[int]) -> int:
+        """ 1035.不相交的线 \n
+            1143.最长公共子序列, 不要求连续 """
+        # 时间:O(m * n) 空间:O(m * n)
+        m, n = len(nums1), len(nums2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if nums1[i - 1] == nums2[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + 1
+                else:
+                    dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+        return max(max(s) for s in dp)
+
+    def maxSubArray(self, nums: List[int]) -> int:
+        """ 53.最大子数组和 """
+
+        # 答案讲解, 相比自己代码简化很多
+        n = len(nums)
+        dp = [0] * n         # 以nums[i]结尾的最大连续子数组和为dp[i]
+        dp[0] = nums[0]
+        for i in range(1, n):
+            dp[i] = max(dp[i - 1] + nums[i], nums[i])   # 因为题目求'连续子数组和', 所以nums[i]要么加入, 要么不加入
+        return max(dp)
+
+        # 自己一下写出来. 总结一下: dp[i] = nums[i] or nums[i] + dp[i - 1], 和答案讲解一样
+        # n = len(nums)
+        # dp = [0] * n        # 以nums[i]结尾的最大连续子数组和为dp[i]
+        # dp[0] = nums[0]
+        # for i in range(1, n):
+        #     if nums[i] >= 0:
+        #         dp[i] = dp[i - 1] + nums[i] if dp[i - 1] >= 0 else nums[i]
+        #     else:
+        #         dp[i] = nums[i] if dp[i - 1] < 0 else nums[i] + dp[i - 1]
+        # return max(dp)
+
+    def isSubsequence(self, s: str, t: str) -> bool:
+        """ 392.判断子序列 \n
+            1143.最长公共子序列, 不要求连续 """
+        # 答案讲解, 编辑距离入门, 也提到1143.题
+        m, n = len(s), len(t)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if s[i - 1] == t[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + 1
+                else:
+                    dp[i][j] = dp[i][j - 1]
+        return dp[-1][-1] == m
+    
+        # 时间:O(m * n) 空间:O(m * n)
+        # m, n = len(s), len(t)
+        # dp = [[0] * (n + 1) for _ in range(m + 1)]
+        # for i in range(1, m + 1):
+        #     for j in range(1, n + 1):
+        #         if s[i - 1] == t[j - 1]:
+        #             dp[i][j] = dp[i - 1][j - 1] + 1
+        #         else:
+        #             dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+        # return dp[-1][-1] == m
+
+    def numDistinct(self, s: str, t: str) -> int:
+        """ 115.不同的子序列 \n
+            编辑距离, 本题只需删除s """
+        # 时间:O(m * n) 空间:O(m * n)
+        m, n = len(s), len(t)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]      # dp[i][j]表示: 以s[i - 1]结尾的子序列 中出现 以t[j - 1]结尾的t 的次数
+        # 初始化: 首行dp[0][j]为0, 首列dp[i][0]为1
+        for i in range(m + 1):
+            dp[i][0] = 1
+        dp[0][0] = 1            # s删除0个元素可到空串
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if s[i - 1] == t[j - 1]:        # 相等, 要么不考虑二者最后元素, 要么删除s最后元素. 回忆dp含义
+                    dp[i][j] = dp[i - 1][j - 1] + dp[i - 1][j]
+                else:                           # 不相等, 删除s最后元素
+                    dp[i][j] = dp[i - 1][j]
+        return dp[-1][-1]
+    
+    def minDistance(self, word1: str, word2: str) -> int:
+        """ 583.两个字符串的删除操作 \n
+            编辑距离. \n
+            与 115.不同的子序列 区别: 递推公式. 说实话, 不太理解. 
+                                自己细品, 两道题所求是不一样的, 看初始化就能看出来 """
+        # 方法二: 1143.最长公共子序列(不要求连续哦~), 更好理解!
+        m, n = len(word1), len(word2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]      # 以word1[i - 1]结尾的子序列 和 以word2[j - 1]结尾的子序列 的最长公共子序列长度为dp[i][j]
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if word1[i - 1] == word2[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + 1
+                else:
+                    dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+        return m + n - 2 * dp[-1][-1]
+
+        # 时间:O(m * n) 空间:O(m * n)
+        # m, n = len(word1), len(word2)
+        # dp = [[0] * (n + 1) for _ in range(m + 1)]      # 以word1[i - 1]结尾 和 以word2[j - 1]结尾 的两个字符串相等所需最小步数
+        # for j in range(n + 1):      # 初始化首行
+        #     dp[0][j] = j
+        # for i in range(m + 1):      # 初始化首列
+        #     dp[i][0] = i
+        # for i in range(1, m + 1):
+        #     for j in range(1, n + 1):
+        #         if word1[i - 1] == word2[j - 1]:
+        #             dp[i][j] = dp[i - 1][j - 1]
+        #         else:
+        #             dp[i][j] = min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + 2)
+        # return dp[-1][-1]
+    
+    def minDistanceII(self, word1: str, word2: str) -> int:
+        """ 72.编辑距离 """
+        # 时间:O(m * n) 空间:O(m * n)
+        m, n = len(word1), len(word2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]      # 以word1[i - 1]为结尾的单词 变成 以word2[j - 1]为结尾的单词, 所需最少操作数为dp[i][j]
+        for j in range(n + 1):
+            dp[0][j] = j
+        for i in range(m + 1):
+            dp[i][0] = i
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if word1[i - 1] == word2[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1]
+                else:
+                    dp[i][j] = min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + 1)
+        return dp[-1][-1]
 
 if __name__ == '__main__':
     sl = Solution()
 
-    k = 2
-    prices = [3,2,6,5,0,3]
-    print(sl.maxProfitIV(k, prices))
+    word1 = "horse"
+    word2 = "ros"
+    print(sl.minDistanceII(word1, word2))
