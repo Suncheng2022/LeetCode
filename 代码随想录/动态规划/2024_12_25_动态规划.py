@@ -821,9 +821,71 @@ class Solution:
                     dp[i][j] = min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + 1)
         return dp[-1][-1]
 
+    def countSubstrings(self, s: str) -> int:
+        """ 647.回文子串 \n
+            题目已说明, 回文子串是连续 """
+        # 动态规划
+        # 时间:O(n^2) 空间:O(n^2)
+        # n = len(s)
+        # dp = [[False] * n for _ in range(n)]        # dp[i][j]表示: 闭区间[i, j]的连续子串是回文子串吗
+        # for i in range(n - 1, -1, -1):              # 遍历行, 从下到上. 由递推公式得来
+        #     for j in range(i, n):                   # 遍历列, 从左到右. 由递推公式得来
+        #         if s[i] != s[j]:
+        #             continue
+
+        #         if j - i <= 1:
+        #             dp[i][j] = True
+        #         elif dp[i + 1][j - 1]:      # 这里能用s[i + 1] == s[j - 1]判断吗?--不能! dp[i + 1][j - 1]表示闭区间[i + 1, j - 1]连续子串是回文子串, 而s[i + 1] == s[j - 1]只能说明两个字符相同
+        #             dp[i][j] = True
+        # return sum(sum(s) for s in dp)
+
+        # 双指针法/中心扩散法, 节省空间
+        # 时间:O(n^2) 空间:O(1)
+        def extend(s, i, j, n):
+            count = 0
+            while i >= 0 and j < n and s[i] == s[j]:
+                count += 1
+                i -= 1
+                j += 1
+            return count
+
+        n = len(s)
+        res = 0
+        for i in range(n):
+            res += extend(s, i, i, n)
+            res += extend(s, i, i + 1, n)
+        return res
+
+    def longestPalindromeSubseq(self, s: str) -> int:
+        """ 516.最长回文子序列 \n
+            不要求连续 """
+        # n = len(s)
+        # dp = [[0] * n for _ in range(n)]
+        # for i in range(n):                  # 为什么要单独初始化dp[i][i]? -- 因为这是长度为1的回文子序列, 递推公式只考虑长度>1的回文子序列
+        #     dp[i][i] = 1
+        # for i in range(n - 1, -1, -1):      # 遍历顺序的限制来自: j - i > 1 ?
+        #     for j in range(i + 1, n):       # 内层for的范围要思考一下(提示:dp只有右上三角形有值)
+        #         if s[i] == s[j]:
+        #             dp[i][j] = dp[i + 1][j - 1] + 2
+        #         else:
+        #             dp[i][j] = max(dp[i + 1][j], dp[i][j - 1])
+        # return max(max(s) for s in dp)
+        
+        # 终于明白内层for的处理逻辑了!
+        n = len(s)
+        dp = [[0] * n for _ in range(n)]
+        for i in range(n): dp[i][i] = 1
+        for i in range(n - 1, -1, -1):
+            for j in range(n):
+                if j - i < 1: continue      # 递推公式只考虑j - i > 1即至少2个元素的情况(闭区间)
+                if s[i] == s[j]:
+                    dp[i][j] = dp[i + 1][j - 1] + 2
+                else:
+                    dp[i][j] = max(dp[i + 1][j], dp[i][j - 1])
+        return max(max(s) for s in dp)
+
 if __name__ == '__main__':
     sl = Solution()
 
-    word1 = "horse"
-    word2 = "ros"
-    print(sl.minDistanceII(word1, word2))
+    s = "bbbab"
+    print(sl.longestPalindromeSubseq(s))
