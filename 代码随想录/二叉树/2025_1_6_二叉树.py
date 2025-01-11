@@ -395,44 +395,73 @@ class Solution:
     def maxDepth(self, root: Optional[TreeNode]) -> int:
         """ 104.二叉树的最大深度 """
         # 时间:O(n) 空间:O(n)
-        from collections import deque
+        # from collections import deque
 
-        res = []
-        if not root:
-            return 0
-        queue = deque([root])
-        while queue:
-            res_level = []
-            for _ in range(len(queue)):
-                node = queue.popleft()
-                res_level.append(node.val)
-                if node.left:
-                    queue.append(node.left)
-                if node.right:
-                    queue.append(node.right)
-            res.append(res_level)
-        return len(res)
+        # res = []
+        # if not root:
+        #     return 0
+        # queue = deque([root])
+        # while queue:
+        #     res_level = []
+        #     for _ in range(len(queue)):
+        #         node = queue.popleft()
+        #         res_level.append(node.val)
+        #         if node.left:
+        #             queue.append(node.left)
+        #         if node.right:
+        #             queue.append(node.right)
+        #     res.append(res_level)
+        # return len(res)
+    
+        # 递归 后序遍历--求高度
+        # 根节点的高度, 即为二叉树的深度, 所以递归后序遍历可以解此题
+        def func(node):
+            if not node:
+                return 0
+            return 1 + max(func(node.left), func(node.right))
+        
+        return func(root)
+
+        # 递归 先序遍历--求深度
+        # 涉及回溯, 以后搞
     
     def minDepth(self, root: Optional[TreeNode]) -> int:
         """ 111.二叉树的最小深度 """
         # 时间:O(n) 空间:O(n)
-        from collections import deque
+        # from collections import deque
 
-        res = 0
-        if not root:
-            return 0
-        queue = deque([root])
-        while queue:
-            res += 1
-            for _ in range(len(queue)):
-                node = queue.popleft()
-                if not (node.left or node.right):
-                    return res
-                if node.left:
-                    queue.append(node.left)
-                if node.right:
-                    queue.append(node.right)
-        return res
+        # res = 0
+        # if not root:
+        #     return 0
+        # queue = deque([root])
+        # while queue:
+        #     res += 1
+        #     for _ in range(len(queue)):
+        #         node = queue.popleft()
+        #         if not (node.left or node.right):
+        #             return res
+        #         if node.left:
+        #             queue.append(node.left)
+        #         if node.right:
+        #             queue.append(node.right)
+        # return res
+
+        # 递归 后序遍历--求高度
+        # 参考 104.二叉树的最大深度. 有点难哦
+        def func(node):
+            if not node:
+                return 0
+            # return 1 + min(func(node.left), func(node.right))       # 必错无疑! 如果根节点只有一个子树呢, 这就错了
+            if node.left and not node.right:
+                return 1 + func(node.left)
+            elif not node.left and node.right:
+                return 1 + func(node.right)
+            elif not node.left and not node.right:
+                return 1
+            elif node.left and  node.right:
+                return 1 + min(func(node.left), func(node.right))
+        
+        return func(root)
     
     def invertTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
         """ 226.翻转二叉树 """
@@ -505,3 +534,159 @@ class Solution:
         res = []
         func(root, res)
         return res
+    
+    def isSymmetric(self, root: Optional[TreeNode]) -> bool:
+        """ 101.对称二叉树 \n
+            判断对称二叉树可不是判断左右两个子节点, 而是要判断左右两棵子树是否为互相翻转的 \n
+            通过判断左右子树的返回值判断二者内侧外侧节点是否相等, 所以 后序遍历 \n
+            左子树--左右中, 右子树--右左中 , 总体看来是后序遍历 """
+        # 时间:O(n) 空间:O(1)
+        # def func(left, right):
+        #     # 终止条件
+        #     if left and not right:
+        #         return False
+        #     elif not left and right:
+        #         return False
+        #     elif not left and not right:
+        #         return True
+        #     elif left.val != right.val:
+        #         return False
+        #     else:
+        #         return func(left.left, right.right) and func(left.right, right.left)
+        
+        # return func(root.left, root.right)      # 题目已说明root不空
+    
+        # 参考答案, 队列
+        # 还是那些条件, 灵活调整而已
+        queue = [root.left, root.right]
+        while queue:
+            left, right = queue.pop(0), queue.pop(0)
+
+            if left and not right:
+                return False
+            elif not left and right:
+                return False
+            elif not left and not right:
+                continue
+            elif left.val != right.val:
+                return False
+
+            queue.extend([left.left, right.right, left.right, right.left])
+        return True
+    
+        # 参考答案, 栈
+        # 其实就是上面队列 pop() 从末尾弹出
+    
+    def isSameTree(self, p: Optional[TreeNode], q: Optional[TreeNode]) -> bool:
+        """ 100.相同的树 \n
+            即 101.对称二叉树 """
+        # 递归
+        def func(left, right):
+            # 终止条件
+            if not left and right:
+                return False
+            elif left and not right:
+                return False
+            elif not left and not right:
+                return True
+            elif left.val != right.val:
+                return False
+            else:
+                return func(left.left, right.left) and func(left.right, right.right)
+        
+        return func(p, q)
+    
+    def isSubtree(self, root: Optional[TreeNode], subRoot: Optional[TreeNode]) -> bool:
+        """ 572.另一棵树的子树 \n
+            即 100.相同的树 101.对称二叉树 """
+        # 递归, 都快背过了
+        def func(left, right):
+            # 终止条件
+            if not left and right:
+                return False
+            elif left and not right:
+                return False
+            elif not left and not right:
+                return True
+            elif left.val != right.val:
+                return False
+            else:
+                return func(left.left, right.left) and func(left.right, right.right)
+            
+        if not (root or subRoot):
+            return True
+        elif not (root and subRoot):
+            return False
+        return func(root, subRoot) or self.isSubtree(root.left, subRoot) or self.isSubtree(root.right, subRoot)
+    
+    def maxDepth(self, root: 'Node') -> int:
+        """ 559.N叉树的最大深度 """
+        # 层序遍历
+        # 时间:O(n) 空间:O(n)
+        # from collections import deque
+
+        # if not root:
+        #     return 0
+        # res = 0             # 深度
+        # queue = deque([root])
+        # while queue:
+        #     res += 1
+        #     for _ in range(len(queue)):
+        #         node = queue.popleft()
+        #         for _nd in node.children:
+        #             if _nd:
+        #                 queue.append(_nd)
+        # return res
+    
+        # 递归 后序遍历--求高度, 根节点高度刚好是树的最大深度
+        # 参考 104.二叉树的最大深度 递归解法
+        def func(node: Optional['Node']) -> Optional[int]:
+            if not node:
+                return 0
+            return 1 + max([func(_nd) for _nd in node.children]) if node.children else 1
+        
+        return func(root)
+    
+    def countNodes(self, root: Optional[TreeNode]) -> int:
+        """ 222.完全二叉树的节点个数 """
+        # 时间:O(n) 空间:O(logn) 算上递归栈调用开销
+        # 参考答案 递归 后序遍历, 因为要用左右节点的返回值计算以当前节点为根节点的子树的节点数量
+        def func(node):
+            if not node:
+                return 0
+            leftNum = func(node.left)
+            rightNum = func(node.right)
+            return 1 + leftNum + rightNum
+
+        return func(root)
+
+        # 不推荐, 隐藏了一些逻辑--简化版代码, 自己也是倾向写出这样的代码
+        # def func(node):
+        #     if not node:
+        #         return 0
+        #     return func(node.left) + func(node.right) + 1
+        
+        # return func(root)
+
+        # 利用 完全二叉树 的性质, 没有看懂
+
+    def isBalanced(self, root: Optional[TreeNode]) -> bool:
+        """ 110.平衡二叉树 \n
+            因为求深度可以从上到下去查 所以需要前序遍历（中左右）
+            而高度只能从下到上去查，所以只能后序遍历（左右中）"""
+        # 从左右子树高度差来判断. 后序递归 求 高度
+        def func(node):
+            if not node:
+                return 0
+            
+            leftHeight = func(node.left)
+            if leftHeight == -1:
+                return -1
+            rightHeight = func(node.right)
+            if rightHeight == -1:
+                return -1
+            
+            if abs(leftHeight - rightHeight) > 1:
+                return -1
+            return 1 + max(leftHeight, rightHeight)
+        return False if func(root) == -1 else True
