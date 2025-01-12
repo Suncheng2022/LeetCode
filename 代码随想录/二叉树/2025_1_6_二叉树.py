@@ -424,6 +424,13 @@ class Solution:
 
         # 递归 先序遍历--求深度
         # 涉及回溯, 以后搞
+
+        # 再来一遍_二叉树最大深度_后序递归
+        # def func(node):
+        #     if node is None:
+        #         return 0
+        #     return 1 + max(func(node.left), func(node.right))
+        # return func(root)
     
     def minDepth(self, root: Optional[TreeNode]) -> int:
         """ 111.二叉树的最小深度 """
@@ -448,19 +455,34 @@ class Solution:
 
         # 递归 后序遍历--求高度
         # 参考 104.二叉树的最大深度. 有点难哦
+        # def func(node):
+        #     if not node:
+        #         return 0
+        #     # return 1 + min(func(node.left), func(node.right))       # 必错无疑! 如果根节点只有一个子树呢, 这就错了
+        #     if node.left and not node.right:
+        #         return 1 + func(node.left)
+        #     elif not node.left and node.right:
+        #         return 1 + func(node.right)
+        #     elif not node.left and not node.right:
+        #         return 1
+        #     elif node.left and  node.right:
+        #         return 1 + min(func(node.left), func(node.right))
+        
+        # return func(root)
+
+        # 再来一遍_二叉树的最小深度_后序递归
         def func(node):
             if not node:
                 return 0
-            # return 1 + min(func(node.left), func(node.right))       # 必错无疑! 如果根节点只有一个子树呢, 这就错了
+            
             if node.left and not node.right:
                 return 1 + func(node.left)
             elif not node.left and node.right:
                 return 1 + func(node.right)
             elif not node.left and not node.right:
                 return 1
-            elif node.left and  node.right:
+            else:
                 return 1 + min(func(node.left), func(node.right))
-        
         return func(root)
     
     def invertTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
@@ -558,24 +580,62 @@ class Solution:
     
         # 参考答案, 队列
         # 还是那些条件, 灵活调整而已
-        queue = [root.left, root.right]
-        while queue:
-            left, right = queue.pop(0), queue.pop(0)
+        # queue = [root.left, root.right]
+        # while queue:
+        #     left, right = queue.pop(0), queue.pop(0)
 
-            if left and not right:
-                return False
-            elif not left and right:
-                return False
-            elif not left and not right:
-                continue
-            elif left.val != right.val:
-                return False
+        #     if left and not right:
+        #         return False
+        #     elif not left and right:
+        #         return False
+        #     elif not left and not right:
+        #         continue
+        #     elif left.val != right.val:
+        #         return False
 
-            queue.extend([left.left, right.right, left.right, right.left])
-        return True
+        #     queue.extend([left.left, right.right, left.right, right.left])
+        # return True
     
         # 参考答案, 栈
         # 其实就是上面队列 pop() 从末尾弹出
+
+        # 再来一遍_只能后续递归
+        # def func(left, right):
+        #     """ 判断两棵子树是否对称, 所以传入两棵子树根节点 """
+        #     if not left and right:
+        #         return False
+        #     elif left and not right:
+        #         return False
+        #     elif not left and not right:
+        #         return True
+        #     elif left.val != right.val:
+        #         return False
+        #     else:
+        #         return func(left.left, right.right) and func(left.right, right.left)
+        # if not root:
+        #     return True
+        # return func(root.left, root.right)
+
+        # 再来一遍_迭代法_队列
+        # 还是尽量保持和上面写法一致吧
+        if not root:
+            return True
+        queue = [root.left, root.right]
+        while queue:
+            left, right = queue.pop(0), queue.pop(0)
+            if not (left or right):
+                continue
+            
+            # 相同的判断条件
+            if not left and right:
+                return False
+            elif left and not right:
+                return False
+            elif left.val != right.val:
+                return False
+            
+            queue.extend([left.left, right.right, left.right, right.left])
+        return True
     
     def isSameTree(self, p: Optional[TreeNode], q: Optional[TreeNode]) -> bool:
         """ 100.相同的树 \n
@@ -600,8 +660,27 @@ class Solution:
         """ 572.另一棵树的子树 \n
             即 100.相同的树 101.对称二叉树 """
         # 递归, 都快背过了
+        # def func(left, right):
+        #     # 终止条件
+        #     if not left and right:
+        #         return False
+        #     elif left and not right:
+        #         return False
+        #     elif not left and not right:
+        #         return True
+        #     elif left.val != right.val:
+        #         return False
+        #     else:
+        #         return func(left.left, right.left) and func(left.right, right.right)
+            
+        # if not (root or subRoot):
+        #     return True
+        # elif not (root and subRoot):
+        #     return False
+        # return func(root, subRoot) or self.isSubtree(root.left, subRoot) or self.isSubtree(root.right, subRoot)
+        
+        # 再来一遍_后序递归
         def func(left, right):
-            # 终止条件
             if not left and right:
                 return False
             elif left and not right:
@@ -612,7 +691,7 @@ class Solution:
                 return False
             else:
                 return func(left.left, right.left) and func(left.right, right.right)
-            
+        
         if not (root or subRoot):
             return True
         elif not (root and subRoot):
@@ -675,8 +754,44 @@ class Solution:
             因为求深度可以从上到下去查 所以需要前序遍历（中左右）
             而高度只能从下到上去查，所以只能后序遍历（左右中）"""
         # 从左右子树高度差来判断. 后序递归 求 高度
+        # def func(node):
+        #     if not node:
+        #         return 0
+            
+        #     leftHeight = func(node.left)
+        #     if leftHeight == -1:
+        #         return -1
+        #     rightHeight = func(node.right)
+        #     if rightHeight == -1:
+        #         return -1
+            
+        #     if abs(leftHeight - rightHeight) > 1:
+        #         return -1
+        #     return 1 + max(leftHeight, rightHeight)
+        # return False if func(root) == -1 else True
+
+        # 再来一遍
+        # def func(node):
+        #     if not node:
+        #         return 0
+            
+        #     leftHeight = func(node.left)
+        #     if leftHeight == -1:
+        #         return -1
+        #     rightHeight = func(node.right)
+        #     if rightHeight == -1:
+        #         return -1
+            
+        #     if abs(leftHeight - rightHeight) > 1:
+        #         return -1
+        #     return 1 + max(leftHeight, rightHeight)
+
+        # return False if func(root) == -1 else True
+    
+        # 再来一遍_二叉平衡树_后序递归
+        # 果然, 你没记住(狗头)
         def func(node):
-            if not node:
+            if node is None:
                 return 0
             
             leftHeight = func(node.left)
@@ -685,8 +800,33 @@ class Solution:
             rightHeight = func(node.right)
             if rightHeight == -1:
                 return -1
-            
             if abs(leftHeight - rightHeight) > 1:
                 return -1
             return 1 + max(leftHeight, rightHeight)
         return False if func(root) == -1 else True
+    
+    def binaryTreePaths(self, root: Optional[TreeNode]) -> List[str]:
+        """ 257.二叉树的所有路径 \n
+            父节点指向子节点的路径--先序递归/回溯 """
+        def func(node, path, res):
+            path.append(node.val)       # 就是这里有点特殊, 写在了终止条件之前, 想想确是如此
+            # 终止条件
+            if not (node.left or node.right):
+                res.append("->".join([str(val) for val in path]))
+                return
+            # 单层递归逻辑
+            if node.left:
+                func(node.left, path, res)
+                path.pop()
+            if node.right:
+                func(node.right, path, res)
+                path.pop()
+        
+        path = []
+        res = []
+        if not root:
+            return res
+        func(root, path, res)
+        return res
+    
+    # -> 404.左叶子之和
