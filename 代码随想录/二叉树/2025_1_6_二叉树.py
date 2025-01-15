@@ -829,4 +829,147 @@ class Solution:
         func(root, path, res)
         return res
     
-    # -> 404.左叶子之和
+    def sumOfLeftLeaves(self, root: Optional[TreeNode]) -> int:
+        """ 404.左叶子之和 \n
+            当前节点必须是父节点, 才能判断是否有左叶子节点"""
+        # 迭代法_更容易理解
+        # 二叉树前中后迭代均可, 也是以当前节点作父节点, 判断左节点是否为左叶子
+        # if not root:
+        #     return 0
+        # res = []
+        # stack = [root]
+        # while stack:
+        #     node = stack.pop()
+        #     if node.left and not (node.left.left or node.left.right):
+        #         res.append(node.left.val)
+        #     if node.right:
+        #         stack.append(node.right)
+        #     if node.left:
+        #         stack.append(node.left)
+        # return sum(res)
+
+        # 后序递归_因为要用左右子树的结果计算当前节点左叶子之和
+        # 终止条件
+        # if not root:
+        #     return 0
+        # elif not root.left and not root.right:
+        #     return 0
+        # # 单层递归逻辑
+        # leftVal = self.sumOfLeftLeaves(root.left)
+        # if root.left and root.left.left is None and root.left.right is None:
+        #     leftVal = root.left.val
+        # rightVal = self.sumOfLeftLeaves(root.right)
+        # return leftVal + rightVal
+    
+        # 再来一遍_迭代法_左叶子之和
+        # if not root:
+        #     return 0
+        # res = []
+        # stack = [root]
+        # while stack:
+        #     node = stack.pop(0)
+        #     if node.left and not (node.left.left or node.left.right):
+        #         res.append(node.left.val)
+        #     if node.right:
+        #         stack.append(node.right)
+        #     if node.left:
+        #         stack.append(node.left)
+        # return sum(res)
+
+        # 再来一遍_后序递归_要通过左右节点的结果来计算当前节点的结果, 牛逼, 竟然写出来了
+        # 终止条件
+        if not root:
+            return 0
+        elif not (root.left or root.right):
+            return 0
+        # 单层递归逻辑
+        leftNum = self.sumOfLeftLeaves(root.left)
+        if root.left and not (root.left.left or root.left.right):
+            leftNum = root.left.val
+        rightNum = self.sumOfLeftLeaves(root.right)
+        return leftNum + rightNum
+    
+    def findBottomLeftValue(self, root: Optional[TreeNode]) -> int:
+        """ 513.找树左下角的值 """
+        # 时间:O(n) 空间:O(n)
+        from collections import deque
+
+        res = []
+        queue = deque([root])
+        while queue:
+            res_level = []
+            for _ in range(len(queue)):     # Python特性, for开始前锁定len(queue)长度
+                node = queue.popleft()
+                res_level.append(node.val)
+                if node.left:
+                    queue.append(node.left)
+                if node.right:
+                    queue.append(node.right)
+            res.append(res_level)
+        return res[-1][0]
+    
+    def hasPathSum(self, root: Optional[TreeNode], targetSum: int) -> bool:
+        """ 112.路径总和 """
+        # 递归函数什么时候需要返回值?
+        #   如果需要搜索搜索整棵二叉树且不用处理递归返回值, 递归函数就不要返回值
+        #   如果需要搜索整棵二叉树且需要处理递归返回值, 递归函数就要返回值
+        #   如果要搜索一条符合条件的路径, 那一定需要返回值, 因为找到了符合条件的路径就要及时返回 --> 本题
+        
+        # 时间:O(n), 每个节点可能都会遍历到 空间:O(n) 递归栈最大深度为树的高度, 二叉平衡树则为logn, 完全退化的树则为n
+        # def func(node, count):
+        #     # 本题不需要遍历所有节点, 所以返回值为bool
+        #     # 终止条件
+        #     if not (node.left or node.right) and count == 0:        # 遍历到叶子节点且路径和为targetSum
+        #         return True
+        #     elif not (node.left or node.right):                     # 遍历到叶子节点且路径和不为targetSum
+        #         return False
+        #     # 单层递归
+        #     if node.left:
+        #         if func(node.left, count - node.left.val):          # 体现回溯
+        #             return True
+        #     if node.right:
+        #         if func(node.right, count - node.right.val):        # 体现回溯
+        #             return True
+        #     return False
+        
+        # if not root:
+        #     return False
+        # return func(root, targetSum - root.val)
+        
+        # 迭代_前序遍历_用栈实现递归
+        # 时间:O(n) 空间:O(n)
+        if not root:
+            return False
+        stack = [[root, root.val]]
+        while stack:
+            node, val = stack.pop()
+            if not (node.left or node.right) and val == targetSum:
+                return True
+            if node.right:
+                stack.append([node.right, val + node.right.val])
+            if node.left:
+                stack.append([node.left, val + node.left.val])
+        return False
+    
+    def pathSum(self, root: Optional[TreeNode], targetSum: int) -> List[List[int]]:
+        """ 113.路径总和II \n
+            与 112.路径总和 区别: 113.要找到所有路径, 要遍历整棵树, 所以不要返回值! """
+        # 时间:O(n), 遍历所有节点 空间:O(n), 递归栈为最大
+        def func(node, count, path, res):
+            if not (node.left or node.right) and count == 0:        # 刚好找到路径
+                res.append(path[:])
+                return
+            elif not (node.left or node.right):
+                return
+            
+            if node.left:
+                func(node.left, count - node.left.val, path + [node.left.val], res)
+            if node.right:
+                func(node.right, count - node.right.val, path + [node.right.val], res)
+        
+        if not root:
+            return []
+        path = [root.val]
+        res = []
+        func(root, targetSum - root.val, path, res)
+        return res
