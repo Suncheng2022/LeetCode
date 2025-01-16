@@ -973,3 +973,63 @@ class Solution:
         res = []
         func(root, targetSum - root.val, path, res)
         return res
+
+    def buildTree(self, inorder: List[int], postorder: List[int]) -> Optional[TreeNode]:
+        """ 106.从中序与后序遍历序列构造二叉树 \n
+            切割 """
+        # 时间:O(n) 空间:O(n)
+        if not postorder:
+            return None
+        
+        rootVal = postorder[-1]
+        root = TreeNode(rootVal)
+        if len(postorder) == 1:
+            return root
+        
+        ind_inorder = inorder.index(rootVal)
+        left_inorder = inorder[:ind_inorder]
+        right_inorder = inorder[ind_inorder + 1:]
+
+        left_postorder = postorder[:len(left_inorder)]
+        right_postorder = postorder[len(left_inorder):-1]
+
+        root.left = self.buildTree(left_inorder, left_postorder)
+        root.right = self.buildTree(right_inorder, right_postorder)
+
+        return root
+    
+    def buildTree(self, preorder: List[int], inorder: List[int]) -> Optional[TreeNode]:
+        """ 105.从前序与中序遍历序列构造二叉树 """
+        # 时间:O(n^2), 因为inorder.index()的时间为O(n) 空间:O(n)
+        if len(preorder) == 0:
+            return None
+        
+        rootVal = preorder[0]
+        root = TreeNode(rootVal)
+        if len(preorder) == 1:
+            return root
+        
+        ind_inorder = inorder.index(rootVal)
+        left_inorder = inorder[:ind_inorder]
+        right_inorder = inorder[ind_inorder + 1:]
+
+        left_preorder = preorder[1:1 + len(left_inorder)]
+        right_preorder = preorder[1 + len(left_inorder):]
+
+        root.left = self.buildTree(left_preorder, left_inorder)
+        root.right = self.buildTree(right_preorder, right_inorder)
+
+        return root
+    
+    def constructMaximumBinaryTree(self, nums: List[int]) -> Optional[TreeNode]:
+        """ 654.最大二叉树 """
+        if len(nums) == 1:
+            return TreeNode(nums[0])
+        maxVal = max(nums)
+        maxInd = nums.index(maxVal)
+        root = TreeNode(maxVal)
+        if maxInd > 0:
+            root.left = self.constructMaximumBinaryTree(nums[:maxInd])
+        if maxInd < len(nums) - 1:
+            root.right = self.constructMaximumBinaryTree(nums[maxInd + 1:])
+        return root
