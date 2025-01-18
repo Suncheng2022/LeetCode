@@ -618,23 +618,56 @@ class Solution:
 
         # 再来一遍_迭代法_队列
         # 还是尽量保持和上面写法一致吧
-        if not root:
-            return True
-        queue = [root.left, root.right]
-        while queue:
-            left, right = queue.pop(0), queue.pop(0)
-            if not (left or right):
-                continue
+        # if not root:
+        #     return True
+        # queue = [root.left, root.right]
+        # while queue:
+        #     left, right = queue.pop(0), queue.pop(0)
+        #     if not (left or right):
+        #         continue
             
-            # 相同的判断条件
-            if not left and right:
+        #     # 相同的判断条件
+        #     if not left and right:
+        #         return False
+        #     elif left and not right:
+        #         return False
+        #     elif left.val != right.val:
+        #         return False
+            
+        #     queue.extend([left.left, right.right, left.right, right.left])
+        # return True
+
+        # Again_只能后序递归_因为要通过左右子树计算当前树的结果
+        # 时间:O(n) 空间:O(n)
+        # def func(left, right):
+        #     if left and not right:
+        #         return False
+        #     elif not left and right:
+        #         return False
+        #     elif not (left or right):
+        #         return True
+        #     elif left.val != right.val:
+        #         return False
+        #     else:
+        #         return func(left.left, right.right) and func(left.right, right.left)
+        
+        # return func(root.left, root.right)
+
+        # Again_迭代法_判断逻辑相同
+        # 时间:O(n) 空间:O(n)
+        queue = [[root.left, root.right]]
+        while queue:
+            left, right = queue.pop(0)
+            if left and not right:
                 return False
-            elif left and not right:
+            elif not left and right:
                 return False
+            elif not (left or right):
+                continue
             elif left.val != right.val:
                 return False
-            
-            queue.extend([left.left, right.right, left.right, right.left])
+            queue.append([left.left, right.right])
+            queue.append([left.right, right.left])
         return True
     
     def isSameTree(self, p: Optional[TreeNode], q: Optional[TreeNode]) -> bool:
@@ -877,28 +910,46 @@ class Solution:
         # return sum(res)
 
         # 再来一遍_后序递归_要通过左右节点的结果来计算当前节点的结果, 牛逼, 竟然写出来了
-        # 终止条件
-        if not root:
-            return 0
-        elif not (root.left or root.right):
-            return 0
-        # 单层递归逻辑
-        leftNum = self.sumOfLeftLeaves(root.left)
-        if root.left and not (root.left.left or root.left.right):
-            leftNum = root.left.val
-        rightNum = self.sumOfLeftLeaves(root.right)
-        return leftNum + rightNum
+        def func(node):
+            if not node:
+                return 0
+            elif not (node.left or node.right):
+                return 0
+            leftRes = func(node.left)
+            if node.left and not (node.left.left or node.left.right):
+                leftRes = node.left.val
+            rightRes = func(node.right)
+            return leftRes + rightRes
+        
+        return func(root)
     
     def findBottomLeftValue(self, root: Optional[TreeNode]) -> int:
         """ 513.找树左下角的值 """
         # 时间:O(n) 空间:O(n)
+        # from collections import deque
+
+        # res = []
+        # queue = deque([root])
+        # while queue:
+        #     res_level = []
+        #     for _ in range(len(queue)):     # Python特性, for开始前锁定len(queue)长度
+        #         node = queue.popleft()
+        #         res_level.append(node.val)
+        #         if node.left:
+        #             queue.append(node.left)
+        #         if node.right:
+        #             queue.append(node.right)
+        #     res.append(res_level)
+        # return res[-1][0]
+
+        # 再来一遍
         from collections import deque
 
-        res = []
         queue = deque([root])
+        res = []
         while queue:
             res_level = []
-            for _ in range(len(queue)):     # Python特性, for开始前锁定len(queue)长度
+            for _ in range(len(queue)):
                 node = queue.popleft()
                 res_level.append(node.val)
                 if node.left:
@@ -938,28 +989,110 @@ class Solution:
         
         # 迭代_前序遍历_用栈实现递归
         # 时间:O(n) 空间:O(n)
+        # if not root:
+        #     return False
+        # stack = [[root, root.val]]
+        # while stack:
+        #     node, val = stack.pop()
+        #     if not (node.left or node.right) and val == targetSum:
+        #         return True
+        #     if node.right:
+        #         stack.append([node.right, val + node.right.val])
+        #     if node.left:
+        #         stack.append([node.left, val + node.left.val])
+        # return False
+
+        # 再来一遍_路径总和
+        # 递归函数什么时候需要返回值:
+        #   如果需要搜索整棵树, 通常不需要返回值
+        #   如果需要搜索一条符合条件的路径, 通常需要返回值, 因为找到要及时返回. 返回bool类型就是为了, 找到就立刻返回
+        # def func(node, count):
+        #     # 重新来做时, 自己没能理清终止条件--遍历到叶子节点判断是否找到
+        #     # 终止条件的返回值用来控制递归终止, 不是为返回题目结果
+        #     if count == 0 and not (node.left or node.right):
+        #         return True
+        #     if count != 0 and not (node.left or node.right):
+        #         return False
+            
+        #     # 递归逻辑的最后一层返回值才是题目结果
+        #     if node.left:
+        #         if func(node.left, count - node.left.val):
+        #             return True
+        #     if node.right:
+        #         if func(node.right, count - node.right.val):
+        #             return True
+        #     return False
+        
+        # if not root:
+        #     return False
+        # return func(root, targetSum - root.val)
+
+        # 自己尝试迭代_路径总和
         if not root:
             return False
         stack = [[root, root.val]]
         while stack:
-            node, val = stack.pop()
-            if not (node.left or node.right) and val == targetSum:
+            node, _sum = stack.pop()
+            if _sum == targetSum and not (node.left or node.right):
                 return True
             if node.right:
-                stack.append([node.right, val + node.right.val])
+                stack.append([node.right, _sum + node.right.val])
             if node.left:
-                stack.append([node.left, val + node.left.val])
+                stack.append([node.left, _sum + node.left.val])
         return False
     
     def pathSum(self, root: Optional[TreeNode], targetSum: int) -> List[List[int]]:
         """ 113.路径总和II \n
             与 112.路径总和 区别: 113.要找到所有路径, 要遍历整棵树, 所以不要返回值! """
         # 时间:O(n), 遍历所有节点 空间:O(n), 递归栈为最大
+        # def func(node, count, path, res):
+        #     if not (node.left or node.right) and count == 0:        # 刚好找到路径
+        #         res.append(path[:])
+        #         return
+        #     elif not (node.left or node.right):
+        #         return
+            
+        #     if node.left:
+        #         func(node.left, count - node.left.val, path + [node.left.val], res)
+        #     if node.right:
+        #         func(node.right, count - node.right.val, path + [node.right.val], res)
+        
+        # if not root:
+        #     return []
+        # path = [root.val]
+        # res = []
+        # func(root, targetSum - root.val, path, res)
+        # return res
+
+        # Again_前序递归_注意回溯
+        # def func(node, count, path, res):
+        #     path.append(node.val)       # 要在终止条件之前加, 每次添加完都要通过终止条件判断是否到达叶子节点
+        #     if count == 0 and not (node.left or node.right):
+        #         res.append(path[:])
+        #         return
+        #     if count != 0 and not (node.left or node.right):
+        #         return
+        #     if node.left:
+        #         func(node.left, count - node.left.val, path, res)
+        #         path.pop()
+        #     if node.right:
+        #         func(node.right, count - node.right.val, path, res)
+        #         path.pop()
+        
+        # if not root:
+        #     return []
+        # res = []
+        # path = []
+        # func(root, targetSum - root.val, path, res)
+        # return res
+
+        # Again_前序递归_隐藏回溯
         def func(node, count, path, res):
-            if not (node.left or node.right) and count == 0:        # 刚好找到路径
+            # 终止条件_上来就终止条件, 所以在调用递归时修改path, 隐藏了回溯逻辑
+            if count == 0 and not (node.left or node.right):
                 res.append(path[:])
                 return
-            elif not (node.left or node.right):
+            elif count != 0 and not (node.left or node.right):
                 return
             
             if node.left:
@@ -969,18 +1102,39 @@ class Solution:
         
         if not root:
             return []
-        path = [root.val]
+        path = []
         res = []
-        func(root, targetSum - root.val, path, res)
+        func(root, targetSum - root.val, [root.val], res)
         return res
 
     def buildTree(self, inorder: List[int], postorder: List[int]) -> Optional[TreeNode]:
         """ 106.从中序与后序遍历序列构造二叉树 \n
             切割 """
         # 时间:O(n) 空间:O(n)
-        if not postorder:
-            return None
+        # if not postorder:
+        #     return None
         
+        # rootVal = postorder[-1]
+        # root = TreeNode(rootVal)
+        # if len(postorder) == 1:
+        #     return root
+        
+        # ind_inorder = inorder.index(rootVal)
+        # left_inorder = inorder[:ind_inorder]
+        # right_inorder = inorder[ind_inorder + 1:]
+
+        # left_postorder = postorder[:len(left_inorder)]
+        # right_postorder = postorder[len(left_inorder):-1]
+
+        # root.left = self.buildTree(left_inorder, left_postorder)
+        # root.right = self.buildTree(right_inorder, right_postorder)
+
+        # return root
+
+        # Again
+        # 时间:O(n) 空间:O(n)
+        if len(postorder) == 0:
+            return None
         rootVal = postorder[-1]
         root = TreeNode(rootVal)
         if len(postorder) == 1:
@@ -991,24 +1145,44 @@ class Solution:
         right_inorder = inorder[ind_inorder + 1:]
 
         left_postorder = postorder[:len(left_inorder)]
-        right_postorder = postorder[len(left_inorder):-1]
+        right_postorder = postorder[len(left_postorder):-1]
 
         root.left = self.buildTree(left_inorder, left_postorder)
         root.right = self.buildTree(right_inorder, right_postorder)
-
         return root
     
     def buildTree(self, preorder: List[int], inorder: List[int]) -> Optional[TreeNode]:
         """ 105.从前序与中序遍历序列构造二叉树 """
         # 时间:O(n^2), 因为inorder.index()的时间为O(n) 空间:O(n)
+        # if len(preorder) == 0:
+        #     return None
+        
+        # rootVal = preorder[0]
+        # root = TreeNode(rootVal)
+        # if len(preorder) == 1:
+        #     return root
+        
+        # ind_inorder = inorder.index(rootVal)
+        # left_inorder = inorder[:ind_inorder]
+        # right_inorder = inorder[ind_inorder + 1:]
+
+        # left_preorder = preorder[1:1 + len(left_inorder)]
+        # right_preorder = preorder[1 + len(left_inorder):]
+
+        # root.left = self.buildTree(left_preorder, left_inorder)
+        # root.right = self.buildTree(right_preorder, right_inorder)
+
+        # return root
+
+        # Again_
+        # 时间:O(n^2) 空间:O(n)
         if len(preorder) == 0:
             return None
-        
         rootVal = preorder[0]
         root = TreeNode(rootVal)
         if len(preorder) == 1:
             return root
-        
+
         ind_inorder = inorder.index(rootVal)
         left_inorder = inorder[:ind_inorder]
         right_inorder = inorder[ind_inorder + 1:]
@@ -1018,18 +1192,109 @@ class Solution:
 
         root.left = self.buildTree(left_preorder, left_inorder)
         root.right = self.buildTree(right_preorder, right_inorder)
-
         return root
-    
+
     def constructMaximumBinaryTree(self, nums: List[int]) -> Optional[TreeNode]:
         """ 654.最大二叉树 """
+        # if len(nums) == 1:
+        #     return TreeNode(nums[0])
+        # maxVal = max(nums)
+        # maxInd = nums.index(maxVal)
+        # root = TreeNode(maxVal)
+        # if maxInd > 0:
+        #     root.left = self.constructMaximumBinaryTree(nums[:maxInd])
+        # if maxInd < len(nums) - 1:
+        #     root.right = self.constructMaximumBinaryTree(nums[maxInd + 1:])
+        # return root
+
+        # Again_前序递归
+        # 时间:O(n^2) 空间:O(n)
         if len(nums) == 1:
             return TreeNode(nums[0])
-        maxVal = max(nums)
-        maxInd = nums.index(maxVal)
-        root = TreeNode(maxVal)
-        if maxInd > 0:
-            root.left = self.constructMaximumBinaryTree(nums[:maxInd])
-        if maxInd < len(nums) - 1:
-            root.right = self.constructMaximumBinaryTree(nums[maxInd + 1:])
+        
+        ind_max = nums.index(max(nums))
+        root = TreeNode(nums[ind_max])
+        if ind_max > 0:
+            root.left = self.constructMaximumBinaryTree(nums[:ind_max])
+        if ind_max < len(nums) - 1:
+            root.right = self.constructMaximumBinaryTree(nums[ind_max + 1:])
         return root
+    
+    def mergeTrees(self, root1: Optional[TreeNode], root2: Optional[TreeNode]) -> Optional[TreeNode]:
+        """ 617.合并二叉树 """
+        # 同时遍历两棵树而已(虽然自己没写出来)_先序递归[推荐]
+        # 时间:O(n) 空间:O(n)
+        # if not root1:
+        #     return root2
+        # elif not root2:
+        #     return root1
+        
+        # root1.val += root2.val
+        # root1.left = self.mergeTrees(root1.left, root2.left)
+        # root1.right = self.mergeTrees(root1.right, root2.right)
+        # return root1
+    
+        # 中序递归
+        # 时间:O(n) 空间:O(n)
+        # if not root1:
+        #     return root2
+        # elif not root2:
+        #     return root1
+        
+        # root1.left = self.mergeTrees(root1.left, root2.left)
+        # root1.val += root2.val
+        # root1.right = self.mergeTrees(root1.right, root2.right)
+        # return root1
+
+        # 后序递归, 也是可以滴. 略
+
+        # 迭代法_参考 101.对称二叉树, 一般同时操作两棵树, 都是使用队列层序遍历
+        # 比较左右两棵子树, 而不是左右节点
+        # 时间:O(n) 空间:O(n)
+        if not root1:
+            return root2
+        elif not root2:
+            return root1
+        
+        queue = [[root1, root2]]
+        while queue:
+            left, right = queue.pop(0)
+            left.val += right.val
+
+            if left.left and right.left:
+                queue.append([left.left, right.left])
+            if left.right and right.right:
+                queue.append([left.right, right.right])
+            if not left.left and right.left:
+                left.left = right.left
+            if not left.right and right.right:
+                left.right = right.right
+        return root1
+    
+    def searchBST(self, root: Optional[TreeNode], val: int) -> Optional[TreeNode]:
+        """ 700.二叉搜索树中的搜索 """
+        # 自己写对了, 感觉条件略有复杂, 可以看下答案
+        # 时间:O(logn), 若普通二叉树则O(n), 退化为链表 空间:O(logn) 若普通二叉树则O(n)
+        # if root.val == val:
+        #     return root
+        # elif not (root.left or root.right):
+        #     return None
+        
+        # if root.val > val and root.left:
+        #     return self.searchBST(root.left, val)
+        # elif root.val < val and root.right:
+        #     return self.searchBST(root.right, val)
+
+        # 迭代法
+        # 时间:O(logn) 空间:O(1)
+        if not root:
+            return None
+        cur = root
+        while cur:
+            if cur.val == val:
+                return cur
+            elif cur.val > val:
+                cur = cur.left
+            elif cur.val < val:
+                cur = cur.right
+        return cur
