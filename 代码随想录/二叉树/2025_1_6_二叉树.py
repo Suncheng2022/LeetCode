@@ -1298,3 +1298,154 @@ class Solution:
             elif cur.val < val:
                 cur = cur.right
         return cur
+    
+    def isValidBST(self, root: Optional[TreeNode]) -> bool:
+        """ 98.验证二叉搜索树 \n
+            二叉搜索树的中序遍历是递增的 """
+        # 中序递归_牛逼
+        # def func(node, res):
+        #     if node.left:
+        #         func(node.left, res)
+        #     res.append(node.val)
+        #     if node.right:
+        #         func(node.right, res)
+        
+        # res = []
+        # func(root, res)
+        # for i in range(1, len(res)):
+        #     if res[i - 1] >= res[i]:
+        #         return False
+        # return True
+
+        # 中序迭代_要复习
+        # 时间:O(n) 空间:O(n)
+        stack = []
+        cur = root
+        res = []
+        while cur or stack:
+            if cur:
+                stack.append(cur)
+                cur = cur.left
+            else:
+                cur = stack.pop()
+                res.append(cur.val)
+                cur = cur.right
+        for i in range(1, len(res)):
+            if res[i - 1] >= res[i]:
+                return False
+        return True
+    
+    def getMinimumDifference(self, root: Optional[TreeNode]) -> int:
+        """ 530.二叉搜索树的最小绝对差 \n
+            二叉搜索树中序遍历严格递增 """
+        # 迭代_中序遍历
+        # 时间:O(n) 空间:O(n)
+        # res = []
+        # stack = []
+        # cur = root
+        # while cur or stack:
+        #     if cur:
+        #         stack.append(cur)
+        #         cur = cur.left
+        #     else:
+        #         cur = stack.pop()
+        #         res.append(cur.val)
+        #         cur = cur.right
+        # min_diff = float('inf')
+        # for i in range(1, len(res)):
+        #     min_diff = min(min_diff, res[i] - res[i - 1])
+        # return min_diff
+
+        # 递归_中序遍历
+        # 时间:O(n) 空间:O(n)
+        # res = []
+        # def func(node):
+        #     if not node:
+        #         return
+        #     func(node.left)
+        #     res.append(node.val)
+        #     func(node.right)
+        
+        # func(root)
+        # min_diff = float('inf')
+        # for i in range(1, len(res)):
+        #     min_diff = min(min_diff, res[i] - res[i - 1])
+        # return min_diff
+
+        # 递归_中序遍历_记录前一个指针
+        pre = None
+        min_diff = float('inf')
+        def func(node):
+            nonlocal pre, min_diff      # 声明使用外部作用域的变量
+            if not node:
+                return
+            func(node.left)
+            if pre:
+                min_diff = min(min_diff, node.val - pre.val)
+            pre = node
+            func(node.right)
+        
+        func(root)
+        return min_diff
+    
+    def findMode(self, root: Optional[TreeNode]) -> List[int]:
+        """ 501.二叉搜索数中的众数 """
+        # 基于 中序递归
+        # 时间:O(n) 空间:O(n)
+        # res = []
+        # max_count = 0
+        # count = 0
+        # pre = None
+        # def func(node):
+        #     nonlocal count, pre, max_count, res
+
+        #     if not node:
+        #         return
+        #     func(node.left)
+        #     if not pre:
+        #         count = 1
+        #     elif pre.val == node.val:
+        #         count += 1
+        #     elif pre.val != node.val:
+        #         count = 1
+        #     pre = node
+        #     if count == max_count:
+        #         res.append(node.val)
+        #     elif count > max_count:
+        #         max_count = count
+        #         res = [node.val]
+        #     func(node.right)
+        
+        # func(root)
+        # return res
+
+        # 基于_中序迭代
+        # 时间:O(n) 空间:O(n)
+        pre = None
+        count = 0
+        max_count = 0
+        res = []
+
+        stack = []
+        cur = root
+        while cur or stack:
+            if cur:
+                stack.append(cur)
+                cur = cur.left
+            else:
+                cur = stack.pop()
+                # 处理逻辑与上面相同
+                if not pre:
+                    count = 1
+                elif pre.val == cur.val:
+                    count += 1
+                elif pre.val != cur.val:
+                    count = 1
+                pre = cur
+                if count == max_count:
+                    res.append(cur.val)
+                elif count > max_count:
+                    max_count = count
+                    res = [cur.val]
+                cur = cur.right
+        return res
