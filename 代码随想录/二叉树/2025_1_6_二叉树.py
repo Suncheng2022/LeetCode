@@ -1449,3 +1449,96 @@ class Solution:
                     res = [cur.val]
                 cur = cur.right
         return res
+    
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        """ 236.二叉树的最近公共祖先 """
+        # 终止条件
+        # 时间:O(n) 空间:O(n)
+        if not root:
+            return root
+        elif root in [p, q]:
+            return root
+        # 单层递归逻辑
+        left = self.lowestCommonAncestor(root.left, p, q)
+        right = self.lowestCommonAncestor(root.right, p, q)
+        if left and right:
+            return root
+        elif not left and right:
+            return right
+        elif left and not right:
+            return left
+        
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        """ 235.二叉搜索树的最近公共祖先 \n
+            二叉搜索树, 直接找就行 """
+        # 迭代法
+        # 时间:O(n) 空间:O(1)
+        while root:
+            if root.val > p.val and root.val > q.val:
+                root = root.left
+            elif root.val < p.val and root.val < q.val:
+                root = root.right
+            else:
+                return root
+        return None
+
+        # 时间:O(n) 空间:O(h)
+        # 终止条件
+        # if not root:
+        #     return root
+        # # 单层递归
+        # if root.val > p.val and root.val > q.val:
+        #     return self.lowestCommonAncestor(root.left, p, q)       # 典型找到一条边就返回. 注意, 不能 == 
+        # elif root.val < p.val and root.val < q.val:
+        #     return self.lowestCommonAncestor(root.right, p, q)
+        # else:
+        #     return root
+
+        # 自己实现的_但不是答案推荐
+        # 时间:O(n) 空间:O(n)
+        # if not root:
+        #     return root
+        # elif p.val <= root.val <= q.val or q.val <= root.val <= p.val:
+        #     return root
+        # leftRes = self.lowestCommonAncestor(root.left, p, q)
+        # rightRes = self.lowestCommonAncestor(root.right, p, q)
+        # if leftRes and rightRes:
+        #     return root
+        # elif not leftRes:
+        #     return rightRes
+        # elif not rightRes:
+        #     return leftRes
+
+    def insertIntoBST(self, root: Optional[TreeNode], val: int) -> Optional[TreeNode]:
+        """ 701.二叉搜索树中的插入操作 \n
+            找val, 直到遇到空节点, 新建插入就行了 """
+        # 时间:O(n) 空间:O(1)
+        # if not root:
+        #     return TreeNode(val)
+        # cur = root
+        # while cur:
+        #     pre = cur
+        #     if cur.val > val:
+        #         cur = cur.left
+        #         if not cur:
+        #             pre.left = TreeNode(val)
+        #             return root
+        #     elif cur.val < val:
+        #         cur = cur.right
+        #         if not cur:
+        #             pre.right = TreeNode(val)
+        #             return root
+
+        # 递归
+        # 时间:O(h) 空间:O(h)
+        # 终止条件
+        if not root:
+            return TreeNode(val)
+        # 单层递归
+        if root.val > val:
+            root.left = self.insertIntoBST(root.left, val)
+        if root.val < val:
+            root.right = self.insertIntoBST(root.right, val)
+        return root
+    
+    # --> 删除二叉搜索树中的节点
