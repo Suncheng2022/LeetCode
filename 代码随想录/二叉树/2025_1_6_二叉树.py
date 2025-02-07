@@ -1541,4 +1541,96 @@ class Solution:
             root.right = self.insertIntoBST(root.right, val)
         return root
     
-    # --> 删除二叉搜索树中的节点
+    def deleteNode(self, root: Optional[TreeNode], key: int) -> Optional[TreeNode]:
+        """ 450.删除二叉搜索树中的节点 """
+        # 比较难, 建议先看答案
+        # 动归五部曲: 1.递归函数参数和返回值, 参数:根节点, key 返回值:删除后的 根节点, 返回给上层承接
+        #           2.遇到空, 没找到, 返回空
+        #           3.单层递归
+        # 时间:O(logn) 空间:O(logn)
+        # 终止条件
+        if not root:            # 没找到删除节点, 返回空
+            return None
+        # ---- 单层递归 ----
+        if root.val == key:     # 找到删除节点
+            if not (root.left or root.right):       # 删除节点为叶节点
+                return None
+            elif not root.left:                     # 删除节点只有 左孩子/右孩子
+                return root.right
+            elif not root.right:
+                return root.left
+            else:                                   # 删除节点有左右孩子
+                cur = root.right
+                while cur.left:
+                    cur = cur.left
+                cur.left = root.left
+                return root.right
+        if key < root.val:
+            root.left = self.deleteNode(root.left, key)
+        if key > root.val:
+            root.right = self.deleteNode(root.right, key)
+        # ------------------
+        return root
+    
+    def trimBST(self, root: Optional[TreeNode], low: int, high: int) -> Optional[TreeNode]:
+        """ 669.修剪二叉搜索树 \n
+            是不是想直接套用 450.删除二叉搜索树中的节点, 可不是这么简单, 先看答案吧 """
+        # 迭代法, 修剪分为3步: (也不是太好理解)
+        #               1.将root移动到合法范围 
+        #               2.修剪左子树 
+        #               3.修剪右子树
+        # if not root:
+        #     return None
+        # while root:
+        #     if root.val < low:
+        #         root = root.right
+        #     elif root.val > high:
+        #         root = root.left
+        #     else:
+        #         break
+        
+        # cur = root
+        # while cur:
+        #     while cur.left and cur.left.val < low:
+        #         cur.left = cur.left.right
+        #     cur = cur.left
+        
+        # cur = root
+        # while cur:
+        #     while cur.right and cur.right.val > high:
+        #         cur.right = cur.right.left
+        #     cur = cur.right
+        # return root
+
+        # 先序递归_不太好理解
+        # 时间:O(logn) 空间:O(logn)
+        # 终止条件
+        # if not root:
+        #     return None
+        # # 单层递归
+        # if root.val < low:
+        #     right = self.trimBST(root.right, low, high)
+        #     return right
+        # elif root.val > high:
+        #     left = self.trimBST(root.left, low, high)
+        #     return left
+        # root.left = self.trimBST(root.left, low, high)
+        # root.right = self.trimBST(root.right, low, high)
+        # return root
+
+        # 重写一遍递归_先序递归
+        # 终止条件
+        if not root:
+            return None
+        # 单层递归
+        # 若当前节点值非法
+        if root.val < low:      # 根据二叉搜索树的性质, root.val < low则要舍弃左子树, 去右子树继续寻找合法节点
+            right = self.trimBST(root.right, low, high)
+            return right
+        elif root.val > high:
+            left = self.trimBST(root.left, low, high)
+            return left
+        # 当前节点值合法, 则修剪左右子树
+        root.left = self.trimBST(root.left, low, high)
+        root.right = self.trimBST(root.right, low, high)
+        return root
