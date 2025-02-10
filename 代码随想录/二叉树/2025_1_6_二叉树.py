@@ -841,25 +841,45 @@ class Solution:
     def binaryTreePaths(self, root: Optional[TreeNode]) -> List[str]:
         """ 257.二叉树的所有路径 \n
             父节点指向子节点的路径--先序递归/回溯 """
-        def func(node, path, res):
-            path.append(node.val)       # 就是这里有点特殊, 写在了终止条件之前, 想想确是如此
-            # 终止条件
-            if not (node.left or node.right):
-                res.append("->".join([str(val) for val in path]))
-                return
-            # 单层递归逻辑
-            if node.left:
-                func(node.left, path, res)
-                path.pop()
-            if node.right:
-                func(node.right, path, res)
-                path.pop()
+        # def func(node, path, res):
+        #     path.append(node.val)       # 就是这里有点特殊, 写在了终止条件之前, 想想确是如此
+        #     # 终止条件
+        #     if not (node.left or node.right):
+        #         res.append("->".join([str(val) for val in path]))
+        #         return
+        #     # 单层递归逻辑
+        #     if node.left:
+        #         func(node.left, path, res)
+        #         path.pop()
+        #     if node.right:
+        #         func(node.right, path, res)
+        #         path.pop()
         
-        path = []
-        res = []
+        # path = []
+        # res = []
+        # if not root:
+        #     return res
+        # func(root, path, res)
+        # return res
+
+        # 尝试迭代法_参考答案
+        # 路径一般先序遍历, 方便记录父节点指向子节点
         if not root:
-            return res
-        func(root, path, res)
+            return []
+        stack = [root]
+        path_st = [[root.val]]
+        res = []
+        while stack:
+            node = stack.pop()
+            path = path_st.pop()
+            if not (node.left or node.right):
+                res.append('->'.join([str(p) for p in path]))
+            if node.right:
+                stack.append(node.right)
+                path_st.append(path + [node.right.val])
+            if node.left:
+                stack.append(node.left)
+                path_st.append(path + [node.left.val])
         return res
     
     def sumOfLeftLeaves(self, root: Optional[TreeNode]) -> int:
@@ -1633,4 +1653,54 @@ class Solution:
         # 当前节点值合法, 则修剪左右子树
         root.left = self.trimBST(root.left, low, high)
         root.right = self.trimBST(root.right, low, high)
+        return root
+    
+    def sortedArrayToBST(self, nums: List[int]) -> Optional[TreeNode]:
+        """ 108.将有序数组转化为二叉搜索树 """
+        # 时间:O(n) 空间:O(logn)
+        def func(nums, left, right):
+            if left > right:
+                return
+            mid = (left + right) // 2
+            root = TreeNode(nums[mid])
+            root.left = func(nums, left, mid - 1)
+            root.right = func(nums, mid + 1, right)
+            return root
+        return func(nums, 0, len(nums) - 1)
+    
+    def convertBST(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+        """ 538.把二叉搜索树转化为累加树 \n
+            二叉搜索树是有序的, 累加树即右中左访问得到数组后, 从后往前累加 """
+        # 反中序递归
+        # 时间:O(n) 空间:O(logn)
+        # pre = 0     # 前一个节点值
+
+        # def func(cur):
+        #     if not cur:
+        #         return
+        #     func(cur.right)
+        #     nonlocal pre
+        #     cur.val += pre
+        #     pre = cur.val
+        #     func(cur.left)
+        
+        # func(root)
+        # return root
+
+        # 反中序迭代_忘了吧, 还是要复习
+        # 时间:O(n) 空间:O(n)
+        if not root:
+            return None
+        stack = []
+        cur = root
+        pre = 0         # 前一个节点值
+        while cur or stack:
+            if cur:
+                stack.append(cur)
+                cur = cur.right
+            else:
+                cur = stack.pop()
+                cur.val += pre
+                pre = cur.val
+                cur = cur.left
         return root
