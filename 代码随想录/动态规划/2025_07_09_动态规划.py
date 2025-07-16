@@ -151,6 +151,196 @@ class Solution:
             for j in range(1, i + 1):
                 dp[i] += dp[j - 1] * dp[i - j]      # 同样, 递推公式不好想
         return dp[-1]
+    
+    def bag01(self):
+        """ 01背包理论 """
+        weights = [1, 3, 4]
+        values = [15, 20, 30]
+        bagWeight = 4
+        dp = [[0] * (bagWeight + 1) for _ in range(len(weights))]   # dp[i][j] 从0~i选择物品, 背包容量为j, 最大价值为dp[i][j]
+        for j in range(weights[0], bagWeight + 1):
+            dp[0][j] = values[0]
+        for i in range(1, len(weights)):        # 先遍历物品
+            for j in range(weights[i], bagWeight + 1):  # 再遍历背包
+                dp[i][j] = max(dp[i - 1][j], dp[i - 1][j - weights[i]] + values[i])
+        return dp[-1][-1]
+    
+    def test_kama46(self):
+        """ 卡码网 46. 携带研究材料 """
+        m, n = map(int, input().split())        # m:物品数量 n:背包容量
+        weights = list(map(int, input().split()[:m]))
+        values = list(map(int, input().split()[:m]))
+        # m, n = 6, 1
+        # weights = [2, 2, 3, 1, 5, 2]
+        # values =  [2, 3, 1, 5, 4, 3]
+        # _wv = [[w, v] for w, v in zip(weights, values)]       # 下面遍历容量的地方从头开始后, 这里也不需要了
+        # _wv.sort(key=lambda x: x[0])
+        # weights.clear()
+        # values.clear()
+        # for w, v in _wv:
+        #     weights.append(w)
+        #     values.append(v)
+        # print(f'>>> m:{m} n:{n}\n'
+        #       f'>>> weights:{weights}\n'
+        #       f'>>> values: {values}')
+
+        dp = [[0] * (n + 1) for _ in range(m)]  # dp[i][j] 从0~i中选取物品 背包容量为j, 最大价值是dp[i][j]
+        for j in range(weights[0], n + 1):
+            dp[0][j] = values[0]
+
+        for i in range(1, m):
+            for j in range(1, n + 1):       # 遍历的起始位置, 保险起见从头开始, 有可能会报错
+                if j < weights[i]:
+                    dp[i][j] = dp[i - 1][j]
+                else:
+                    dp[i][j] = max(dp[i - 1][j], dp[i - 1][j - weights[i]] + values[i])
+        # for line in dp:
+        #     print(line)
+        print(dp[-1][-1])
+
+    def bag01_(self):
+        """ 01背包理论\n
+            优化空间 滚动数组 """
+        # m, n = 6, 1
+        # weights = [2, 2, 3, 1, 5, 2]
+        # values =  [2, 3, 1, 5, 4, 3]
+        m, n = map(int, input().split())
+        weights = list(map(int, input().split()))
+        values = list(map(int, input().split()))
+        dp = [0] * (n + 1)
+        # for j in range(weights[0], n + 1):            # 不必初始化
+        #     dp[j] = values[0]
+        for i in range(m):
+            for j in range(n, weights[i] - 1, -1):      # 01背包的一维数组一定倒序 否则会重复放入--原因由推导公式可知
+                dp[j] = max(dp[j], dp[j - weights[i]] + values[i])
+        print(dp[-1])
+
+    def canPartition(self, nums: List[int]) -> bool:
+        """ 416.分割等和子集 """
+        # 时间:O(mxn) 空间:O(n)
+        if sum(nums) % 2:
+            return False
+        
+        n = len(nums)
+        bagWeight = sum(nums) // 2
+        dp = [0] * (bagWeight + 1)      # dp[j]表示装满容量j的背包最大价值是dp[j]
+        for i in range(n):
+            for j in range(bagWeight, nums[i] - 1, -1):     # 一维dp, 遍历容量倒序
+                dp[j] = max(dp[j], dp[j - nums[i]] + nums[i])
+        # for line in dp:
+        #     print(line)
+        return dp[-1] == bagWeight
+    
+    def lastStoneWeightII(self, stones: List[int]) -> int:
+        """ 1049.最后一块石头的重量II \n
+            思路 416.分割等和子集 """
+        # 时间:O(mxn) 空间:O(n)
+        bagWeight = sum(stones) // 2
+        dp = [0] * (bagWeight + 1)      # dp[j]表示装满容量为j的背包所得最大价值
+        for i in range(len(stones)):
+            for j in range(bagWeight, stones[i] - 1, -1):
+                dp[j] = max(dp[j], dp[j - stones[i]] + stones[i])
+        return sum(stones) - dp[-1] * 2
+    
+    def findTargetSumWays(self, nums: List[int], target: int) -> int:
+        """ 494.目标和 \n
+            由 left + right = sum \n
+               left - right = target, 得left = (sum + target) / 2 \n
+            之前是求容量为j的背包最多能装多少, 本题是求装满最多有多少种方法--组合问题 """
+        # 时间:O(mxn) 空间:O(mxn)
+        # if sum(nums) < abs(target):
+        #     return 0
+        # if (sum(nums) + target) % 2:
+        #     return 0
+        # m = len(nums)                       # 物品数量
+        # n = (sum(nums) + target) // 2       # bagWeight
+        # dp = [[0] * (n + 1) for _ in range(m)]  # dp[i][j] 从[0,i]选物品 装满 容量为j的背包, 最多有dp[i][j]种办法
+        # _zeroNum = 0
+        # for i in range(m):            # 初始化列, 注意nums元素为0
+        #     if nums[i] == 0:
+        #         _zeroNum += 1
+        #     dp[i][0] = 2 ** _zeroNum
+        # for j in range(1, n + 1):     # 初始化行, 这里没想清楚
+        #     if j == nums[0]:
+        #         dp[0][j] = 1
+        # for i in range(1, m):
+        #     for j in range(1, n + 1):
+        #         if j < nums[i]:
+        #             dp[i][j] = dp[i - 1][j]
+        #         else:
+        #             dp[i][j] = dp[i - 1][j] + dp[i - 1][j - nums[i]]
+        # for line in dp:
+        #     print(line)
+        # return dp[-1][-1]
+
+        ## 一维dp
+        # 时间:O(mxn) 空间:O(n)
+        # if (sum(nums) + target) % 2:
+        #     return 0
+        # if sum(nums) < abs(target):
+        #     return 0
+        # bagWeight = (sum(nums) + target) // 2
+        # dp = [0] * (bagWeight + 1)      # dp[j] 装满容量为j的背包最多有dp[j]种方法
+        # dp[0] = 1
+        # for i in range(len(nums)):
+        #     for j in range(bagWeight, nums[i] - 1, -1):
+        #         dp[j] += dp[j - nums[i]]
+        # return dp[-1]
+
+        ## Again
+        # left = (sum + target) / 2
+        # 装满背包有多少种方法 
+        ## 二维dp 推导公式dp[i][j] = dp[i - 1][j] + dp[i - 1][j - nums[i]]
+        # if sum(nums) < abs(target):
+        #     return 0
+        # if (sum(nums) + target) % 2:
+        #     return 0
+        # bagWeight = (sum(nums) + target) // 2
+        # dp = [[0] * (bagWeight + 1) for _ in range(len(nums))]  # dp[i][j] 从[0, i]选取物品装满容量为j的背包有dp[i][j]种方法
+        # _zeroNum = 0
+        # for i in range(len(nums)):          # 初始化首列
+        #     if nums[i] == 0:
+        #         _zeroNum += 1
+        #     dp[i][0] = 2 ** _zeroNum
+        # # if nums[0] <= bagWeight:            # 初始化首行 | 果然有问题, 会覆盖初始化的首列
+        # #     dp[0][nums[0]] = 1
+        # for j in range(1, bagWeight + 1):   # 初始化首行
+        #     if j == nums[0]:
+        #         dp[0][j] = 1
+        # for i in range(1, len(nums)):
+        #     for j in range(1, bagWeight + 1):
+        #         if j < nums[i]:
+        #             dp[i][j] = dp[i - 1][j]
+        #         else:
+        #             dp[i][j] = dp[i - 1][j] + dp[i - 1][j - nums[i]]
+        # return dp[-1][-1]
+        
+        ## 一维dp 推导公式dp[j] += dp[j - nums[i]]
+        if sum(nums) < abs(target):
+            return 0
+        if (sum(nums) + target) % 2:
+            return 0
+        bagWeight = (sum(nums) + target) // 2
+        dp = [0] * (bagWeight + 1)      # 一维dp, 去掉物品i维度
+        dp[0] = 1       # ?
+        for i in range(len(nums)):
+            for j in range(bagWeight, nums[i] - 1, -1):
+                dp[j] += dp[j - nums[i]]
+        return dp[-1]
+
+    def findMaxForm(self, strs: List[str], m: int, n: int) -> int:
+        """ 474.一和零 """
+        from collections import Counter
+
+        # 时间:O(mxn) 空间:O(mxn)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]      # dp[i][j] 有i个0和j个1的最大子集长度为dp[i][j]
+        for s in strs:
+            zeroNum = Counter(s)['0']
+            oneNum = Counter(s)['1']
+            for i in range(m, zeroNum - 1, -1):
+                for j in range(n, oneNum - 1, -1):
+                    dp[i][j] = max(dp[i][j], dp[i - zeroNum][j - oneNum] + 1)
+        return dp[-1][-1]
 
 if __name__ == '__main__':
     """
@@ -163,5 +353,6 @@ if __name__ == '__main__':
     """
     sl = Solution()
 
-    n = 1
-    print(sl.numTrees(n))
+    nums = [1, 1, 1, 1]
+    target = -1000
+    print(sl.findTargetSumWays(nums, target))
