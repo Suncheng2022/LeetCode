@@ -2,6 +2,7 @@
 07.09   是的, 该走了
 """
 from typing import List
+from ipdb import set_trace as st
 
 class Solution:
     def fib(self, n: int) -> int:
@@ -341,6 +342,182 @@ class Solution:
                 for j in range(n, oneNum - 1, -1):
                     dp[i][j] = max(dp[i][j], dp[i - zeroNum][j - oneNum] + 1)
         return dp[-1][-1]
+    
+    def complete_bag(self):
+        """ 完全背包理论基础 \n
+            与01背包的差别:
+                01背包递推公式  dp[i][j] = max(dp[i - 1][j], dp[i - 1][j - weights[i]] + values[i])
+                完全背包递推公式 dp[i][j] = max(pd[i - 1][j], dp[i][j - weights[i]] + values[i])
+            卡码网 52. 携带研究材料 """
+        n, v = map(int, input().split())        # n物品数量 v背包容量
+        weights = []
+        values = []
+        for _ in range(n):
+            wi, vi = map(int, input().split())
+            weights.append(wi)
+            values.append(vi)
+        dp = [[0] * (v + 1) for _ in range(n)]
+        # for i in range(n):                      # 初始化首列, 虽然多余, 强调一下吧. 这句带着竟然会超时
+        #     dp[i][0] = 0
+        for j in range(weights[0], v + 1):      # 初始化首行
+            dp[0][j] = dp[0][j - weights[0]] + values[0]
+        for i in range(1, n):
+            for j in range(v + 1):
+                if j < weights[i]:
+                    dp[i][j] = dp[i - 1][j]
+                else:
+                    dp[i][j] = max(dp[i - 1][j], dp[i][j - weights[i]] + values[i])
+        
+        print(dp[-1][-1])
+
+    def change(self, amount: int, coins: List[int]) -> int:
+        """ 518.零钱兑换II \n
+            01背包: 装满背包所得最大价值是多少      递推公式: dp[i][j] = max(dp[i - 1][j], dp[i - 1][j - weights[i]] + values[i]) \n
+            纯完全背包: 装满背包所得最大价值是多少   递推公式: dp[i][j] = max(dp[i - 1][j], dp[i][j - weights[i]] + values[i]) \n
+            01背包 组合:装满背包最大组合数         递推公式: dp[i][j] = dp[i - 1][j] + dp[i - 1][j - weights[i]] \n
+            本题: 装满背包的组合数 (组合, 没有顺序) 递推公式: dp[i][j] = dp[i - 1][j] + dp[i][j - weights[i]] \n """
+        # 时间:O(mxn) 空间:O(mxn)
+        # dp = [[0] * (amount + 1) for _ in range(len(coins))]        # dp[i][j] 从[0, i]选物品, 装满容量为j的背包的组合数
+        # for i in range(len(coins)):     # 初始化首列
+        #     dp[i][0] = 1
+        # for j in range(1, amount + 1):  # 初始化首行
+        #     if j % coins[0] == 0:
+        #         dp[0][j] = 1
+        # for i in range(1, len(coins)):
+        #     for j in range(amount + 1):
+        #         if j < coins[i]:
+        #             dp[i][j] = dp[i - 1][j]
+        #         else:
+        #             dp[i][j] = dp[i - 1][j] + dp[i][j - coins[i]]
+        # return dp[-1][-1]
+
+        ## 一维dp
+        # 时间:O(mxn) 空间:O(n)
+        dp = [0] * (amount + 1)     # dp[j] 装满容量为j的背包的组合数量(注: 组合没有顺序)
+        dp[0] = 1
+        for i in range(len(coins)):
+            for j in range(coins[i], amount + 1):
+                dp[j] += dp[j - coins[i]]       # 求 组合数/装满背包有多少种方法, 都是这个公式
+        return dp[-1]
+    
+    def combinationSum4(self, nums: List[int], target: int) -> int:
+        """ 377.组合总和IV \n
+            完全背包 \n
+            排列, 有顺序 """
+        # 时间:O(mxn) 空间:O(n)
+        dp = [0] * (target + 1)     # dp[j] 装满容量为j的背包有多少种方法 区分顺序 可重复拿
+        dp[0] = 1
+        for j in range(1, target + 1):
+            for i in range(len(nums)):
+                if nums[i] <= j:
+                    dp[j] += dp[j - nums[i]]
+        return dp[-1]
+    
+    def climb_(self):
+        """ 卡码网 57.爬楼梯 进阶版 \n
+            完全背包 \n
+            排列, 有序 """
+        # 提交正确
+        n, m = map(int, input().split())        # n台阶数 m至多爬m阶
+        dp = [0] * (n + 1)          # dp[j] 装满容量为j的背包有多少种方法 完全背包 有顺序
+        dp[0] = 1
+        for j in range(1, n + 1):
+            for i in range(1, m + 1):   # 遍历物品 注意, 物品取值为1~m
+                if i <= j:
+                    dp[j] += dp[j - i]
+        print(dp[-1])
+
+    def coinChange(self, coins: List[int], amount: int) -> int:
+        """ 322.零钱兑换 \n
+            有点难度 好多细节 \n
+            完全背包 \n
+            求组合, 没顺序 --> 本题比较别致, 不关心组合还是排列, 要求的是所需最少硬币数量, 所以内外循环是谁都可以 """
+        # 时间:O(mxn) 空间:O(n)
+        # dp = [float('inf')] * (amount + 1)     # dp[j] 装满容量为j的背包的所需最少硬币数量 -- 同时思考递推公式
+        # dp[0] = 0
+        # for i in range(len(coins)):
+        #     for j in range(coins[i], amount + 1):
+        #         dp[j] = min(dp[j], dp[j - coins[i]] + 1)
+        # return dp[-1] if dp[-1] != float('inf') else -1
+
+        ## Again
+        # 先遍历物品
+        # dp = [float('inf')] * (amount + 1)    # dp[j] 装满容量为j的背包所需最少硬币数量
+        # dp[0] = 0       # 递推基准
+        # for i in range(len(coins)):
+        #     for j in range(coins[i], amount + 1):
+        #         dp[j] = min(dp[j], dp[j - coins[i]] + 1)
+        # return dp[-1] if dp[-1] != float('inf') else -1
+
+        # 先遍历背包
+        dp = [float('inf')] * (amount + 1)
+        dp[0] = 0
+        for j in range(1, amount + 1):
+            for i in range(len(coins)):
+                if coins[i] <= j:
+                    dp[j] = min(dp[j], dp[j - coins[i]] + 1)
+        return dp[-1] if dp[-1] != float('inf') else -1
+
+    def numSquares(self, n: int) -> int:
+        """ 279.完全平方数 \n
+            由题意:
+                完全背包 \n
+                既不是组合也不是排列, 是求最小的数量, 所以内外遍历顺序无所谓 """
+        # 时间:O(mxn) 空间:O(n)
+        # dp = [float('inf')] * (n + 1)      # dp[j] 装满容量为j的背包所需完全平方数的最少数量为dp[j]
+        # dp[0] = 0                          # 纯为递推 根据题意
+        # for i in range(1, n + 1):
+        #     for j in range(i ** 2, n + 1):
+        #         dp[j] = min(dp[j], dp[j - i ** 2] + 1)
+        # return dp[-1]
+
+        ## 先遍历背包
+        dp = [float('inf')] * (n + 1)
+        dp[0] = 0       # 不容易想到
+        for j in range(1, n + 1):
+            for i in range(1, n + 1):
+                if i ** 2 > j:
+                    break
+                dp[j] = min(dp[j], dp[j - i ** 2] + 1)
+        return dp[-1]
+
+    def wordBreak(self, s: str, wordDict: List[str]) -> bool:
+        """ 139.单词拆分 \n
+            完全背包 \n
+            >>> 居然是求排列 <<< """
+        # 时间:O(mxn) 空间:O(n)
+        dp = [False] * (len(s) + 1)     # dp[j] 容量为j的背包能被单词字典装满
+        dp[0] = True
+        for j in range(1, len(s) + 1):
+            for word in wordDict:
+                length_word = len(word)
+                if length_word <= j and dp[j - length_word] and s[j - length_word:j] in wordDict:
+                    dp[j] = True
+        return dp[-1]
+    
+    def multipleBags(self):
+        """ 卡码网 56. 携带矿石资源 \n
+            多重背包 转为 01背包 """
+        # 提交超时, 不过你是懂其中原理的哈哈, 花了不少时间
+        c, n = map(int, input().strip().split())            # c背包容量 n物品种类数量
+        weights = list(map(int, input().strip().split()))
+        values = [int(x) for x in input().strip().split() if x]
+        nums = list(map(int, input().strip().split()))
+        # _ws = []
+        # _vs = []
+        # for i, _n in enumerate(nums):
+        #     _ws.extend([weights[i]] * _n)
+        #     _vs.extend([values[i]] * _n)
+        # weights = _ws
+        # values = _vs
+        dp = [0] * (c + 1)      # dp[j] 容量为j的背包最多能装下物品的价值为dp[j]
+        for i in range(n):
+            for j in range(c, weights[i] - 1, -1):
+                for k in range(1, nums[i] + 1):         # 物品i最多能放nums[i], 这是在模拟能放多少个 --> 总的意思就是01背包, 你细品
+                    if k * weights[i] > j:
+                        break
+                    dp[j] = max(dp[j], dp[j - k * weights[i]] + k * values[i])
+        print(dp[-1])
 
 if __name__ == '__main__':
     """
@@ -353,6 +530,6 @@ if __name__ == '__main__':
     """
     sl = Solution()
 
-    nums = [1, 1, 1, 1]
-    target = -1000
-    print(sl.findTargetSumWays(nums, target))
+    s = "catsandog"
+    wordDict = ["cats", "dog", "sand", "and", "cat"]
+    print(sl.multipleBags())
