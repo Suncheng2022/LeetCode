@@ -1107,6 +1107,137 @@ class Solution:
         # elif not (left or right):
         #     return None
         
+    def insertIntoBST(self, root: Optional[TreeNode], val: int) -> Optional[TreeNode]:
+        """ 701.二叉搜索树中的插入操作 """
+        ## 递归. 将插入的返回值返回给上层, 上层接住, 这样就完成了新建节点和父节点的连接
+        # # 终止条件
+        # if not root:
+        #     return TreeNode(val)
+        # # 递归逻辑
+        # if root.val < val:
+        #     root.right = self.insertIntoBST(root.right, val)
+        # elif root.val > val:
+        #     root.left = self.insertIntoBST(root.left, val)
+        # return root
+
+        ## 迭代 为容易建立父子节点关系, 从上到下遍历
+        ## BST与中序遍历是好朋友
+        # if not root:
+        #     return TreeNode(val)
+        # cur = root
+        # parent = None
+        # while cur:
+        #     if cur.val > val:
+        #         parent = cur
+        #         cur = cur.left
+        #         if not cur:
+        #             parent.left = TreeNode(val)
+        #             return root
+        #     elif cur.val < val:
+        #         parent = cur
+        #         cur = cur.right
+        #         if not cur:
+        #             parent.right = TreeNode(val)
+        #             return root
+
+        ## 迭代 答案优雅版
+        if not root:
+            return TreeNode(val)
+        pre = None
+        cur = root
+        while cur:
+            pre = cur
+            if cur.val < val:
+                cur = cur.right
+            elif cur.val > val:
+                cur = cur.left
+        if pre.val < val:
+            pre.right = TreeNode(val)
+        else:
+            pre.left = TreeNode(val)
+        return root
+    
+    def deleteNode(self, root: Optional[TreeNode], key: int) -> Optional[TreeNode]:
+        """ 450.删除二叉搜索树中的节点 """
+        ## 递归
+        # 终止条件
+        if not root:
+            return None
+        # 递归逻辑
+        if root.val == key:
+            if not (root.left or root.right):
+                return None
+            elif not root.left and root.right:
+                return root.right
+            elif root.left and not root.right:
+                return root.left
+            else:
+                cur = root.right
+                while cur.left:
+                    cur = cur.left
+                cur.left = root.left
+                return root.right
+        elif root.val > key:
+            root.left = self.deleteNode(root.left, key)
+        elif root.val < key:
+            root.right = self.deleteNode(root.right, key)
+        return root
+    
+    def trimBST(self, root: Optional[TreeNode], low: int, high: int) -> Optional[TreeNode]:
+        """ 669.修剪二叉搜索树 """
+        ## 递归 与上面删除BST某节点还不一样
+        # if not root:
+        #     return None
+        # if root.val < low:      # 如果 当前节点<low,  那么当前节点及其左子树肯定都不符合
+        #     return self.trimBST(root.right, low, high)
+        # elif root.val > high:   # 如果 当前节点>high, 那么当前节点及其右子树肯定都不符合
+        #     return self.trimBST(root.left, low, high)
+        # else:                   # 如果 当前节点符合范围, 那么递归修剪其左右子树
+        #     root.left = self.trimBST(root.left, low, high)
+        #     root.right = self.trimBST(root.right, low, high)
+        # return root
+
+    def sortedArrayToBST(self, nums: List[int]) -> Optional[TreeNode]:
+        """ 108.将有序数组转化为二叉搜索树 """
+        if not nums:
+            return None
+        rootVal = nums[(len(nums) - 1) // 2]        # mid = (left + right) / 2
+        ind = nums.index(rootVal)
+        root = TreeNode(rootVal)
+        root.left = self.sortedArrayToBST(nums[:ind])
+        root.right = self.sortedArrayToBST(nums[ind + 1:])
+        return root
+    
+    def convertBST(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+        """ 538.把二叉搜索树转换为累加树 """
+        ## 递归 模板
+        # preVal = 0
+        # def backtrack(node):
+        #     nonlocal preVal
+        #     if not node:
+        #         return None
+        #     backtrack(node.right)
+        #     node.val += preVal
+        #     preVal = node.val
+        #     backtrack(node.left)
+        
+        # backtrack(root)
+        # return root
+
+        ## 迭代法 就是中序迭代模板题了
+        stack = []
+        cur = root
+        preVal = 0
+        while cur or stack:
+            if cur:
+                stack.append(cur)
+                cur = cur.right
+            else:
+                node = stack.pop(-1)
+                node.val += preVal
+                preVal = node.val
+                cur = node.left
+        return root
 
 
 if __name__ == '__main__':
