@@ -571,27 +571,6 @@ class Solution:
         # backtracking(nums)
         # return res
 
-        # Again
-        # 要点: nums有重复
-        path = []
-        res = []
-        used = [False] * len(nums)
-        nums.sort()
-        def backtracking():
-            if len(path) == len(nums):
-                res.append(path[:])
-                return
-            for i in range(len(nums)):
-                if i > 0 and nums[i - 1] == nums[i] and used[i - 1] == False:
-                    continue
-                path.append(nums[i])
-                used[i] = True
-                backtracking()
-                used[i] = False
-                path.pop()
-        backtracking()
-        return res
-    
 if __name__ == "__main__":
     sl = Solution()
 
