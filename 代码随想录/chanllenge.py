@@ -25,8 +25,8 @@ def numIslands_1():
                 dfs(i, j)       # 标记邻接区域
     return res
 
-res = numIslands_1()
-print(res)
+# res = numIslands_1()
+# print(res)
 
 def numIslands_1():
     """ 岛屿问题（一）：岛屿数量 广度搜索 """
@@ -58,9 +58,9 @@ def numIslands_1():
                 bfs(i, j)
     return res
 
-if __name__ == "__main__":
-    res = numIslands_1()
-    print(res)
+# if __name__ == "__main__":
+#     res = numIslands_1()
+#     print(res)
 
 def numIsland_3():
     """ 岛屿问题(三): 岛屿的最大面积\n
@@ -90,9 +90,9 @@ def numIsland_3():
                 max_res = max(max_res, cur_count)
     return max_res
 
-if __name__ == "__main__":
-    res = numIsland_3()
-    print(res)
+# if __name__ == "__main__":
+#     res = numIsland_3()
+#     print(res)
 
 def numIsland_3():
     """ 岛屿问题(三): 岛屿的最大面积\n
@@ -128,9 +128,9 @@ def numIsland_3():
                 max_res = max(max_res, cur_count)
     return max_res
 
-if __name__ == "__main__":
-    res = numIsland_3()
-    print(res)
+# if __name__ == "__main__":
+#     res = numIsland_3()
+#     print(res)
 
 def numIsland_4():
     """ 岛屿问题(四):孤岛的总面积 \
@@ -168,8 +168,8 @@ def numIsland_4():
                 res += 1
     return res
 
-if __name__ == "__main__":
-    print(numIsland_4())
+# if __name__ == "__main__":
+#     print(numIsland_4())
 
 def numIsland_4():
     """ 岛屿问题(四):孤岛的总面积 \
@@ -211,8 +211,8 @@ def numIsland_4():
                 res += 1
     return res
 
-if __name__ == "__main__":
-    print(numIsland_4())
+# if __name__ == "__main__":
+#     print(numIsland_4())
 
 # ========================= 第一次实现 ==============================
 from typing import List
@@ -372,3 +372,80 @@ class Solution:
                 elif grid[i][j] == 2:
                     grid[i][j] = 1
         return grid
+    
+    def func(s):
+        """
+        新东方一面
+        LeetCode 227 基本计算器 II、772 等
+        1.按符号分开, 数字入队列
+        2.遍历符号, 按优先级计算
+        """
+        stack = []
+        sign = '+'
+        num = 0
+        for i in range(len(s)):
+            # 若是数字
+            if s[i].isdigit():
+                num = num * 10 + int(s[i])
+            # 若是符号
+            if not s[i].isdigit() or i == len(s) - 1:
+                if sign == '+':
+                    stack.append(num)
+                elif sign == '-':
+                    stack.append(-num)
+                elif sign == '*':
+                    _top = stack.pop()
+                    stack.append(_top * num)
+                elif sign == '/':
+                    _top = stack.pop()
+                    stack.append(int(_top / num))   # 为什么取整?
+            
+                sign = s[i]
+                num = 0
+
+        return sum(stack)
+
+    def calculate(self, s: str) -> int:
+        """ 227.基本计算器II """
+        s = s.replace(' ', '')
+        stack = []
+        sign = '+'
+        num = 0
+        for i in range(len(s)):
+            if s[i].isdigit():
+                num = num * 10 + int(s[i])
+            
+            if not s[i].isdigit() or i == len(s) - 1:
+                if sign == '+':
+                    stack.append(num)
+                elif sign == '-':
+                    stack.append(-num)
+                elif sign == '*':
+                    stack.append(stack.pop() * num)
+                elif sign == '/':
+                    stack.append(int(stack.pop() / num))
+                sign = s[i]
+                num = 0
+        return sum(stack)
+
+    def findKthPositive(self, arr: List[int], k: int) -> int:
+        """ 1539.第k个缺失的正整数 \n
+            字节视频搜索一面 """
+        cur = 1         # 当前遍历的数字, 题目已说明从1开始
+        miss_count = 0  # 缺失数字计数
+        i = 0           # 当前遍历的下标
+        while True:
+            if i < len(arr) and arr[i] == cur:
+                i += 1
+            else:
+                miss_count += 1
+                if miss_count == k:
+                    return cur
+            cur += 1
+    
+    """
+    字节视频搜索一面 \n
+    问题:20个苹果，分给5个人，每人至少一个苹果，多少种方法？ \n
+    每人先分1个, 用掉5个.
+    剩下15个, 怎么分, 相当于将15个苹果分为5份, 有的份可以为0 --> 往15个苹果中间插4个板子, 从 15 + 4 = 19 个位置里，挑 4 个位置放板子, 即C_19^4
+    """
