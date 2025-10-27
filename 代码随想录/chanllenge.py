@@ -172,7 +172,8 @@ def numIsland_4():
 #     print(numIsland_4())
 
 def numIsland_4():
-    """ 岛屿问题(四):孤岛的总面积 \
+    """ 1020.飞地的数量 \n
+        岛屿问题(四):孤岛的总面积 \
         bfs """
     m, n = map(int, input().split())
     grid = [list(map(int, input().split())) for _ in range(m)]
@@ -271,7 +272,8 @@ class Solution:
         return res
     
     def numIsland_area(self, grid: List[List[int]]) -> int:
-        """ 岛屿问题（三）：最大面积 """
+        """ 659.岛屿的最大面积  \n
+            岛屿问题（三）：最大面积 """
         m, n = len(grid), len(grid[0])
         visited = [[False] * n for _ in range(m)]
         max_area = 0
@@ -297,7 +299,8 @@ class Solution:
         return max_area
     
     def numIsland_4(self, grid: List[List[int]]) -> int:
-        """ 岛屿问题（四）：孤岛的总面积 """
+        """ 同 659.岛屿的最大面积\n
+            岛屿问题（四）：孤岛的总面积 """
         # 按ACM格式
         res = 0
         m, n = map(int, input().split())
@@ -337,7 +340,8 @@ class Solution:
     
     from typing import List
     def numIsland_5() -> List[List[int]]:
-        """ 岛屿问题（五）：沉没孤岛 \n
+        """ 这个题不太好理解, skip it. \n
+            岛屿问题（五）：沉没孤岛 \n
             按照ACM格式输入 """
         m, n = map(int, input().split())
         grid = [list(map(int, input().split())) for _ in range(m)]
