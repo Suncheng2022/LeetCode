@@ -1,7 +1,13 @@
 '''
 10.26   执行力这么差?
 '''
-from typing import List
+from typing import List, Optional
+
+# Definition for singly-linked list.
+class ListNode:
+    def __init__(self, x):
+        self.val = x
+        self.next = None
 
 class Solution:
     def twoSum(self, nums: List[int], target: int) -> List[int]:
@@ -245,10 +251,178 @@ class Solution:
             res[i] *= tmp
             tmp *= nums[i]
         return res
+    
+    def setZeroes(self, matrix: List[List[int]]) -> None:
+        """
+        73.矩阵置零 \n
+        Do not return anything, modify matrix in-place instead.
+        """
+        zero_rows = []
+        zero_cols = []
+        for i in range(len(matrix)):
+            for j in range(len(matrix[0])):
+                if matrix[i][j] == 0:
+                    zero_rows.append(i)
+                    zero_cols.append(j)
+        for i in zero_rows:
+            matrix[i] = [0] * len(matrix[0])
+        for j in zero_cols:
+            for i in range(len(matrix)):
+                matrix[i][j] = 0
         
+    def spiralOrder(self, matrix: List[List[int]]) -> List[int]:
+        """ 54.螺旋矩阵 """
+        l, r = 0, len(matrix[0]) - 1
+        t, b = 0, len(matrix) - 1
+        res = []
+        while True:
+            for i in range(l, r + 1):
+                res.append(matrix[t][i])
+            t += 1
+            if t > b:
+                break
+
+            for i in range(t, b + 1):
+                res.append(matrix[i][r])
+            r -= 1
+            if l > r:
+                break
+
+            for i in range(r, l - 1, -1):
+                res.append(matrix[b][i])
+            b -= 1
+            if t > b:
+                break
+
+            for i in range(b, t - 1, -1):
+                res.append(matrix[i][l])
+            l += 1
+            if l > r:
+                break
+        return res
+    
+    def rotate(self, matrix: List[List[int]]) -> None:
+        """
+        48.旋转图像 \n
+        Do not return anything, modify matrix in-place instead.
+        """
+
+        ## 顺时针转90° = 转置 + 行反转
+        n = len(matrix)
+        for i in range(n):
+            for j in range(i):
+                matrix[i][j], matrix[j][i] = matrix[j][i], matrix[i][j]
+        for i in range(n):
+            matrix[i] = matrix[i][::-1]     # 列表的reverse()是原地操作
+
+        ## not in-place
+        # n = len(matrix)
+        # res = [[0] * n for _ in range(n)]
+        # for i in range(n):
+        #     for j in range(n):
+        #         res[j][n - 1 - i] = matrix[i][j]    # i,j是matrix的, 更好理解
+        # matrix[:] = res
+
+    def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+        """ 240.搜索二维矩阵II """
+        def binarySearch(nums):
+            l, r = 0, len(nums) - 1
+            while l <= r:
+                m = (l + r) // 2
+                if nums[m] == target:
+                    return True
+                elif nums[m] > target:
+                    r = m - 1
+                else:
+                    l = m + 1
+            return False
+        
+        for row in matrix:
+            if binarySearch(row):
+                return True
+        return False
+    
+    def getIntersectionNode(self, headA: ListNode, headB: ListNode) -> Optional[ListNode]:
+        """ 160.相交链表 """
+        pA, pB = headA, headB
+        while pA != pB:
+            pA = pA.next if pA else headB       # pA走完A, 就开始走B. 设A的长度=a+c
+            pB = pB.next if pB else headA       # pB走完B, 就开始走A. 设B的长度=b+c. 这个步骤相当于让pA pB都走a+b+c步, 总会相遇
+        return pA
+        
+        ## 自己想到两层循环遍历 超时
+
+    def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        """ 206.反转链表 """
+        pre = None
+        cur = head
+        while cur:
+            next = cur.next
+            cur.next = pre
+            pre = cur
+            cur = next
+        return pre
+
+        ## 自己写的能过, 但感觉不太优雅
+        # if not head:
+        #     return head
+        
+        # stack = []
+        # pH = head
+        # while pH:
+        #     stack.append(pH)
+        #     pH = pH.next
+        # pH = stack.pop()
+        # res = pH
+        # while stack:
+        #     node = stack.pop()
+        #     pH.next = node
+        #     pH = node
+        # pH.next = None
+        # return res
+
+    def isPalindrome(self, head: Optional[ListNode]) -> bool:
+        """ 234.回文链表 """
+        ## 思路简单, 不够优雅
+        # stack = []
+        # while head:
+        #     stack.append(head.val)
+        #     head = head.next
+        
+        # l, r = 0, len(stack) - 1
+        # while l <= r:
+        #     if stack[l] != stack[r]:
+        #         return False
+        #     l += 1
+        #     r -= 1
+        # return True
+        
+        ## 借鉴 206.反转链表
+        def reverse_link(head):
+            pre = None
+            while head:
+                next = head.next
+                head.next = pre
+                pre = head
+                head = next
+            return pre
+
+        slow = fast = head
+        while fast.next and fast.next.next:
+            slow = slow.next
+            fast = fast.next.next
+        
+        head2 = reverse_link(slow.next)
+        while head2:
+            if head.val != head2.val:
+                return False
+            head = head.next
+            head2 = head2.next
+        return True
 
 if __name__ == '__main__':
     sl = Solution()
 
-    nums = [1,2,3,4]
-    print(sl.productExceptSelf(nums))
+    matrix = [[1,2,3],[4,5,6],[7,8,9]]
+    print(sl.rotate(matrix))
+    print(matrix)
