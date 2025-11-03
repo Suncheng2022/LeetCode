@@ -499,6 +499,113 @@ class Solution:
         tmp.next = list1 if list1 else list2
         return resHead.next
 
+    def addTwoNumbers(self, l1: Optional[ListNode], l2: Optional[ListNode]) -> Optional[ListNode]:
+        """ 2.两数相加 """
+        cur = head = ListNode()
+        sum, mt10 = 0, False        # 当前位置节点的和; more than 10
+        while l1 or l2:
+            sum = 0
+            if l1:
+                sum += l1.val
+                l1 = l1.next
+            if l2:
+                sum += l2.val
+                l2 = l2.next
+            if mt10 is True:
+                sum += 1
+            cur.next = ListNode(sum % 10)
+            cur = cur.next
+            mt10 = sum >= 10        # 是否进位, 体现在下一位
+        
+        if mt10 is True:
+            cur.next = ListNode(1)
+        return head.next
+
+        ## 效率较低
+        # num1 = 0
+        # i = 0
+        # while l1:
+        #     num1 = l1.val * 10 ** i + num1
+        #     l1 = l1.next
+        #     i += 1
+        # num2 = 0
+        # i = 0
+        # while l2:
+        #     num2 = l2.val * 10 ** i + num2
+        #     l2 = l2.next
+        #     i += 1
+        # res = num1 + num2
+        # head = ListNode()
+        # if res == 0:
+        #     return head
+        # cur = head
+        # while res:
+        #     cur.next = ListNode(res % 10)
+        #     cur = cur.next
+        #     res //= 10
+        # return head.next
+
+    def removeNthFromEnd(self, head: Optional[ListNode], n: int) -> Optional[ListNode]:
+        """ 19.删除链表的倒数第N个节点 """
+        ## 头结点, 简约~
+        dummyHead = ListNode()
+        dummyHead.next = head
+        pre = dummyHead
+        front = end = head
+
+        for _ in range(n):
+            end = end.next
+        while end:
+            pre = front
+            front = front.next
+            end = end.next
+        pre.next = front.next
+        return dummyHead.next
+    
+    def swapPairs(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        """ 24.两两交换链表中的节点 \n
+            就是每两个一组交换, 奇数的话最后一个不动, 别想复杂 """
+        ## 头结点~简约
+        dummyHead = ListNode()
+        dummyHead.next = head
+        prev = dummyHead
+
+        while head and head.next:
+            first = head
+            second = head.next
+
+            prev.next = second
+            first.next = second.next
+            second.next = first
+
+            prev = first
+            head = first.next
+        return dummyHead.next
+        
+        ## 不太容易理解, 边界条件也不好考虑
+        # if not head or not head.next:       # 边界条件, 处理0或1个节点的情况
+        #     return head
+        # cur = head
+        # stack = [cur, cur.next]
+        # cur = cur.next.next                 # 指向第一个未被访问的节点
+
+        # head = stack.pop()
+        # head.next = stack.pop()
+        # pre = head.next                     # 指向最后一个被访问的节点
+
+        # while cur and cur.next:
+        #     stack.extend([cur, cur.next])
+        #     cur = cur.next.next
+
+        #     pre.next = stack.pop()
+        #     pre.next.next = stack.pop()
+        #     pre = pre.next.next
+
+        # if cur and not cur.next:            # 奇数个节点的情况, 处理最后一个节点
+        #     pre.next = cur
+        #     pre = pre.next
+        # pre.next = None                     # pre只想最后一个被访问的节点, 那必然处理一下next指针, 否则可能死循环
+        # return head
 
 if __name__ == '__main__':
     sl = Solution()

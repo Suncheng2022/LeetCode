@@ -181,3 +181,29 @@ class MultiHeadAttention(nn.Module):
         v = v.permute(1, 0, 2).contiguous().view(seq_length, batch_size, -1)                                # [s,b,d]
         v = self.out_proj(v)
         return v
+
+## 10.30    你好慢, 你好墨迹
+def NMS(bboxes, confs, t):
+    bboxes = np.asarray(bboxes)     # [n, 4]
+    confs = np.asarray(confs)       # [n]
+
+    pick_bboxes = []
+    pick_confs = []
+
+    areas = (bboxes[:, 2] - bboxes[:, 0]) * (bboxes[:, 3] - bboxes[:, 1])   # [n]
+    orders = confs.argsort()[::-1]  # [n]
+    while len(orders):
+        ind = orders[0]
+        pick_bboxes.append(bboxes[ind])
+        pick_confs.append(confs[ind])
+
+        xmin = np.maximum(bboxes[ind, 0], bboxes[orders[1:], 0])    # [n - 1]
+        ymin = np.maximum(bboxes[ind, 1], bboxes[orders[1:], 1])    # [n - 1]
+        xmax = np.minimum(bboxes[ind, 2], bboxes[orders[1:], 2])    # [n - 1]
+        ymax = np.minimum(bboxes[ind, 3], bboxes[orders[1:], 3])    # [n - 1]
+        inter_areas = np.maximum(0, xmax - xmin) * np.maximum(0, ymax - ymin)   # [n - 1]
+
+        ious = inter_areas / (areas[ind] + areas[orders[1:]] - inter_areas)     # [n - 1]
+        valid_inds = np.where(ious < t)[0]      # [n - 1]
+        orders = orders[1:][valid_inds]
+    return pick_bboxes, pick_confs

@@ -453,3 +453,31 @@ class Solution:
     每人先分1个, 用掉5个.
     剩下15个, 怎么分, 相当于将15个苹果分为5份, 有的份可以为0 --> 往15个苹果中间插4个板子, 从 15 + 4 = 19 个位置里，挑 4 个位置放板子, 即C_19^4
     """
+
+    def myPow(self, x: float, n: int) -> float:
+        """
+        50.Pow(x, n) \n
+        Shopee图搜一面
+        """
+        ## 优化. 将幂转为二进制
+        if n == 0:
+            return 1
+        if n < 0:
+            x, n = 1 / x, -n
+        res = 1
+        while n:
+            if n & 1:
+                res *= x
+            n >>= 1
+            x *= x      # 如果写成 x = x ** 2, 会不会更明了一点
+        return res
+
+        ## 我的实现--超时
+        # if n == 0:
+        #     return 1
+        # flag = 1 if n > 0 else -1
+        # n = abs(n)
+        # res = 1
+        # for _ in range(n):
+        #     res *= x
+        # return res if flag == 1 else 1 / res

@@ -2,6 +2,8 @@
 08.04   将近一月, 加油!
         参考 实现最正常的版本 吧
 """
+import torch
+import torch.nn.functional as F
 import numpy as np
 
 def NMS(bboxes, confs, threshold):
@@ -261,23 +263,17 @@ def forward(self, batch):
     text_emb = self.TextEmbedding(text_feats)      # [batch, d_emb]
     
     # == CLIP应该还对特征做一个归一化, 这样下面计算相似度时才准确, 不会受向量长度影响了
-    img_emb = img_emb.normalization(p=2, dim=-1)
-    text_emb = text_emb.normalization(p=2, )
+    img_emb = F.normalize(img_emb, p=2, dim=-1)    # [batch, d_emb]
+    text_emb = F.normalize(text_emb, p=2, dim=-1)  # [batch, d_emb]
     
-    logits = (img_emb @ text_emb.T) / temperature  # [batch, batch], 温度也可学习, 控制softmax的平滑程度
+    logits_per_img = (img_emb @ text_emb.T) / temperature  # [batch, batch], 温度也可学习, 控制softmax的平滑程度. 对于每一行: 一张图像 vs 所有文本的相似度
+    logits_per_text = logits_per_img.T             #                                                         对于每一行: 一个文本 vs 所有图像的相似度
 
-    img_similar = img_emb @ img_emb.T              # [batch, batch]     # 对角线最大, 肯定和自己最相似
-    text_similar = text_emb @ text_emb.T           # [batch, batch]     # 对角线最大, 肯定和自己最相似
-    targets = ((img_similar + text_similar) / 2).softmax(dim=-1)    # [batch, batch]    # 对角线最大. GT不得softmax一下
+    targets = torch.arrange(len(batch['image']))   # [batch, ]
 
-    img_loss = cross_loss(logits, targets)         # [batch, ]
-    text_loss = cross_loss(logits.T, targets.T)    # [batch, ]
-    loss = (img_loss + text_loss) / 2              # [batch, ]
-    return loss.mean()
-
-def cross_loss(pred, targets):
-    pred = pred.log_softmax(dim=-1)
-    loss = (-targets * pred).sum(dim=1)     # [batch, ]
+    loss_img = F.cross_entropy(logits_per_img, targets)
+    loss_text = F.cross_entropy(logits_per_text, targets)
+    loss = (loss_img + loss_text) / 2
     return loss
 '''
 
