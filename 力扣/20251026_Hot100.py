@@ -420,6 +420,86 @@ class Solution:
             head2 = head2.next
         return True
 
+    def hasCycle(self, head: Optional[ListNode]) -> bool:
+        """ 141.环形链表 """
+        ## 快慢指针
+        slow = fast = head
+        while fast:
+            slow = slow.next
+            fast = fast.next
+            if fast:
+                fast = fast.next
+            
+            if slow == fast:
+                break
+        if not fast:
+            return False
+        return True
+
+        ## 没超时, 但效率不高
+        # nodes = set()
+        # while head is not None:
+        #     if head in nodes:
+        #         return True
+        #     nodes.add(head)
+        #     head = head.next
+        # return False
+
+    def detectCycle(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        """ 142.环形链表II """
+        ## Again, 快慢指针
+        slow = fast = head
+        while fast:
+            slow = slow.next
+            fast = fast.next
+            if fast:
+                fast = fast.next
+            
+            if slow == fast:
+                break
+        if fast is None:        # 没有环
+            return None
+        fast = head
+        while slow != fast:
+            slow = slow.next
+            fast = fast.next
+        return slow             # or return fast
+
+        ## 快慢指针
+        # slow = fast = head
+        # while fast:
+        #     slow = slow.next
+        #     fast = fast.next
+        #     if fast:
+        #         fast = fast.next
+            
+        #     if slow == fast:        # 相遇点
+        #         break
+        
+        # if fast is None:            # 从while跳出, 没有环
+        #     return None
+        # fast = head                 # 从slow==fast跳出, 此时slow在相遇点
+        # while slow != fast:         # 注:可能不会执行, 比如入口就是head
+        #     slow = slow.next
+        #     fast = fast.next
+        # return slow
+
+    def mergeTwoLists(self, list1: Optional[ListNode], list2: Optional[ListNode]) -> Optional[ListNode]:
+        """ 21.合并两个有序链表 """
+        ## 自己还是低效, 答案吧~
+        resHead = tmp = ListNode()
+        while list1 and list2:
+            if list1.val < list2.val:
+                tmp.next = list1
+                list1 = list1.next
+            else:
+                tmp.next = list2
+                list2 = list2.next
+            tmp = tmp.next
+        tmp.next = list1 if list1 else list2
+        return resHead.next
+
+
 if __name__ == '__main__':
     sl = Solution()
 
