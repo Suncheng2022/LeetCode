@@ -9,6 +9,40 @@ class ListNode:
         self.val = x
         self.next = None
 
+# Definition for a Node.
+class Node:
+    def __init__(self, x: int, next: 'Node' = None, random: 'Node' = None):
+        self.val = int(x)
+        self.next = next
+        self.random = random
+
+# Definition for a binary tree node.
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+class LRUCache:
+    """ 146.LRU缓存 """
+    def __init__(self, capacity: int):
+        from collections import OrderedDict
+
+        self.cache = OrderedDict()
+        self.capcity = capacity
+
+    def get(self, key: int) -> int:
+        if key in self.cache:
+            self.cache.move_to_end(key)
+        return self.cache.get(key, -1)
+
+    def put(self, key: int, value: int) -> None:
+        if key in self.cache:
+            self.cache.move_to_end(key)
+        self.cache[key] = value
+        if len(self.cache) > self.capcity:
+            self.cache.popitem(last=False)
+
 class Solution:
     def twoSum(self, nums: List[int], target: int) -> List[int]:
         """ 1.两数之和 """
@@ -606,6 +640,289 @@ class Solution:
         #     pre = pre.next
         # pre.next = None                     # pre只想最后一个被访问的节点, 那必然处理一下next指针, 否则可能死循环
         # return head
+
+    def copyRandomList(self, head: 'Optional[Node]') -> 'Optional[Node]':
+        """ 138.随机链表的复制 """
+        # 参考: https://leetcode.cn/problems/copy-list-with-random-pointer/submissions/675733996/?envType=study-plan-v2&envId=top-100-liked
+        ## 拼接 + 拆分, 空间O(1)
+        if not head:
+            return None
+        cur = head
+        while cur:
+            tmp = Node(cur.val)
+            tmp.next = cur.next
+            cur.next = tmp
+            cur = cur.next.next
+        
+        cur = head
+        while cur:
+            if cur.random:
+                cur.next.random = cur.random.next
+            cur = cur.next.next
+
+        cur = res = head.next
+        while cur.next:
+            cur.next = cur.next.next
+            cur = cur.next
+        cur.next = None
+        return res
+        
+        ## 哈希, 两次遍历, 空间O(N)
+        # if not head:
+        #     return None
+        # old2new = {}        # 新旧节点map
+        # cur = head
+        # while cur:
+        #     old2new[cur] = Node(cur.val)
+        #     cur = cur.next
+        
+        # cur = head
+        # while cur:
+        #     old2new[cur].next = old2new.get(cur.next, None)     # next 可能空
+        #     old2new[cur].random = old2new.get(cur.random, None) # random 可能空
+        #     cur = cur.next
+        # return old2new[head]
+        
+    def sortList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        """ 148.排序链表 """
+        def myMerge(l1, l2):
+            cur = dummy = ListNode()
+            while l1 and l2:
+                if l1.val < l2.val:
+                    cur.next = l1
+                    l1 = l1.next
+                else:
+                    cur.next = l2
+                    l2 = l2.next
+                cur = cur.next
+            cur.next = l1 or l2
+            return dummy.next
+        
+        def mySplit(head, k):
+            """ 将链表k划分为: k个节点 + 剩余部分 \n
+                返回 剩余部分的第一个节点 """
+            ## 划分k个节点
+            for _ in range(k - 1):      # 细节 k - 1
+                if not head:
+                    return
+                head = head.next
+            if not head:
+                return
+            ## 剩余部分
+            right = head.next
+            head.next = None
+            return right
+
+        if not head or not head.next:
+            return head
+        
+        n = 0
+        cur = head
+        while cur:
+            n += 1
+            cur = cur.next
+        
+        dummyHead = ListNode()
+        dummyHead.next = head
+
+        step = 1
+        while step < n:
+            prev = dummyHead
+            cur = prev.next
+            
+            while cur:                      # 一次归并 
+                left = cur
+                right = mySplit(left, step)
+                cur = mySplit(right, step)
+                
+                mergeNode = myMerge(left, right)
+                prev.next = mergeNode
+                while prev.next:
+                    prev = prev.next
+
+            step *= 2
+        return dummyHead.next
+    
+    def inorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
+        """ 94.二叉树的中序遍历 """
+        ## 递归
+        res = []
+        if not root:
+            return res
+        
+        def func(node):
+            if not node:
+                return
+            func(node.left)
+            res.append(node.val)
+            func(node.right)
+        
+        func(root)
+        return res
+
+        ## 栈
+        # if not root:
+        #     return []
+        # res = []
+        # stack = []
+        # cur = root
+        # while stack or cur:
+        #     if cur:
+        #         stack.append(cur)
+        #         cur = cur.left
+        #     else:
+        #         cur = stack.pop()
+        #         res.append(cur.val)
+        #         cur = cur.right
+        # return res
+
+    def maxDepth(self, root: Optional[TreeNode]) -> int:
+        """ 104.二叉树的最大深度 """
+        ## 层序遍历, 首选方案
+        # if not root:
+        #     return 0
+        # res = []
+        # stack = [root]
+        # while stack:
+        #     num_level = len(stack)
+        #     res_level = []
+        #     for _ in range(num_level):
+        #         node = stack.pop(0)
+        #         res_level.append(node.val)
+        #         if node.left:
+        #             stack.append(node.left)
+        #         if node.right:
+        #             stack.append(node.right)
+        #     res.append(res_level[:])
+        # return len(res)
+
+        ## 递归
+        if not root:
+            return 0
+        max_depth = 0
+        def func(node, depth):
+            if not node:
+                return
+            nonlocal max_depth
+            max_depth = max(max_depth, depth)
+            if node.left:
+                func(node.left, depth + 1)
+            if node.right:
+                func(node.right, depth + 1)
+        
+        func(root, 1)
+        return max_depth
+
+    def invertTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+        """ 226.翻转二叉树 """
+        ## 层序遍历
+        # if not root:
+        #     return None
+        # stack = [root]
+        # while stack:
+        #     num_level = len(stack)
+        #     for _ in range(num_level):
+        #         node = stack.pop(0)
+        #         node.left, node.right = node.right, node.left
+        #         if node.left:
+        #             stack.append(node.left)
+        #         if node.right:
+        #             stack.append(node.right)
+        # return root
+
+        ## 递归
+        if not root:
+            return None
+        
+        def func(node):
+            if not node:
+                return
+            node.left, node.right = node.right, node.left
+            func(node.left)
+            func(node.right)
+        
+        func(root)
+        return root
+    
+    def isSymmetric(self, root: Optional[TreeNode]) -> bool:
+        """ 101.对称二叉树 """
+        ## 递归 后序-->要点:想到参数是两个节点哈哈
+        # def func(h1, h2):
+        #     if not (h1 or h2):
+        #         return True
+        #     elif not (h1 and h2):
+        #         return False
+        #     elif h1.val != h2.val:
+        #         return False
+        #     else:
+        #         leftRes = func(h1.left, h2.right)
+        #         rightRes = func(h1.right, h2.left)
+        #         return leftRes and rightRes
+        # return func(root.left, root.right)
+
+        ## 迭代, 代码几乎同递归
+        queue = [[root.left, root.right]]
+        while queue:
+            h1, h2 = queue.pop(0)
+            if not (h1 or h2):
+                continue
+            elif not (h1 and h2):
+                return False
+            elif h1.val != h2.val:
+                return False
+            else:
+                queue.append([h1.left, h2.right])
+                queue.append([h1.right, h2.left])
+        return True
+    
+    def diameterOfBinaryTree(self, root: Optional[TreeNode]) -> int:
+        """ 543.二叉树的直径 """
+        res = 0
+        def func(node):
+            """ 以node为根节点的树的高度 """
+            if not node:
+                return 0
+            nonlocal res
+            l = func(node.left)
+            r = func(node.right)
+            res = max(res, l + r)
+            return max(l, r) + 1
+        func(root)
+        return res
+    
+    def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:
+        """ 102.二叉树的层序遍历 """
+        if not root:
+            return []
+        res = []
+        queue = [root]
+        while queue:
+            num_level = len(queue)
+            res_level = []
+            for _ in range(num_level):
+                node = queue.pop(0)
+                res_level.append(node.val)
+                if node.left:
+                    queue.append(node.left)
+                if node.right:
+                    queue.append(node.right)
+            res.append(res_level)
+        return res
+    
+    def sortedArrayToBST(self, nums: List[int]) -> Optional[TreeNode]:
+        """ 108.将有序数组转化为二叉搜索树 """
+        def func(nums):
+            if len(nums) == 0:
+                return
+            i, j = 0, len(nums) - 1
+            mid = (i + j) // 2
+            root = TreeNode(nums[mid])
+            root.left = func(nums[i:mid])
+            root.right = func(nums[mid + 1:])
+            return root
+        return func(nums)
+
+
 
 if __name__ == '__main__':
     sl = Solution()
