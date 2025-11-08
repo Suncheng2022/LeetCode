@@ -922,7 +922,205 @@ class Solution:
             return root
         return func(nums)
 
+    def isValidBST(self, root: Optional[TreeNode]) -> bool:
+        """ 98.验证二叉搜索树 """
+        ## 中序遍历, 遍历结果应当升序
+        # res = []
+        # stack = []
+        # cur = root
+        # while cur or stack:
+        #     if cur:
+        #         stack.append(cur)
+        #         cur = cur.left
+        #     else:
+        #         node = stack.pop()
+        #         res.append(node.val)
+        #         cur = node.right
+        # for i in range(1, len(res)):
+        #     if res[i - 1] >= res[i]:
+        #         return False
+        # return True
 
+        ## 递归 中序
+        res = []
+        def func(node):
+            if not node:
+                return
+            func(node.left)
+            res.append(node.val)
+            func(node.right)
+        
+        func(root)
+        for i in range(1, len(res)):
+            if res[i - 1] >= res[i]:
+                return False
+        return True
+
+    def kthSmallest(self, root: Optional[TreeNode], k: int) -> int:
+        """ 230.二叉搜索树中第K小的元素 """
+        ## 中序, 遍历到第k个元素直接返回
+        res = []
+        stack = []
+        cur = root
+        while cur or stack:
+            if cur:
+                stack.append(cur)
+                cur = cur.left
+            else:
+                node = stack.pop()
+                res.append(node.val)
+                if len(res) == k:
+                    return res[-1]
+                cur = node.right
+
+    def rightSideView(self, root: Optional[TreeNode]) -> List[int]:
+        """ 199.二叉树的右视图 """
+        ## 层序遍历
+        if not root:
+            return []
+        res = []
+        queue = [root]
+        while queue:
+            num_level = len(queue)
+            res_level = []
+            for _ in range(num_level):
+                node = queue.pop(0)
+                res_level.append(node.val)
+                if node.left:
+                    queue.append(node.left)
+                if node.right:
+                    queue.append(node.right)
+            res.append(res_level[-1])
+        return res
+    
+    def flatten(self, root: Optional[TreeNode]) -> None:
+        """
+        114.二叉树展开为链表 \n
+        Do not return anything, modify root in-place instead.
+        """
+        if not root:
+            return
+        cur = root
+        while cur:
+            if not cur.left:
+                cur = cur.right
+                continue
+            else:
+                tmp = cur.right
+                cur.right = cur.left
+                cur.left = None
+
+                _cur = cur
+                while _cur.right:
+                    _cur = _cur.right
+                _cur.right = tmp
+
+                cur = cur.right
+        return root
+    
+    def buildTree(self, preorder: List[int], inorder: List[int]) -> Optional[TreeNode]:
+        """ 105.从前序与中序遍历序列构造二叉树 """
+        def func(preorder, inorder):
+            if len(preorder) == 0:
+                return
+            rootVal = preorder[0]
+            root = TreeNode(rootVal)
+            ind = inorder.index(rootVal)        # 中序索引
+            root.left = func(preorder[1:ind + 1], inorder[:ind])
+            root.right = func(preorder[ind + 1:], inorder[ind + 1:])
+            return root
+        
+        return func(preorder, inorder)
+                
+    def pathSum(self, root: Optional[TreeNode], targetSum: int) -> int:
+        """ 437.路径总和III """
+        prefixSumMap = {0: 1}
+        def func(node, curSum):
+            if not node:
+                return 0
+            res = 0
+            curSum += node.val
+            res += prefixSumMap.get(curSum - targetSum, 0)
+
+            prefixSumMap[curSum] = prefixSumMap.get(curSum, 0) + 1
+            res += func(node.left, curSum)
+            res += func(node.right, curSum)
+            prefixSumMap[curSum] -= 1
+            return res
+        
+        return func(root, 0)
+    
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        """ 236.二叉树的最近公共祖先 \n
+            递归思路要清楚: 在以root为根的子树中找p或q, 如果p或q都存在则返回最近公共祖先, 若只有一个在则返回自己, 若都不在则返回None """
+        if not root or root in [p, q]:
+            return root
+        left = self.lowestCommonAncestor(root.left, p, q)       # 左子树是否包含p或q
+        right = self.lowestCommonAncestor(root.right, p, q)     # 右子树是否包含p或q
+        if left and right:
+            return root
+        elif not left and right:
+            return right
+        elif left and not right:
+            return left
+        elif not (left or right):
+            return None
+        
+    def numIslands(self, grid: List[List[str]]) -> int:
+        """ 200.岛屿数量 """
+        m = len(grid)
+        n = len(grid[0])
+        visited = [[False] * n for _ in range(m)]
+        res = 0
+
+        def dfs(x, y):
+            """ 标记所有与[x,y]相连的陆地 """
+            visited[x][y] = True
+            for dc in [-1, 0], [1, 0], [0, -1], [0, 1]:
+                nextX = x + dc[0]
+                nextY = y + dc[1]
+                if nextX < 0 or nextX >= m or nextY < 0 or nextY >= n:
+                    continue
+                if visited[nextX][nextY] == False and grid[nextX][nextY] == '1':
+                    dfs(nextX, nextY)
+        
+        for i in range(m):
+            for j in range(n):
+                if grid[i][j] == '1' and visited[i][j] == False:
+                    res += 1
+                    dfs(i, j)
+        return res
+    
+    def orangesRotting(self, grid: List[List[int]]) -> int:
+        """ 994. 腐烂的橘子 \n
+            与 200.岛屿数量 稍稍相似, 彼为dfs, 此为bfs """
+        m = len(grid)
+        n = len(grid[0])
+        
+        round = 0
+        count = 0   # 新鲜橘子数量
+        queue = []  # 腐烂橘子位置
+        for i in range(m):
+            for j in range(n):
+                if grid[i][j] == 1:
+                    count += 1
+                elif grid[i][j] == 2:
+                    queue.append([i, j])
+        
+        while count > 0 and len(queue) > 0:
+            round += 1
+            num_bad = len(queue)
+            for _ in range(num_bad):
+                x, y = queue.pop(0)
+                for dir in [-1, 0], [1, 0], [0, -1], [0, 1]:
+                    nextX, nextY = x + dir[0], y + dir[1]
+                    if nextX < 0 or nextX >= m or nextY < 0 or nextY >= n:
+                        continue
+                    if grid[nextX][nextY] == 1:
+                        grid[nextX][nextY] = 2
+                        queue.append([nextX, nextY])
+                        count -= 1
+        return round if count == 0 else -1
 
 if __name__ == '__main__':
     sl = Solution()
