@@ -43,6 +43,40 @@ class LRUCache:
         if len(self.cache) > self.capcity:
             self.cache.popitem(last=False)
 
+class TireNode:
+    def __init__(self):
+        from collections import defaultdict
+
+        self.children = defaultdict(TireNode)
+        self.isword = False
+
+class Trie:
+    """ 208.实现Tire(前缀树) """
+    def __init__(self):
+        self.root = TireNode()
+
+    def insert(self, word: str) -> None:
+        cur = self.root
+        for c in word:
+            cur = cur.children[c]
+        cur.isword = True
+
+    def search(self, word: str) -> bool:
+        cur = self.root
+        for c in word:
+            cur = cur.children.get(c, None)
+            if cur is None:
+                return False
+        return cur.isword
+
+    def startsWith(self, prefix: str) -> bool:
+        cur = self.root
+        for c in prefix:
+            cur = cur.children.get(c, None)
+            if cur is None:
+                return False
+        return True
+
 class Solution:
     def twoSum(self, nums: List[int], target: int) -> List[int]:
         """ 1.两数之和 """
@@ -1121,6 +1155,91 @@ class Solution:
                         queue.append([nextX, nextY])
                         count -= 1
         return round if count == 0 else -1
+
+    def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:
+        """ 207.课程表 """
+        ## Again
+        from collections import defaultdict
+        
+        res = 0
+        indegree = [0 for _ in range(numCourses)]       # 每门课需要多少前置课 indegree[i]表示 课程i 有 indegree[i] 门前置课
+        pre2cur = defaultdict(set)                      # 前置课id:[后置课id]
+        for cur, pre in prerequisites:
+            indegree[cur] += 1
+            pre2cur[pre].add(cur)
+        
+        queue = [i for i, degree in enumerate(indegree) if degree == 0]     # 先学不需要前置课的
+        while queue:
+            cur = queue.pop(0)
+            res += 1
+            for _cur in pre2cur[cur]:
+                if indegree[_cur] > 0:
+                    indegree[_cur] -= 1
+                if indegree[_cur] == 0:
+                    queue.append(_cur)
+        return res == numCourses
+
+
+        ## 太绕, 但已经是标准解法
+        # from collections import defaultdict
+
+        # res = 0
+        # inCounts = [0 for _ in range(numCourses)]      # 初始化 每门课需要多少门前置课程, inCounts[i]表示: 课程i 需要 inCounts[i] 门前置课程
+        # pre2cur = defaultdict(set)                          # 初始化 key前置课程:val后置课程
+        # for cur, pre in prerequisites:
+        #     pre2cur[pre].add(cur)
+        #     inCounts[cur] += 1
+        # queue = [i for i, count in enumerate(inCounts) if count == 0]       # 不需要前置课的课程
+        # while queue:
+        #     cur = queue.pop(0)
+        #     res += 1
+        #     for i in pre2cur[cur]:
+        #         if inCounts[i] > 0:
+        #             inCounts[i] -= 1
+        #         if inCounts[i] == 0:
+        #             queue.append(i)
+        # return res == numCourses
+
+    def permute(self, nums: List[int]) -> List[List[int]]:
+        """ 46.全排列 """
+        ## 回溯/递归
+        res = []
+        path = []
+        used = [False] * len(nums)
+
+        def backtrack():
+            if len(path) == len(nums):
+                res.append(path[:])
+                return
+            for i in range(len(nums)):
+                if used[i]:
+                    continue
+                used[i] = True
+                path.append(nums[i])
+                backtrack()
+                path.pop()
+                used[i] = False
+        
+        backtrack()
+        return res
+    
+    def subsets(self, nums: List[int]) -> List[List[int]]:
+        """ 78.子集 """
+        ## 回溯/递归
+        res = []
+        path = []
+
+        def backtrack(startInd):
+            res.append(path[:])
+            if startInd == len(nums):
+                return
+            for i in range(startInd, len(nums)):
+                path.append(nums[i])
+                backtrack(i + 1)
+                path.pop()
+        
+        backtrack(0)
+        return res
 
 if __name__ == '__main__':
     sl = Solution()
