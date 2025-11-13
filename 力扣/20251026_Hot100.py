@@ -1240,6 +1240,132 @@ class Solution:
         
         backtrack(0)
         return res
+    
+    def letterCombinations(self, digits: str) -> List[str]:
+        """ 17.电话号码的字母组合 \n
+            求一个集合的组合, 使用startInd \n
+            求多个集合的组合, 不使用startInd, 使用ind指示不同集合 """
+        res = []
+        path = []
+        d2l = {str(k):v for k, v in zip(list(range(2, 10)), 
+                                 ['abc', 'def', 'ghi', 'jkl', 'mno', 'pqrs', 'tuv', 'wxyz'])}
+        
+        def backtrack(ind):
+            if ind == len(digits):
+                res.append("".join(path[:]))
+                return
+            letters = d2l[digits[ind]]
+            for c in letters:
+                path.append(c)
+                backtrack(ind + 1)
+                path.pop()
+        
+        backtrack(0)
+        return res
+    
+    def combinationSum(self, candidates: List[int], target: int) -> List[List[int]]:
+        """ 39.组合总和 """
+        ## 一个集合 求 组合, 使用startInd. 元素可重复, 回溯调用时i
+        res = []
+        path = []
+
+        def backtrack(startInd, leftVal):
+            if sum(path) == target:
+                res.append(path[:])
+                return
+            elif sum(path) > target:
+                return
+            for i in range(startInd, len(candidates)):
+                path.append(candidates[i])
+                backtrack(i, leftVal - candidates[i])
+                path.pop()
+        
+        backtrack(0, target)
+        return res
+    
+    def generateParenthesis(self, n: int) -> List[str]:
+        """ 22.括号生成 """
+        ## 回溯法, GPT
+        res = []
+        path = ''
+
+        def backtrack(left, right):
+            """
+            left:  还能放多少个左括号 \n
+            right: 还能放多少个右括号
+            """
+            nonlocal path
+            if left == 0 and right == 0:
+                res.append(path)
+                return
+            if left:
+                path += '('
+                backtrack(left - 1, right)
+                path = path[:-1]
+            if right > left:        # 任何时刻, 右括号的数量 < 左括号的数量. 若写为 if right == left, 前面还没有可匹配的左括号; if right, 可能会先放右括号, 就错了
+                path += ')'
+                backtrack(left, right - 1)
+                path = path[:-1]
+        
+        backtrack(n, n)
+        return res
+    
+    def exist(self, board: List[List[str]], word: str) -> bool:
+        """ 79.单词搜索 """
+        def func(i, j, word):
+            if len(word) == 0:
+                return True
+            for dir in [-1, 0], [1, 0], [0, 1], [0, -1]:
+                nextX = i + dir[0]
+                nextY = j + dir[1]
+                if nextX < 0 or nextX >= m or nextY < 0 or nextY >= n:
+                    continue
+                if board[nextX][nextY] == word[0] and not visited[nextX][nextY]:
+                    visited[nextX][nextY] = True
+                    if func(nextX, nextY, word[1:]):
+                        return True
+                    visited[nextX][nextY] = False
+            return False
+
+        m, n = len(board), len(board[0])
+        visited = [[False] * n for _ in range(m)]
+
+        for i in range(m):
+            for j in range(n):
+                if board[i][j] == word[0] and not visited[i][j]:
+                    visited[i][j] = True
+                    if func(i, j, word[1:]):
+                        return True
+                    visited[i][j] = False
+        return False
+    
+    def partition(self, s: str) -> List[List[str]]:
+        """ 131.分割回文串 """
+        ## 分割--组合--startInd
+        res = []
+        path = []
+
+        def isValid(s):
+            l, r = 0, len(s) - 1
+            while l <= r:
+                if s[l] != s[r]:
+                    return False
+                l += 1
+                r -= 1
+            return True
+
+        def backtrack(startInd):
+            if startInd == len(s):
+                res.append(path)
+                return
+            for i in range(startInd, len(s)):
+                if isValid(s[startInd:i + 1]):
+                    path.append(s[startInd:i + 1])
+                    backtrack(i + 1)
+                    path.pop()
+        
+        backtrack(0)
+        return res
 
 if __name__ == '__main__':
     sl = Solution()
