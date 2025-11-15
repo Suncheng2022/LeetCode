@@ -76,6 +76,26 @@ class Trie:
             if cur is None:
                 return False
         return True
+    
+class MinStack:
+    """ 155.最小栈 """
+    def __init__(self):
+        self.stack = [0]
+        self.minVal = [float('inf')]
+
+    def push(self, val: int) -> None:
+        self.minVal.append(min(self.minVal[-1], val))
+        self.stack.append(val)
+
+    def pop(self) -> None:
+        _ = self.stack.pop()
+        _ = self.minVal.pop()
+
+    def top(self) -> int:
+        return self.stack[-1]
+
+    def getMin(self) -> int:
+        return self.minVal[-1]
 
 class Solution:
     def twoSum(self, nums: List[int], target: int) -> List[int]:
@@ -1439,9 +1459,120 @@ class Solution:
             r += 1
         return [l, r]
 
+    def search(self, nums: List[int], target: int) -> int:
+        """ 33.搜索螺旋排序数组 """
+        ## 这题有点绕的意思, 没有太懂
+        l, r = 0, len(nums) - 1
+        while l <= r:
+            m = (l + r) // 2
+            if nums[m] == target:
+                return m
+            elif nums[l] < nums[m]:     # 假设某一边有序
+                if nums[l] <= target < nums[m]:
+                    r = m - 1
+                else:
+                    l = m + 1
+            else:                       # 只能写成else, 写别的就错, 没有太明白
+                if nums[m] < target <= nums[r]:
+                    l = m + 1
+                else:
+                    r = m - 1
+        return -1
+    
+    def findMin(self, nums: List[int]) -> int:
+        """ 153.寻找旋转排序数组中的最小值 """
+        # l, r = 0, len(nums) - 1
+        # while l < r:        # while l <= r, 这是经典的普通二分查找. while l < r, 这是区间收缩直到只剩一个元素的写法, 适合本题的 寻找最左边的最小值
+        #     m = (l + r) // 2
+        #     if nums[m] < nums[-1]:      # m指定落在右边递增那段上了, 所以收缩; m不是落在右半段了吗, m可能就是最小值(最小值只可能在右半段上), 所以让r=m
+        #         r = m
+        #     else:
+        #         l = m + 1               # 因为最小值只可能在右半段, 所以当m落在左半段时可以跳过m
+        # return nums[l]                  # while退出就是l==r, 所以最终结果l r均可
+
+        ## Again上面解法
+        l, r = 0, len(nums) - 1
+        while l < r:
+            m = (l + r) // 2
+            if nums[m] < nums[-1]:      # m落在右半段
+                r = m
+            else:
+                l = m + 1
+        return nums[r]
+
+        ## 错误! 虽然看了官方答案, 自己实现仍然错误!
+        # l, r = 0, len(nums) - 1
+        # while l <= r:
+        #     m = (l + r) // 2
+        #     if nums[m] < nums[-1]:
+        #         r = m - 1
+        #     else:
+        #         l = m + 1
+        # return l
+
+    def isValid(self, s: str) -> bool:
+        """ 20.有效的括号 """
+        ## 参考之前做的
+        left2right = dict(zip('({[', ')}]'))
+        stack = []      # 暂存左括号
+        for c in s:
+            if c in left2right:
+                stack.append(c)
+            elif stack and c == left2right[stack[-1]]:
+                stack.pop()
+            else:
+                return False
+        return True if not stack else False
+
+        ## 自己想的复杂
+        # if len(s) == 1:
+        #     return False
+        # stack = []
+        # left = ['{', '(', '[']
+        # right = ['}', ')', ']']
+        # for i in range(len(s)):
+        #     if s[i] in left:
+        #         stack.append(s[i])
+        #     else:
+        #         if not stack:
+        #             return False
+        #         _l = stack.pop()
+        #         if left.index(_l) != right.index(s[i]):
+        #             return False
+        # return True if not stack else False
+            
+    def decodeString(self, s: str) -> str:
+        """ 394.字符串解码 """
+        res = ''        # 最终的结果
+        multi = 0       # 重复次数
+        stack = []
+        for c in s:
+            if c.isdigit():
+                multi = multi * 10 + int(c)
+            elif c == '[':
+                stack.append([multi, res])
+                multi = 0
+                res = ''
+            elif c == ']':
+                _multi, _res = stack.pop()
+                res = _res + _multi * res
+            else:
+                res += c
+        return res
+    
+    def dailyTemperatures(self, temperatures: List[int]) -> List[int]:
+        """ 739.每日温度 """
+        res = [0] * len(temperatures)   # 结果
+        stack = []                      # 递减栈
+        for i, t in enumerate(temperatures):
+            while stack and t > temperatures[stack[-1]]:
+                ind = stack.pop()
+                res[ind] = i - ind
+            stack.append(i)             # 放到这, 维护的依然是递减栈
+        return res
+
 if __name__ == '__main__':
     sl = Solution()
 
-    matrix = [[1,2,3],[4,5,6],[7,8,9]]
-    print(sl.rotate(matrix))
-    print(matrix)
+    s = "3[a2[c]]"
+    print(sl.decodeString(s))
