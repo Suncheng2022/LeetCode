@@ -1366,6 +1366,78 @@ class Solution:
         
         backtrack(0)
         return res
+    
+    def searchInsert(self, nums: List[int], target: int) -> int:
+        """ 35.搜索插入位置 """
+        ## 二分查找 时间:O(logn)
+        l, r = 0, len(nums) - 1
+        while l <= r:
+            m = (l + r) // 2
+            if nums[m] == target:
+                return m
+            elif nums[m] < target:
+                l = m + 1
+            elif nums[m] > target:
+                r = m - 1
+        return l
+    
+    def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+        """ 74.搜索二维矩阵 """
+        ## 自己想的, 比较容易想到
+        # m, n = len(matrix), len(matrix[0])
+        # for i in range(m):
+        #     if matrix[i][0] > target:
+        #         if i == 0:
+        #             return False
+        #         else:
+        #             i -= 1
+        #         break
+        # for j in range(n):
+        #     if matrix[i][j] == target:
+        #         return True
+        # return False
+
+        ## 二分查找, 加深理解. 参考 74.搜索二维矩阵
+        ## 本题二分查找, 查找第一列时, 找的是第一个<=target的, 所以返回r
+        def binSearch(nums, target):
+            l, r = 0, len(nums) - 1
+            while l <= r:
+                m = (l + r) // 2
+                if nums[m] == target:
+                    return m
+                elif nums[m] < target:
+                    l = m + 1
+                elif nums[m] > target:
+                    r = m - 1
+            return r
+
+        m, n = len(matrix), len(matrix[0])
+        rowInd = binSearch([ln[0] for ln in matrix], target)
+        colInd = binSearch(matrix[rowInd], target)
+        return matrix[rowInd][colInd] == target
+    
+    def searchRange(self, nums: List[int], target: int) -> List[int]:
+        """ 34.在排序数组中查找元素的第一个和最后一个位置 """
+        ## 不要想太复杂: 二分查找 + 中心探测, 至少二分查找会确定是否有target
+        if len(nums) == 0:
+            return [-1, -1]
+        l, r = 0, len(nums) - 1
+        while l <= r:
+            m = (l + r) // 2
+            if nums[m] == target:
+                break
+            elif nums[m] < target:
+                l = m + 1
+            elif nums[m] > target:
+                r = m - 1
+        if nums[m] != target:
+            return [-1, -1]
+        l = r = m
+        while l - 1 >= 0 and nums[l - 1] == nums[m]:
+            l -= 1
+        while r + 1 <= len(nums) - 1 and nums[r + 1] == nums[m]:
+            r += 1
+        return [l, r]
 
 if __name__ == '__main__':
     sl = Solution()
