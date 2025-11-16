@@ -1570,9 +1570,66 @@ class Solution:
                 res[ind] = i - ind
             stack.append(i)             # 放到这, 维护的依然是递减栈
         return res
+    
+    def findKthLargest(self, nums: List[int], k: int) -> int:
+        """ 215.数组中的第K个最大元素 """
+        def quickselect(l, r, k):
+            """ 找第k个最小的 """
+            pivot = nums[l]
+            i, j = l, r
+            while i <= j:
+                while nums[i] < pivot:
+                    i += 1
+                while pivot < nums[j]:
+                    j -= 1
+                if i <= j:
+                    nums[i], nums[j] = nums[j], nums[i]
+                    i += 1
+                    j -= 1
+            if k <= j:
+                return quickselect(l, j, k)
+            elif k >= i:
+                return quickselect(i, r, k)
+            return nums[k]
+        
+        n = len(nums)
+        return quickselect(0, n - 1, n - k)     # 找倒数第k个, 即正数第n-k个
+    
+    def topKFrequent(self, nums: List[int], k: int) -> List[int]:
+        """ 347.前K个高频元素 """
+        from collections import defaultdict
+
+        d2c = defaultdict(int)
+        for n in nums:
+            d2c[n] += 1
+        d2c = dict(sorted(d2c.items(), key=lambda x: x[1], reverse=True))
+        return list(d2c.keys())[:k]
+    
+    def maxProfit(self, prices: List[int]) -> int:
+        """ 121.买卖股票的最佳时机 """
+        ## 状态0: 不持有 
+        ## 状态1: 持有
+        n = len(prices)
+        dp = [[0, 0] for _ in range(n)]
+        dp[0] = [0, -prices[0]]
+        for i in range(1, n):
+            dp[i][0] = max(dp[i - 1][0], dp[i - 1][1] + prices[i])
+            dp[i][1] = max(-prices[i], dp[i - 1][1])
+        return dp[-1][0]
+    
+    def canJump(self, nums: List[int]) -> bool:
+        """ 55.跳跃游戏 """
+        ## 贪心
+        maxReach = 0
+        for i, n in enumerate(nums):
+            if maxReach < i:
+                return False
+            maxReach = max(maxReach, i + n)
+        return True
 
 if __name__ == '__main__':
     sl = Solution()
 
-    s = "3[a2[c]]"
-    print(sl.decodeString(s))
+    nums = [3,2,1,5,6,4]
+    k = 2
+    print(sl.findKthLargest(nums, k))
