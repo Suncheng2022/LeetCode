@@ -1626,6 +1626,36 @@ class Solution:
                 return False
             maxReach = max(maxReach, i + n)
         return True
+    
+    def jump(self, nums: List[int]) -> int:
+        """ 45.跳跃游戏II """
+        res = 0
+        start = 0
+        end = 1     # 不包含
+        maxRange = 0
+        while end < len(nums):
+            for i in range(start, end):
+                maxRange = max(maxRange, i + nums[i])
+            
+            start = end
+            end = maxRange + 1      # 不包含
+            res += 1
+        return res
+    
+    def partitionLabels(self, s: str) -> List[int]:
+        """ 763.划分字母区间 """
+        last = [0] * 26
+        for i, c in enumerate(s):
+            last[ord(c) - ord('a')] = i
+        
+        res = []
+        start = end = 0
+        for i, c in enumerate(s):
+            end = max(end, last[ord(c) - ord('a')])
+            if i == end:
+                res.append(end - start + 1)
+                start = end + 1
+        return res
 
 if __name__ == '__main__':
     sl = Solution()
