@@ -2,6 +2,7 @@
 10.26   执行力这么差?
 '''
 from typing import List, Optional
+import math
 
 # Definition for singly-linked list.
 class ListNode:
@@ -1656,10 +1657,101 @@ class Solution:
                 res.append(end - start + 1)
                 start = end + 1
         return res
+    
+    def climbStairs(self, n: int) -> int:
+        """ 70.爬楼梯 """
+        # if n <= 2:
+        #     return n
+        # dp = [0] * (n + 1)
+        # dp[1] = 1
+        # dp[2] = 2
+        # for i in range(3, n + 1):
+        #     dp[i] = dp[i - 1] + dp[i - 2]
+        # return dp[-1]
+
+        ## 优化空间
+        if n <= 2:
+            return n
+        dp = [0] * 3
+        dp[1] = 1
+        dp[2] = 2
+        for i in range(3, n + 1):
+            tmp = dp[1] + dp[2]
+            dp[1], dp[2] = dp[2], tmp
+        return dp[-1]
+    
+    def generate(self, numRows: int) -> List[List[int]]:
+        """ 118.杨辉三角 """
+        res = []
+        for i in range(numRows):
+            row = []
+            for j in range(i + 1):
+                if j == 0 or j == i:
+                    row.append(1)
+                else:
+                    row.append(res[i - 1][j] + res[i - 1][j - 1])
+            res.append(row)
+        return res
+    
+    def rob(self, nums: List[int]) -> int:
+        """ 198.打家劫舍 """
+        n = len(nums)
+        if n <= 2:
+            return max(nums)
+        dp = [0] * n
+        dp[0] = nums[0]
+        dp[1] = max(nums[:2])
+        for i in range(2, n):
+            dp[i] = max(dp[i - 1], dp[i - 2] + nums[i])
+        return dp[-1]
+    
+    def numSquares(self, n: int) -> int:
+        """ 279.完全平方数 """
+        ## 完全背包
+        dp = [float('inf')] * (n + 1)
+        dp[0] = 0       # 纯为递推
+        # 求组合, 不要求有序
+        for i in range(1, n + 1):           # 外层for背包
+            for j in range(1, int(math.sqrt(i)) + 1):  # 内层for物品
+                dp[i] = min(dp[i], dp[i - j ** 2] + 1)
+        return dp[-1]
+    
+    def coinChange(self, coins: List[int], amount: int) -> int:
+        """ 322.零钱兑换 """
+        ## 完全背包
+        dp = [float('inf')] * (amount + 1)
+        dp[0] = 0
+        for i in range(len(coins)):
+            for j in range(coins[i], amount + 1):
+                dp[j] = min(dp[j], dp[j - coins[i]] + 1)
+        return dp[-1] if dp[-1] != float('inf') else -1
+    
+    def wordBreak(self, s: str, wordDict: List[str]) -> bool:
+        """ 139.单词拆分 """
+        ## 完全背包. 求排列
+        # n = len(s)
+        # dp = [False] * (n + 1)      # dp[i] 前i个字符是否能被字典表示
+        # dp[0] = True
+        # for j in range(1, n + 1):
+        #     for i in range(j):
+        #         if dp[i] and s[i:j] in wordDict:    # 前i个字符能被表示(索引到i-1) 且 s[i:j]在字典中 --> 总的意思是, 前j个字符(索引到j-1)能否被字典表示
+        #             dp[j] = True
+        # return dp[-1]
+
+        n = len(s)
+        dp = [False] * (n + 1)
+        dp[0] = True
+        for j in range(1, n + 1):
+            for word in wordDict:
+                if len(word) > j:
+                    continue
+                if dp[j - len(word)] and s[j - len(word):j] == word:
+                    dp[j] = True
+        return dp[-1]
 
 if __name__ == '__main__':
     sl = Solution()
 
-    nums = [3,2,1,5,6,4]
-    k = 2
-    print(sl.findKthLargest(nums, k))
+    s = "leetcode"
+    wordDict = ["leet", "code"]
+    print(sl.wordBreak(s, wordDict))
