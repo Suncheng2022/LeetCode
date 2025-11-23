@@ -1748,6 +1748,55 @@ class Solution:
                 if dp[j - len(word)] and s[j - len(word):j] == word:
                     dp[j] = True
         return dp[-1]
+    
+    def lengthOfLIS(self, nums: List[int]) -> int:
+        """ 300.最长递增子序列 """
+        n = len(nums)
+        dp = [1] * n
+        for i in range(1, n):
+            for j in range(i):
+                if nums[j] < nums[i]:
+                    dp[i] = max(dp[i], dp[j] + 1)
+        return dp[-1]
+    
+    def maxProduct(self, nums: List[int]) -> int:
+        """ 152.乘积最大子数组 """
+        ## 要同时维护最大值和最小值
+        n = len(nums)
+        dp = [[0, 0] for _ in range(n)]
+        dp[0] = [nums[0], nums[0]]
+        for i in range(1, n):
+            if nums[i] >= 0:
+                dp[i][0] = min(nums[i], nums[i] * dp[i - 1][0])
+                dp[i][1] = max(nums[i], nums[i] * dp[i - 1][1])
+            else:
+                dp[i][0] = min(nums[i], nums[i] * dp[i - 1][1])
+                dp[i][1] = max(nums[i], nums[i] * dp[i - 1][0])
+        return max(max(l) for l in dp)
+    
+    def canPartition(self, nums: List[int]) -> bool:
+        """ 416.分割等和子集 """
+        if sum(nums) % 2:
+            return False
+        target = sum(nums) // 2
+        dp = [0] * (target + 1)
+        # 一维dp, 外层for物品 内层for背包且背包倒序, 避免覆盖前面的
+        for i in range(len(nums)):
+            for j in range(target, nums[i] - 1, -1):
+                dp[j] = max(dp[j], dp[j - nums[i]] + nums[i])
+        return dp[-1] == target
+    
+    def uniquePaths(self, m: int, n: int) -> int:
+        """ 62.不同路径 """
+        dp = [[0] * n for _ in range(m)]
+        for i in range(m):
+            dp[i][0] = 1
+        for j in range(n):
+            dp[0][j] = 1
+        for i in range(1, m):
+            for j in range(1, n):
+                dp[i][j] = dp[i - 1][j] + dp[i][j - 1]
+        return dp[-1][-1]
 
 if __name__ == '__main__':
     sl = Solution()
