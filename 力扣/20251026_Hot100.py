@@ -1797,6 +1797,69 @@ class Solution:
             for j in range(1, n):
                 dp[i][j] = dp[i - 1][j] + dp[i][j - 1]
         return dp[-1][-1]
+    
+    def minPathSum(self, grid: List[List[int]]) -> int:
+        """ 64.最小路径和 """
+        m, n = len(grid), len(grid[0])
+        for i in range(m):
+            for j in range(n):
+                if i == 0 and j >= 1:       # 第0行
+                    grid[i][j] += grid[i][j - 1]
+                elif j == 0 and i >= 1:     # 第0列
+                    grid[i][j] += grid[i - 1][j]
+                elif i >= 1 and j >= 1:
+                    grid[i][j] += min(grid[i - 1][j], grid[i][j - 1])
+        return grid[-1][-1]
+    
+    def longestPalindrome(self, s: str) -> str:
+        """ 5.最长回文子串 """
+        ## 两边探测
+        res = ''
+        n = len(s)
+        for i in range(n):
+            l, r = i - 1, i + 1
+            while l >= 0 and s[l] == s[i]:
+                l -= 1
+            while r <= n - 1 and s[r] == s[i]:
+                r += 1
+            while 0 <= l <= r <= n - 1 and s[l] == s[r]:
+                l -= 1
+                r += 1
+            l += 1
+            r -= 1
+            res = s[l:r + 1] if r - l + 1 > len(res) else res
+        return res
+    
+    def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+        """ 1143.最长公共子序列 """
+        m = len(text1)
+        n = len(text2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if text1[i - 1] == text2[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + 1
+                else:
+                    dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+        return max(max(l) for l in dp)
+    
+    def minDistance(self, word1: str, word2: str) -> int:
+        """ 72.编辑距离 """
+        m = len(word1)
+        n = len(word2)
+        dp = [[float('inf')] * (n + 1) for _ in range(m + 1)]
+        for i in range(1, m + 1):
+            dp[i][0] = i
+        for j in range(1, n + 1):
+            dp[0][j] = j
+        dp[0][0] = 0
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if word1[i - 1] == word2[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1]
+                else:
+                    dp[i][j] = min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]) + 1
+        return dp[-1][-1]
 
 if __name__ == '__main__':
     sl = Solution()
