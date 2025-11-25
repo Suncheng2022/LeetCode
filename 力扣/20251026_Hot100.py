@@ -286,12 +286,13 @@ class Solution:
     def maxSubArray(self, nums: List[int]) -> int:
         """ 53.最大子数组和 \n
             要求连续 """
-        ## 动态规划
-        dp = [0] * len(nums)        # dp[i] 以nums[i]结尾的连续子数组和为dp[i]
+        n = len(nums)
+        dp = [0] * n    # dp[i] 以nums[i]结尾的最大子数组和
         dp[0] = nums[0]
-        for i in range(1, len(nums)):
-            dp[i] = max(nums[i], dp[i - 1] + nums[i])
+        for i in range(1, n):
+            dp[i] = max(dp[i - 1] + nums[i], nums[i])
         return max(dp)
+
     
     def merge(self, intervals: List[List[int]]) -> List[List[int]]:
         """ 56.合并区间 """

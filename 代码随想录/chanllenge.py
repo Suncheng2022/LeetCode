@@ -491,3 +491,47 @@ class Solution:
     eg: 
         第一次称重, 左:1 2 3 4 右:5 6 7 8 若平衡, 则异常球在余下的球中. 第二次称重, 左: 1~8任选3颗 右:9 10 11, 不平衡--则知异常球轻还是重 平衡--则12是异常球 第三次, 左: 9 右:10. 解了
     """
+
+    def threeSumClosest(self, nums: List[int], target: int) -> int:
+        """ 16.最接近的三数之和 \n
+            虾皮一面 寄, 没做过 """
+        nums.sort()
+        res = sum(nums[:3])     # 要给一个真实的基准
+        for i in range(len(nums) - 2):
+            start, end = i + 1, len(nums) - 1
+            while start < end:
+                sum = nums[i] + nums[start] + nums[end]
+                res = sum if abs(target - sum) < abs(target - res) else res
+                if sum < target:
+                    start += 1
+                elif sum == target:
+                    return sum
+                else:
+                    end -= 1
+        return res
+
+    def threeSum(self, nums: List[int]) -> List[List[int]]:
+        """ 15.三数之和 """
+        nums.sort()
+        res = []
+        for i in range(len(nums) - 2):
+            start, end = i + 1, len(nums) - 1
+            if i > 0 and nums[i - 1] == nums[i]:        # 去重
+                continue
+            while start < end:
+                _tmp = [nums[i], nums[start], nums[end]]
+                _sum = sum(_tmp)
+                if _sum == 0:
+                    res.append(_tmp)
+                    while start < end and nums[start] == nums[start + 1]:   # 跳出情况一: 已经用start < end限制了, 跳出时即便start == end, 但最外层的for会兜住
+                        start += 1
+                    while start < end and nums[end - 1] == nums[end]:
+                        end -= 1
+                    start += 1                                              # 跳出情况二: 跳出时nums[start] != nums[start + 1], 但此时nums[start]依然是上一个重复区间, 所以要右移彻底跳出去
+                    end -= 1
+                elif _sum < 0:
+                    start += 1
+                else:
+                    end -= 1
+        return res
+        
