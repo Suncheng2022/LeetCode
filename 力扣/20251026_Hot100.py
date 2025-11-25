@@ -1861,6 +1861,113 @@ class Solution:
                     dp[i][j] = min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]) + 1
         return dp[-1][-1]
 
+    def singleNumber(self, nums: List[int]) -> int:
+        """ 136.只出现一次的数字 """
+        # nums.sort()
+
+        # stack = []
+        # for n in nums:
+        #     if stack and n == stack[-1]:
+        #         stack.pop()
+        #     else:
+        #         stack.append(n)
+        # return stack[-1]
+
+        ## 异或
+        res = nums.pop(0)
+        while nums:
+            res ^= nums.pop(0)
+        return res
+    
+    def majorityElement(self, nums: List[int]) -> int:
+        """ 169.多数元素 """
+        counts = 0
+        res = 0
+        for n in nums:
+            if counts == 0:
+                res = n
+            counts += (1 if n == res else -1)
+        return res
+
+    def sortColors(self, nums: List[int]) -> None:
+            """
+            75.颜色分类 \n
+            经典荷兰国旗问题 \n
+            Do not return anything, modify nums in-place instead.
+            """
+            ## 单指针
+            # n = len(nums)
+            # ptr = 0     # 索引[0, ptr - 1]是头部, 用户交换元素
+            # for i in range(n):
+            #     if nums[i] == 0:
+            #         nums[i], nums[ptr] = nums[ptr], nums[i]
+            #         ptr += 1
+            # for i in range(ptr, n):
+            #     if nums[i] == 1:
+            #         nums[i], nums[ptr] = nums[ptr], nums[i]
+            #         ptr += 1
+
+            ## 双指针
+            n = len(nums)
+            pt0 = pt1 = 0
+            for i in range(n):
+                if nums[i] == 1:
+                    nums[i], nums[pt1] = nums[pt1], nums[i]
+                    pt1 += 1
+                if nums[i] == 0:
+                    nums[i], nums[pt0] = nums[pt0], nums[i]
+                    if pt0 < pt1:
+                        nums[i], nums[pt1] = nums[pt1], nums[i]
+                    pt0 += 1
+                    pt1 += 1        # 0的部分 1的部分, 你想, 前面插入0, pt1自然要向后移
+
+    def nextPermutation(self, nums: List[int]) -> None:
+            """
+            31.下一个排列 \n
+            Do not return anything, modify nums in-place instead.
+            """
+            if len(nums) == 1:
+                return
+            i, j = len(nums) - 2, len(nums) - 1
+            # 从右往左, 找第一个升序的相邻数对
+            while i < j and i >= 0:
+                if nums[i] < nums[j]:       # 对nums[i]下手
+                    break
+                i -= 1
+                j -= 1
+            # 对nums[i]下手
+            if i >= 0:
+                k = len(nums) - 1
+                while i < k:
+                    if nums[i] < nums[k]:
+                        break
+                    k -= 1
+                if i < k:
+                    nums[i], nums[k] = nums[k], nums[i]
+                    nums[i + 1:] = sorted(nums[i + 1:])
+            else:
+                nums.sort()
+
+    def findDuplicate(self, nums: List[int]) -> int:
+        """ 287.寻找重复数 """
+        ## 思路: 环形链表 的 快慢指针
+        # 初始化快慢指针
+        slow = 0
+        fast = 0
+        # 指针走一步
+        slow = nums[slow]
+        fast = nums[nums[fast]]
+        while slow != fast:
+            slow = nums[slow]
+            fast = nums[nums[fast]]
+        # while退出到达相遇点. 分别从起点 相遇点出发, 一步一步走肯定会在环入口相遇
+        start0 = 0
+        start1 = slow
+        while start0 != start1:
+            start0 = nums[start0]
+            start1 = nums[start1]
+        return start0
+
 if __name__ == '__main__':
     sl = Solution()
 
