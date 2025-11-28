@@ -1969,6 +1969,102 @@ class Solution:
             start1 = nums[start1]
         return start0
 
+    ################ 千万别放弃, 加油! ############################################################
+    def maximalSquare(self, matrix: List[List[str]]) -> int:
+        """ 221.最大正方形 """
+        m, n = len(matrix), len(matrix[0])
+        dp = [[0] * n for _ in range(m)]        # dp[i][j]表示以matrix[i][j]为右下角的正方形最大边长
+        # 初始化dp
+        for i in range(m):
+            if matrix[i][0] == '1':
+                dp[i][0] = 1
+        for j in range(n):
+            if matrix[0][j] == '1':
+                dp[0][j] = 1
+        # 遍历
+        for i in range(1, m):
+            for j in range(1, n):
+                if matrix[i][j] == '1':
+                    dp[i][j] = min(dp[i - 1][j - 1], dp[i][j - 1], dp[i - 1][j]) + 1
+        return max(max(l) for l in dp) ** 2
+
+    def getIntersectionNode(self, headA: ListNode, headB: ListNode) -> Optional[ListNode]:
+        """ 160.相交链表 """
+        ## 这道题不能用快慢指针, 要一步一步走
+        pA = headA
+        pB = headB
+        while pA != pB:
+            pA = pA.next if pA else headB
+            pB = pB.next if pB else headA
+        return pA
+    
+    def maxProfit(self, prices: List[int]) -> int:
+        """ 309.买卖股票的最佳时机含冷冻期 \n
+            状态:
+                0.无操作
+                1.持有
+                2.冷冻期
+                3.不持有
+        """
+        n = len(prices)
+        dp = [[0] * 4 for _ in range(n)]
+        dp[0] = [0, -prices[0], 0, 0]
+        for i in range(1, n):
+            dp[i][1] = max(dp[i - 1][0] - prices[i], dp[i - 1][1], dp[i - 1][3] - prices[i])
+            dp[i][2] = dp[i - 1][1] + prices[i]
+            dp[i][3] = max(dp[i - 1][2], dp[i - 1][3])
+        return max(dp[-1])
+
+    def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:
+        """ 207.课程表 """
+        ## 还是看之前的实现
+        from collections import defaultdict
+        
+        res = 0
+
+        indegrees = [0] * numCourses    # 课程i 需要 indegrees[i]门前置课程
+        p2i = defaultdict(set)          # 前置课程p: 课程i 们
+        for i, p in prerequisites:
+            indegrees[i] += 1
+            p2i[p].add(i)
+        
+        queue = [i for i, indegree in enumerate(indegrees) if indegree == 0]    # 可学习队列
+        while queue:
+            i = queue.pop(0)
+            res += 1
+            for cur in p2i[i]:
+                indegrees[cur] = max(0, indegrees[cur] - 1)
+                if indegrees[cur] == 0:
+                    queue.append(cur)
+        return res == numCourses
+    
+    def generateParenthesis(self, n: int) -> List[str]:
+        """ 22.括号生成 """
+        ## 回溯法--GPT. 参考之前
+        res = []
+        path = ''
+
+        def backtrack(left, right):
+            """
+            left: 还可生成左括号的数量
+            right: 还可生成右括号的数量
+            """
+            nonlocal path
+            if left == 0 and right == 0:
+                res.append(path)
+                return
+            if left:
+                path = path + '('
+                backtrack(left - 1, right)
+                path = path[:-1]
+            if right > left:
+                path = path + ')'
+                backtrack(left, right - 1)
+                path = path[:-1]
+        
+        backtrack(n, n)
+        return res
+
 if __name__ == '__main__':
     sl = Solution()
 

@@ -1,3 +1,4 @@
+from typing import List, Optional
 import torch
 import numpy as np
 
@@ -207,3 +208,158 @@ def NMS(bboxes, confs, t):
         valid_inds = np.where(ious < t)[0]      # [n - 1]
         orders = orders[1:][valid_inds]
     return pick_bboxes, pick_confs
+
+def BubbleSort(nums):
+    """ 交换排序 - 冒泡排序, 稳定, 每次都会固定一个元素到最终位置 """
+    # n = len(nums)
+    # for i in range(n - 1):      # 冒泡次数
+    #     flag = False
+    #     for j in range(n - 1 - i):      # 冒泡范围
+    #         if nums[j] > nums[j + 1]:
+    #             flag = True
+    #             nums[j], nums[j + 1] = nums[j + 1], nums[j]
+    #     if not flag:
+    #         break
+
+    ## Again
+    n = len(nums)
+    for i in range(n - 1):          # 冒泡次数
+        flag = False
+        for j in range(n - 1 - i):  # 冒泡范围
+            if nums[j] > nums[j + 1]:
+                flag = True
+                nums[j], nums[j + 1] = nums[j + 1], nums[j]
+        if not flag:
+            break
+
+def SelectSort(nums):
+    """ 简单选择排序 """
+    n = len(nums)
+    for i in range(n - 1):      # 选择次数
+        minInd = i
+        for j in range(i + 1, n):   # 选择范围 从i或i+1开始都行,没啥大影响
+            if nums[j] < nums[minInd]:
+                minInd = j
+        if minInd != i:
+            nums[minInd], nums[i] = nums[i], nums[minInd]
+
+""" 堆排, 小顶堆 """
+def HeapSort(nums):
+    BuildHeap(nums)
+    for i in range(len(nums) - 1, 0, -1):
+        print(nums[1])      # 访问堆顶 最小值
+        nums[1], nums[i] = nums[i], nums[1]
+        AdjustDown(nums, 1, i - 1)
+
+def BuildHeap(nums):
+    i = len(nums) // 2
+    while i >= 1:
+        AdjustDown(nums, i, len(nums) - 1)
+        i -= 1
+
+def AdjustDown(nums, k, end):
+    """
+    Description:
+        将根节点k下沉到合适的位置, 恢复堆的性质
+    Args:
+        nums:
+        k:   待调整的根节点
+        end: 待调整的最后节点
+    """
+    nums[0] = nums[k]       # 哨兵, 临时存放
+    i = 2 * k
+    while i <= end:
+        if i < end and nums[i + 1] < nums[i]:   # i指向较小孩子
+            i = i + 1
+        if nums[i] < nums[0]:                   # i指向的元素 < 根节点, 往上浮
+            nums[k] = nums[i]
+            k = i
+        i *= 2
+    nums[k] = nums[0]       # 哨兵元素归位
+
+# Definition for singly-linked list.
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+class Solution:
+    def threeSumClosest(self, nums: List[int], target: int) -> int:
+        """ 16.最接近的三数之和 """
+        nums.sort()
+        res = sum(nums[:3])
+        for i in range(len(nums) - 2):
+            l, r = i + 1, len(nums) - 1
+            while l < r:
+                _tmp = nums[i] + nums[l] + nums[r]
+                res = res if abs(target - res) < abs(target - _tmp) else _tmp
+                if _tmp == target:
+                    return _tmp
+                elif _tmp < target:
+                    l += 1
+                else:
+                    r -= 1
+        return res
+    
+    def sortList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        """ 148.排序链表 """
+        ## 归并排序
+        def mysplit(head, step):
+            """ 将链表head划分为: step个节点 + 剩余部分 \n
+                返回剩余部分第一个节点 """
+            for _ in range(step - 1):
+                if not head:
+                    return
+                head = head.next
+            
+            if head:
+                res = head.next
+                head.next = None
+                return res
+            else:
+                return
+        
+        def mymerge(h1, h2):
+            cur = dummyHead = ListNode()
+            while h1 and h2:
+                if h1.val < h2.val:
+                    cur.next = h1
+                    h1 = h1.next
+                else:
+                    cur.next = h2
+                    h2 = h2.next
+                cur = cur.next
+            cur.next = h1 or h2
+            return dummyHead.next
+
+        # 边界
+        if not head or not head.next:
+            return head
+        
+        # 链表长度
+        n = 0
+        cur = head
+        while cur:
+            n += 1
+            cur = cur.next
+        
+        dummyHead = ListNode()
+        dummyHead.next = head
+        
+        step = 1
+        while step < n:
+            # 一次归排
+            prev = dummyHead
+            cur = prev.next
+
+            while cur:
+                left = cur
+                right = mysplit(left, step)
+                cur = mysplit(right, step)
+                
+                prev.next = mymerge(left, right)
+                while prev.next:
+                    prev = prev.next
+
+            step *= 2
+        return dummyHead.next

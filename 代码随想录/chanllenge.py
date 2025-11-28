@@ -492,6 +492,49 @@ class Solution:
         第一次称重, 左:1 2 3 4 右:5 6 7 8 若平衡, 则异常球在余下的球中. 第二次称重, 左: 1~8任选3颗 右:9 10 11, 不平衡--则知异常球轻还是重 平衡--则12是异常球 第三次, 左: 9 右:10. 解了
     """
 
+    def QuickSort(self, nums, low, high):
+        """ 快速排序 \n
+            虾皮一面 寄, 没写出来. 刷题还是少呀 """
+        # def partition(low, high):
+        #     ''' 基准划分 填坑法 \n
+        #         要点: 
+        #             1.pivot = nums[low]说明nums[low]已经是坑了, 所以先从右往左找 先填上nums[low]
+        #             2.最后pivot放在low或high都对, 因为while退出条件 '''
+        #     pivot = nums[low]       # 在一次划分期间固定基准
+        #     while low < high:
+        #         while low < high and nums[high] >= pivot:   # 先从右往左找
+        #             high -= 1
+        #         nums[low] = nums[high]
+        #         while low < high and nums[low] <= pivot:
+        #             low += 1
+        #         nums[high] = nums[low]
+        #     nums[low] = pivot       # 基准归位
+        #     return low
+        
+        # if low < high:
+        #     k = partition(low, high)
+        #     self.QuickSort(nums, low, k - 1)
+        #     self.QuickSort(nums, k + 1, high)
+
+        ## Again
+        def partition(low, high):
+            pivot = nums[low]       # 一次划分前, 先确定基准
+            while low < high:
+                while low < high and nums[high] >= pivot:
+                    high -= 1
+                nums[low] = nums[high]
+                while low < high and nums[low] <= pivot:
+                    low += 1
+                nums[high] = nums[low]
+            nums[low] = pivot
+            return low
+        
+        if low < high:
+            k = partition(low, high)
+            self.QuickSort(nums, low, k - 1)
+            self.QuickSort(nums, k + 1, high)
+
+
     def threeSumClosest(self, nums: List[int], target: int) -> int:
         """ 16.最接近的三数之和 \n
             虾皮一面 寄, 没做过 """
