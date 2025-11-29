@@ -578,3 +578,44 @@ class Solution:
                     end -= 1
         return res
         
+    def findLengthOfLCIS(self, nums: List[int]) -> int:
+        """ 674.最长连续递增子序列 要求连续\n
+            小马智行一面, 似乎是这道题 """
+        ## 其实可以更简洁
+        n = len(nums)
+        dp = [0] * n    # dp[i] 以nums[i]结尾 的 最长连续递增子序列 最大长度
+        dp[0] = 1
+        for i in range(1, n):
+            if nums[i - 1] < nums[i]:
+                dp[i] = dp[i - 1] + 1
+            else:
+                dp[i] = 1
+        return max(dp)
+    def lengthOfLIS(self, nums: List[int]) -> int:
+        """ 300.最长递增子序列 不要求连续 \n
+            小马智行一面, 也似乎是这道 """
+        n = len(nums)
+        dp = [1] * n
+        for i in range(1, n):
+            for j in range(i):
+                if nums[j] < nums[i]:
+                    dp[i] = max(dp[i], dp[j] + 1)
+        return max(dp)
+    def findMaxAverage(self, nums: List[int], k: int) -> float:
+        """ 643.子数组最大平均数I \n
+            简单(居然) \n
+            小马智行一面, 也也似乎是这道, 当时还让他换了一道题来着 """
+        ## 很简单想到滑窗, 因为题目要求固定k
+        winSum = sum(nums[:k])
+        res = winSum
+        for i in range(k, len(nums)):
+            winSum = winSum - nums[i - k] + nums[i]
+            res = max(res, winSum)
+        return res / k
+
+        ## 超时, 干
+        # res = float('-inf')
+        # n = len(nums)
+        # for i in range(0, n - k + 1):
+        #     res = max(res, sum(nums[i:i + k]) / k)    # 复杂度: O(n * k)
+        # return res

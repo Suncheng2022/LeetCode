@@ -2064,6 +2064,150 @@ class Solution:
         
         backtrack(n, n)
         return res
+    
+    def mergeTwoLists(self, list1: Optional[ListNode], list2: Optional[ListNode]) -> Optional[ListNode]:
+        """ 21.合并两个有序链表 """
+        cur = dummyHead = ListNode()
+        while list1 and list2:
+            if list1.val < list2.val:
+                cur.next = list1
+                list1 = list1.next
+            else:
+                cur.next = list2
+                list2 = list2.next
+            cur = cur.next
+        cur.next = list1 or list2
+        return dummyHead.next
+    
+    def sortColors(self, nums: List[int]) -> None:
+        """
+        75.颜色分类 \n
+        Do not return anything, modify nums in-place instead.
+        """
+        ## 冒泡
+        n = len(nums)
+        for i in range(n - 1):          # 冒泡次数
+            flag = False
+            for j in range(n - 1 - i):  # 冒泡范围
+                if nums[j] > nums[j + 1]:
+                    nums[j], nums[j + 1] = nums[j + 1], nums[j]
+                    flag = True
+            if not flag:
+                break
+
+    def removeNthFromEnd(self, head: Optional[ListNode], n: int) -> Optional[ListNode]:
+        """ 19.删除链表的倒数第N个节点 """
+        ## 一趟扫描
+        dummyHead = ListNode()
+        dummyHead.next = head
+        start = end = head
+        for _ in range(n):
+            end = end.next
+        
+        prev = dummyHead        # 要考虑如果删除的就是head节点呢
+        while end:
+            prev = start
+            start = start.next
+            end = end.next
+        prev.next = start.next
+        return dummyHead.next
+
+        ## 建议直接参考一趟扫描 <-- 自己想的比较笨, 错误率会更高.
+        # counts = 0
+        # cur = head
+        # while cur:
+        #     counts += 1
+        #     cur = cur.next
+        
+        # delInd = counts - n + 1     # 正数第几个节点, 从1开始
+        # if delInd == 1:
+        #     return head.next
+        # else:
+        #     prev = cur = head
+        #     for _ in range(delInd - 1):
+        #         prev = cur
+        #         cur = cur.next
+        #     prev.next = cur.next
+        #     return head
+
+    def findAnagrams(self, s: str, p: str) -> List[int]:
+        """ 438.找到字符串中所有字母异位词 """
+        ## 能想到滑窗, 没想到高效滑窗
+        res = []
+        m = len(s)
+        n = len(p)
+        if m < n:
+            return res
+        
+        # 初始化滑窗
+        s_cts = [0] * 26
+        p_cts = [0] * 26
+        for i in range(n):
+            s_cts[ord(s[i]) - ord('a')] += 1
+            p_cts[ord(p[i]) - ord('a')] += 1
+        if s_cts == p_cts:
+            res.append(0)
+        
+        # 滑窗
+        for i in range(n, m):
+            s_cts[ord(s[i]) - ord('a')] += 1
+            s_cts[ord(s[i - n]) - ord('a')] -= 1
+            if s_cts == p_cts:
+                res.append(i - n + 1)
+        return res
+    
+    def searchRange(self, nums: List[int], target: int) -> List[int]:
+        """ 34.在排序数组中查找元素的第一个和最后一个位置 """
+        ## 二分法 + 中心探测
+        if len(nums) == 0:
+            return [-1, -1]
+
+        l, r = 0, len(nums) - 1
+        while l <= r:
+            m = (l + r) // 2
+            if nums[m] == target:
+                break
+            elif nums[m] < target:
+                l = m + 1
+            else:
+                r = m - 1
+        if nums[m] != target:
+            return [-1, -1]
+        l = r = m
+        while l - 1 >= 0 and nums[l - 1] == target:
+            l -= 1
+        while r + 1 <= len(nums) - 1 and nums[r + 1] == target:
+            r += 1
+        return [l, r]
+    
+    def countSubstrings(self, s: str) -> int:
+        """ 647.回文子串 \n
+            连续 """
+        n = len(s)
+        dp = [[False] * n for _ in range(n)]    # dp[i][j] 闭区间[i,j]是否回文
+        for i in range(n - 1, -1, -1):          # 根据递推公式, 从右往左遍历
+            for j in range(i, n):
+                if s[i] == s[j]:
+                    if j - i <= 1:
+                        dp[i][j] = True
+                    elif dp[i + 1][j - 1]:
+                        dp[i][j] = True
+        return sum(sum(l) for l in dp)
+
+    def inorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
+        """ 94.二叉树的中序遍历 """
+        res = []
+        stack = []
+        cur = root
+        while cur or stack:
+            if cur:
+                stack.append(cur)
+                cur = cur.left
+            else:
+                node = stack.pop()
+                res.append(node.val)
+                cur = node.right
+        return res
 
 if __name__ == '__main__':
     sl = Solution()
