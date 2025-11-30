@@ -2208,6 +2208,114 @@ class Solution:
                 res.append(node.val)
                 cur = node.right
         return res
+    
+    def merge(self, intervals: List[List[int]]) -> List[List[int]]:
+        """ 56.合并区间 """
+        if len(intervals) == 1:
+            return intervals
+        
+        intervals.sort(key=lambda x: x[0])
+        res = [intervals[0]]
+        for inter in intervals[1:]:
+            if res[-1][-1] >= inter[0]:
+                res[-1][-1] = max(res[-1][-1], inter[1])
+            else:
+                res.append(inter)
+        return res
+
+    def numTrees(self, n: int) -> int:
+        """ 96.不同的二叉搜索树 """
+        if n <= 2:
+            return n
+        dp = [0] * (n + 1)    # dp[i] i个从1~i的节点能组成二叉搜索树的数量
+        dp[0] = 1       # 空树也是一种哦
+        for i in range(1, n + 1):
+            for j in range(i):
+                dp[i] += dp[j] * dp[i - 1 - j]
+        return dp[-1]
+
+    def threeSum(self, nums: List[int]) -> List[List[int]]:
+        """ 15.三数之和 """
+        ## 双指针
+        res = []
+        nums.sort()
+
+        for i in range(len(nums) - 2):
+            if i > 0 and nums[i] == nums[i - 1]:
+                continue
+            start, end = i + 1, len(nums) - 1
+            while start < end:
+                _tmp = [nums[i], nums[start], nums[end]]
+                _sum = sum(_tmp)
+                if _sum == 0:
+                    res.append(_tmp[:])
+                    while start < end and nums[start + 1] == nums[start]:
+                        start += 1
+                    while start < end and nums[end - 1] == nums[end]:
+                        end -= 1
+                    start += 1
+                    end -= 1
+                elif _sum < 0:
+                    start += 1
+                else:
+                    end -= 1
+        return res
+
+        ## 不推荐解法 <-- 可以用回溯, 但复杂度高 提交超时
+        # res = []
+        # path = []
+        # nums.sort()     # 排序 去重
+
+        # def backtrack(startInd):
+        #     if len(path) == 3:
+        #         if sum(path) == 0:
+        #             res.append(path[:])
+        #         return
+        #     for i in range(startInd, len(nums)):
+        #         if i > startInd and nums[i] == nums[i - 1]:
+        #             continue
+        #         path.append(nums[i])
+        #         backtrack(i + 1)
+        #         path.pop()
+        
+        # backtrack(0)
+        # return res
+
+    def majorityElement(self, nums: List[int]) -> int:
+        """ 169.多数元素 """
+        ## 投票
+        res = 0
+        count = 0
+        for n in nums:
+            if count == 0:
+                res = n
+            count += 1 if n == res else -1
+        return res
+    
+    def letterCombinations(self, digits: str) -> List[str]:
+        """ 17.电话号码的字母组合 """
+        ## 可以稍微简化一下, 整体没问题
+        d2c = dict(zip(
+            list('23456789'),
+            ['abc', 'def', 'ghi', 'jkl', 'mno', 'pqrs', 'tuv', 'wxyz']))
+        res = []
+        path = ''
+
+        def backtrack(ind):
+            nonlocal path
+            if len(path) == len(digits):
+                    res.append(path[:])
+            if ind == len(digits):
+                return
+            for i in range(ind, len(digits)):
+                letters = d2c[digits[i]]
+                for l in letters:
+                    path += l
+                    backtrack(i + 1)
+                    path = path[:-1]
+
+        backtrack(0)
+        return res
 
 if __name__ == '__main__':
     sl = Solution()
