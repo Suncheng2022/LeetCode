@@ -2,9 +2,15 @@ from typing import List, Optional
 
 # Definition for singly-linked list.
 class ListNode:
-    def __init__(self, x):
-        self.val = x
-        self.next = None
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
 
 class MinStack:
     """ 155.最小栈 """
@@ -131,13 +137,14 @@ class Solution:
     
     def dailyTemperatures(self, temperatures: List[int]) -> List[int]:
         """ 739.每日温度 """
+        ## 递减栈
         res = [0] * len(temperatures)
         stack = []
         for i, t in enumerate(temperatures):
-            while stack and t > temperatures[stack[-1]]:
+            while stack and t > temperatures[stack[-1]]:    # 如果t相比stack中记录的升高了, 则stack中保存的索引要更新. while可以刷新整个stack, 只要不退出
                 ind = stack.pop()
                 res[ind] = i - ind
-            stack.append(i)
+            stack.append(i)     # 体现递减栈--假设没执行到while里面, 则stack记录的温度索引在递减
         return res
     
     def sortColors(self, nums: List[int]) -> None:
@@ -169,6 +176,64 @@ class Solution:
         #     if not flag:
         #         break
 
+    def isPalindrome(self, head: Optional[ListNode]) -> bool:
+        """ 234.回文链表 """
+        def reverseList(head):
+            """ 反转链表 """
+            _pre = None
+            while head:
+                _next = head.next
+                head.next = _pre        # 第一次执行到这时_pre=None, 链表与前面断开了
+                _pre = head
+                head = _next            # 当head是最后一个节点, 最后一次执行while, _pre成为第一个节点
+            return _pre
+
+        slow = fast = head
+        while fast.next and fast.next.next:     # while退出后, fast指向第二段的最后一个节点, slow指向第一段的最后一个节点
+            slow = slow.next
+            fast = fast.next.next
+        head2 = reverseList(slow.next)          # slow.next指向第二段的第一个节点, 执行反转
+        while head and head2:                   # 即使长短不同, 都work
+            if head.val != head2.val:
+                return False
+            head = head.next
+            head2 = head2.next
+        return True
+
+    def productExceptSelf(self, nums: List[int]) -> List[int]:
+        """ 238.除自身以外数组的乘积 """
+        res = [0] * len(nums)
+        
+        _tmp = 1
+        for i, n in enumerate(nums):
+            res[i] = _tmp
+            _tmp *= nums[i]
+        _tmp = 1
+        for i in range(len(nums) - 1, -1, -1):
+            res[i] *= _tmp
+            _tmp *= nums[i]
+        return res
+    
+    def flatten(self, root: Optional[TreeNode]) -> None:
+        """
+        114.二叉树展开为链表 
+        Do not return anything, modify root in-place instead.
+        """
+        cur = root
+        while cur:
+            if not cur.left:
+                cur = cur.right
+            else:
+                tmp = cur.right
+                cur.right = cur.left
+                cur.left = None
+
+                toRight = cur
+                while toRight.right:
+                    toRight = toRight.right
+                toRight.right = tmp
+
+                cur = cur.right
 
 if __name__ == '__main__':
     sl = Solution()
