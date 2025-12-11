@@ -272,7 +272,7 @@ class Solution:
         return res
     
     def numIsland_area(self, grid: List[List[int]]) -> int:
-        """ 659.岛屿的最大面积  \n
+        """ 695.岛屿的最大面积  \n
             岛屿问题（三）：最大面积 """
         m, n = len(grid), len(grid[0])
         visited = [[False] * n for _ in range(m)]
@@ -299,7 +299,7 @@ class Solution:
         return max_area
     
     def numIsland_4(self, grid: List[List[int]]) -> int:
-        """ 同 659.岛屿的最大面积\n
+        """ 同 695.岛屿的最大面积\n
             岛屿问题（四）：孤岛的总面积 """
         # 按ACM格式
         res = 0
