@@ -138,7 +138,28 @@ class Transformer(nn.Module):
     def forward(self, x):
         return self.encoder(x)
 
+## CLIP psedu-code
+"""
+def forward(self, batch):
+    img_feats = self.ImgEncoder(batch['img'])   # [batch, d_model]
+    txt_feats = self.TxtEncoder(batch['txt'])   # [batch, d_model]
+    img_embs = self.ImgEmbedding(img_feats)     # [batch, d_emb]
+    txt_embs = self.TxtEmbedding(txt_feats)     # [batch, d_emb]
+
+    img_embs = F.normalize(img_embs, p=2, dim=-1)   # 必须的, 避免模长对相似度的影响, 将向量"长度"消掉, 让模型只关注"方向"即语义
+    txt_embs = F.normalize(txt_embs, p=2, dim=-1)
+
+    logits_per_img = (img_embs @ txt_embs.T) / temp     # [batch, batch] 每行表示, 每个图像对所有文本的相似度. 温度可学习--因为每个batch的embedding不同, 让模型自己决定该"激进"or"保守"
+    logits_per_txt = logits_per_img.T                   # [batch, batch] 每行表示, 每个文本对所有图像的相似度
+    labels = torch.arange(len(batch['img']))           # [batch]
+
+    loss_per_img = F.cross_entropy(logits_per_img, labels)  # 标量
+    loss_per_txt = F.cross_entropy(logits_per_txt, labels)  # 标量
+    return (loss_per_img + loss_per_txt) / 2
+"""
+
 if __name__ == '__main__':
+    ## Transformer test
     voc_size = 6000
     batch, max_len, d_model = 1, 77, 512
     heads = 4
