@@ -235,8 +235,133 @@ class Solution:
 
                 cur = cur.right
 
+    def canPartition(self, nums: List[int]) -> bool:
+        """ 416.分割等和子集 """
+        ## 背包--动态规划
+        if sum(nums) % 2:
+            return False
+        target = sum(nums) // 2
+        dp = [0] * (target + 1)     # dp[j] 装满容量为j的背包 所得最大价值是多少
+        for i in range(len(nums)):
+            for j in range(target, nums[i] - 1, -1):    # 一维dp 背包倒序 避免覆盖前面的
+                dp[j] = max(dp[j - nums[i]] + nums[i], dp[j])
+        return dp[-1] == target
+    
+    def singleNumber(self, nums: List[int]) -> int:
+        """ 136.只出现一次的数字 """
+        ## 位运算
+        res = nums.pop(0)
+        while nums:
+            res ^= nums.pop()
+        return res
+
+        ## 不够算法
+        # nums.sort()
+        # stack = []
+        # while nums:
+        #     n = nums.pop(0)
+        #     if not stack or stack[-1] != n:
+        #         stack.append(n)
+        #     else:
+        #         stack.pop()
+        # return stack[-1]
+
+    def permute(self, nums: List[int]) -> List[List[int]]:
+        """ 46.全排列 """
+        ## 回溯三部曲
+        res = []
+        path = []
+        used = [False] * len(nums)
+
+        def backtrack():
+            if len(path) == len(nums):
+                res.append(path[:])
+                return
+            for i in range(len(nums)):
+                if used[i] == True:
+                    continue
+                used[i] = True
+                path.append(nums[i])
+                backtrack()
+                path.pop()
+                used[i] = False
+        
+        backtrack()
+        return res
+    
+    def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+        """ 240.搜索二维矩阵II """
+        ## 利用matrix的特性
+        m, n = len(matrix), len(matrix[0])
+        rowInd, colInd = 0, n - 1       # 起点
+        while rowInd < m and colInd >= 0:
+            val = matrix[rowInd][colInd]
+            if val == target:
+                return True
+            elif val < target:
+                rowInd += 1
+            else:
+                colInd -= 1
+        return False
+
+        ## 不够算法 没有利用matrix特性
+        # def binarySearch(nums):
+        #     l, r = 0, len(nums) - 1
+        #     while l <= r:
+        #         m = (l + r) // 2
+        #         if nums[m] == target:
+        #             return True
+        #         elif nums[m] > target:
+        #             r = m - 1
+        #         else:
+        #             l = m + 1
+        #     return False
+        
+        # for row in matrix:
+        #     if binarySearch(row):
+        #         return True
+        # return False
+
+    def dailyTemperatures(self, temperatures: List[int]) -> List[int]:
+        """ 739.每日温度 """
+        ## 递减栈, 参考之前
+        answers = [0] * len(temperatures)
+        stack = []
+        for i, t in enumerate(temperatures):
+            while stack and t > temperatures[stack[-1]]:
+                ind = stack.pop()
+                answers[ind] = i - ind
+            stack.append(i)     # 若没执行while, 就能理解这是递减栈了
+        return answers
+    
+    def longestConsecutive(self, nums: List[int]) -> int:
+        """ 128.最长连续序列 """
+        ## 动规, 能做 但复杂度不符合要求
+        # if len(nums) == 0:
+        #     return 0
+        # nums = list(set(nums))
+        # nums.sort()
+        # n = len(nums)
+        # dp = [1] * n        # dp[i] 以nums[i]结尾的最长连续序列的长度
+        # for i in range(1, n):
+        #     if nums[i - 1] + 1 == nums[i]:
+        #         dp[i] = dp[i - 1] + 1
+        # return max(dp)
+
+        ## 建议这个解法-->参考之前
+        nums = set(nums)
+        res = 0
+        for dg in nums:
+            if dg - 1 not in nums:
+                _len = 1
+                while dg + 1 in nums:
+                    _len += 1
+                    dg += 1
+                res = max(res, _len)
+        return res
+
 if __name__ == '__main__':
     sl = Solution()
 
-    nums = [3,2,1,0,4]
-    print(sl.canJump(nums))
+    nums = [1,0,1,2]
+    print(sl.longestConsecutive(nums))
