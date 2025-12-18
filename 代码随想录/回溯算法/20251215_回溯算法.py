@@ -210,6 +210,146 @@ class Solution:
         
         backtrack(0)
         return res
+    
+    def restoreIpAddresses(self, s: str) -> List[str]:
+        """ 93.复原IP地址 """
+        ## 分割--回溯
+        def isValid(sub_s):
+            if len(sub_s) > 1 and (sub_s[0] == '0' or int(sub_s) > 255):
+                return False
+            for c in sub_s:
+                if ord(c) - ord('0') < 0 or ord(c) - ord('0') > 9:
+                    return False
+            return True
+
+        res = []
+        path = []
+
+        def backtrack(startInd):
+            if len(path) == 4:
+                if startInd == len(s):
+                    res.append('.'.join(path))
+                return
+            for i in range(startInd, len(s)):
+                if isValid(s[startInd:i + 1]):
+                    path.append(s[startInd:i + 1])
+                    backtrack(i + 1)
+                    path.pop()
+        
+        backtrack(0)
+        return res
+    
+    def subsets(self, nums: List[int]) -> List[List[int]]:
+        """ 78.子集 """
+        ## 子集--回溯
+        res = []
+        path = []
+
+        def backtrack(startInd):
+            res.append(path[:])
+            for i in range(startInd, len(nums)):
+                path.append(nums[i])
+                backtrack(i + 1)
+                path.pop()
+        
+        backtrack(0)
+        return res
+    
+    def subsetsWithDup(self, nums: List[int]) -> List[List[int]]:
+        """ 90.子集II """
+        ## 子集--回溯
+        ## 有重复元素-去重
+        res = []
+        path = []
+        nums.sort()
+        used = [False] * len(nums)
+
+        def backtrack(startInd):
+            res.append(path[:])
+            for i in range(startInd, len(nums)):
+                if i > 0 and nums[i - 1] == nums[i] and used[i - 1] == False:
+                    continue
+                path.append(nums[i])
+                used[i] = True
+                backtrack(i + 1)
+                used[i] = False
+                path.pop()
+        
+        backtrack(0)
+        return res
+    
+    def findSubsequences(self, nums: List[int]) -> List[List[int]]:
+        """ 491.非递减子序列 """
+        ## 很有意思的一道题, 如此去重
+        res = []
+        path = []
+
+        def backtrack(startInd):
+            if len(path) >= 2:
+                res.append(path[:])
+            unseen = set()
+            for i in range(startInd, len(nums)):
+                if (path and path[-1] > nums[i]) or nums[i] in unseen:
+                    continue
+                unseen.add(nums[i])
+                path.append(nums[i])
+                backtrack(i + 1)
+                path.pop()
+        
+        backtrack(0)
+        return res
+    
+    def permute(self, nums: List[int]) -> List[List[int]]:
+        """ 46.全排列 """
+        ## 排列--回溯
+        ## 不用startInd了, 每次递归都是从头搜索
+        res = []
+        path = []
+        used = [False] * len(nums)
+
+        def backtrack():
+            if len(path) == len(nums):
+                res.append(path[:])
+                return
+            for i in range(len(nums)):
+                if used[i]:
+                    continue
+                path.append(nums[i])
+                used[i] = True
+                backtrack()
+                used[i] = False
+                path.pop()
+        
+        backtrack()
+        return res
+    
+    def permuteUnique(self, nums: List[int]) -> List[List[int]]:
+        """ 47.全排列II """
+        ## 排列--回溯
+        ## 不使用startInd
+        ## 基于 46.全排列, 去重
+        res = []
+        path = []
+        used = [False] * len(nums)
+        nums.sort()
+
+        def backtrack():
+            if len(path) == len(nums):
+                res.append(path[:])
+                return
+            for i in range(len(nums)):
+                if used[i]:
+                    continue
+                if i > 0 and nums[i - 1] == nums[i] and used[i - 1] == False:
+                    continue
+                path.append(nums[i])
+                used[i] = True
+                backtrack()
+                used[i] = False
+                path.pop()
+        
+        backtrack()
+        return res
 
 if __name__ == '__main__':
     """
@@ -226,5 +366,5 @@ if __name__ == '__main__':
     """
     sl = Solution()
 
-    s = "aab"
-    print(sl.partition(s))
+    nums = [1,2,3]
+    print(sl.permute(nums))
