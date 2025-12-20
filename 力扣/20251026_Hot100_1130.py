@@ -359,9 +359,175 @@ class Solution:
                     dg += 1
                 res = max(res, _len)
         return res
+    
+    def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:
+        """ 207.课程表 """
+        ## 还是参考之前, 忘了
+        from collections import defaultdict
+
+        res = 0
+        i2indegree = [0] * numCourses
+        p2i = defaultdict(set)
+        for cur, pre in prerequisites:
+            i2indegree[cur] += 1
+            p2i[pre].add(cur)
+        queue = [i for i, indegree in enumerate(i2indegree) if indegree == 0]
+
+        while queue:
+            cur = queue.pop(0)
+            res += 1
+            for ind in p2i[cur]:
+                i2indegree[ind] = max(0, i2indegree[ind] - 1)
+                if i2indegree[ind] == 0:
+                    queue.append(ind)
+        return res == numCourses
+        
+    def sortColors(self, nums: List[int]) -> None:
+        """
+        75.颜色分类 \n
+        Do not return anything, modify nums in-place instead.
+        """
+        ## 一趟扫描
+        pos0 = pos1 = 0
+        for i in range(len(nums)):
+            if nums[i] == 1:
+                nums[i], nums[pos1] = nums[pos1], nums[i]
+                pos1 += 1
+            
+            if nums[i] == 0:
+                nums[i], nums[pos0] = nums[pos0], nums[i]
+                pos0 += 1
+                if nums[i] == 1:
+                    nums[i], nums[pos1] = nums[pos1], nums[i]
+                pos1 += 1
+
+        ## 冒泡
+        # n = len(nums)
+        # for i in range(n - 1):
+        #     flag = False
+        #     for j in range(n - 1 - i):
+        #         if nums[j] > nums[j + 1]:
+        #             nums[j], nums[j + 1] = nums[j + 1], nums[j]
+        #             flag = True
+        #     if not flag:
+        #         break
+        
+    def mergeTrees(self, root1: Optional[TreeNode], root2: Optional[TreeNode]) -> Optional[TreeNode]:
+        """ 617.合并二叉树 """
+        from collections import deque
+
+        if not (root1 and root2):
+            return root1 or root2
+        
+        queue = deque([[root1, root2]])
+        while queue:
+            node1, node2 = queue.popleft()
+            node1.val += node2.val
+            if node1.left and node2.left:
+                queue.append([node1.left, node2.left])
+            if node1.right and node2.right:
+                queue.append([node1.right, node2.right])
+            if not node1.left and node2.left:
+                node1.left = node2.left
+            if not node1.right and node2.right:
+                node1.right = node2.right
+        return root1
+    
+    def sortList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        """ 148.排序链表 """
+        ## 归排
+        def mysplit(head, step):
+            """ 将链表head划分为两段: 长度为step + 长度为剩下, 返回第二段的第一个节点 """
+            for _ in range(step - 1):
+                if not head:
+                    return
+                head = head.next
+            if head:
+                res = head.next
+                head.next = None
+                return res
+            else:
+                return
+        
+        def mymerge(h1, h2):
+            cur = dummyHead = ListNode()
+            while h1 and h2:
+                if h1.val < h2.val:
+                    cur.next = h1
+                    h1 = h1.next
+                else:
+                    cur.next = h2
+                    h2 = h2.next
+                cur = cur.next
+            cur.next = h1 or h2
+            return dummyHead.next
+        
+        if not (head and head.next):
+            return head
+
+        n = 0
+        cur = head
+        while cur:
+            n += 1
+            cur = cur.next
+        
+        dummyHead = ListNode(next=head)
+        
+        step = 1
+        while step < n:
+            ## 一次归排
+            prev = dummyHead
+            cur = prev.next
+            while cur:
+                left = cur
+                right = mysplit(left, step)
+                cur = mysplit(right, step)
+
+                prev.next = mymerge(left, right)
+                while prev.next:
+                    prev = prev.next
+
+            step *= 2
+        return dummyHead.next
+    
+    def calcEquation(self, equations: List[List[str]], values: List[float], queries: List[List[str]]) -> List[float]:
+        """ 399.除法求值 """
+        graph = {}
+        for [s, t], v in zip(equations, values):
+            if s not in graph:
+                graph[s] = {t: v}
+            else:
+                graph[s][t] = v
+            if t not in graph:
+                graph[t] = {s: 1 / v}
+            else:
+                graph[t][s] = 1 / v
+        
+        def dfs(s, t):
+            if s not in graph:
+                return -1
+            elif s == t:
+                return 1
+            for node in graph[s].keys():
+                if node == t:
+                    return graph[s][t]
+                elif node not in visited:
+                    visited.add(node)
+                    v = dfs(node, t)
+                    if v != -1:
+                        return v * graph[s][node]
+            return -1
+
+        res = []
+        for s, t in queries:
+            visited = set()
+            v = dfs(s, t)
+            res.append(v)
+        return res
 
 if __name__ == '__main__':
     sl = Solution()
 
-    nums = [1,0,1,2]
-    print(sl.longestConsecutive(nums))
+    numCourses = 2
+    prerequisites = [[1,0],[0,1]]
+    print(sl.canFinish(numCourses, prerequisites))
