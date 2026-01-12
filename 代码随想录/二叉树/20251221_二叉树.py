@@ -476,3 +476,203 @@ class Solution:
         root.left = self.constructMaximumBinaryTree(nums[:maxInd])
         root.right = self.constructMaximumBinaryTree(nums[maxInd + 1:])
         return root
+    
+    def mergeTrees(self, root1: Optional[TreeNode], root2: Optional[TreeNode]) -> Optional[TreeNode]:
+        """ 617.合并二叉树 """
+        ## 递归-超级简单
+        # if not (root1 and root2):
+        #     return root2 or root1
+        # root1.val += root2.val
+        # root1.left = self.mergeTrees(root1.left, root2.left)
+        # root1.right = self.mergeTrees(root1.right, root2.right)
+        # return root1
+
+        ## 迭代--同时遍历两棵树
+        if not (root1 and root2):
+            return root1 or root2
+        queue = [[root1, root2]]
+        while queue:
+            node1, node2 = queue.pop(0)
+            node1.val += node2.val
+            if node1.left and node2.left:
+                queue.append([node1.left, node2.left])
+            if node1.right and node2.right:
+                queue.append([node1.right, node2.right])
+            if not node1.left and node2.left:
+                node1.left = node2.left
+            if not node1.right and node2.right:
+                node1.right = node2.right
+        return root1
+    
+    def searchBST(self, root: Optional[TreeNode], val: int) -> Optional[TreeNode]:
+        """ 700.二叉搜索树中的搜索 """
+        ## 迭代--二叉搜索树特性已决定了搜索路径
+        # if not root:
+        #     return
+        # cur = root
+        # while cur:
+        #     if cur.val == val:
+        #         return cur
+        #     elif cur.val > val:
+        #         cur = cur.left
+        #     else:
+        #         cur = cur.right
+        # return
+
+        ## 递归
+        if not root:
+            return
+        if root.val == val:
+            return root
+        return self.searchBST(root.left, val) or self.searchBST(root.right, val)
+    
+    def isValidBST(self, root: Optional[TreeNode]) -> bool:
+        """ 98.验证二叉搜索树 """
+        ## 忘记了 二叉搜索树的中序遍历严格递增
+        ## 递归中序
+        # curVal = float('-inf')
+
+        # def backtrack(node):
+        #     nonlocal curVal
+        #     if not node:
+        #         return True
+            
+        #     left = backtrack(node.left)
+        #     if node.val <= curVal:
+        #         return False
+        #     else:
+        #         curVal = node.val
+        #     right = backtrack(node.right)
+        #     return left and right
+        
+        # return backtrack(root)
+
+        ## 迭代中序
+        res = []
+        stack = []
+        cur = root
+        while cur or stack:
+            if cur:
+                stack.append(cur)
+                cur = cur.left
+            else:
+                node = stack.pop()
+                if res and res[-1] >= node.val:
+                    return False
+                res.append(node.val)
+                cur = node.right
+        return True
+    
+    def getMinimumDifference(self, root: Optional[TreeNode]) -> int:
+        """ 530.二叉搜索树的最小绝对差 """
+        ## 二叉搜索树找最值/差值, 想象在升序数组上操作, 记录上一个节点
+        res = float('inf')
+        pre = None
+
+        def backtrack(node):
+            nonlocal res, pre
+            if not node:
+                return
+            backtrack(node.left)
+            if pre is not None:
+                res = min(res, node.val - pre.val)      # 升序嘛
+            pre = node
+            backtrack(node.right)
+        
+        backtrack(root)
+        return res
+
+        ## 这样做不太标准, 标准思路是上面的解法
+        # absDiff = float('inf')
+        # res = []
+
+        # def backtrack(node):
+        #     if not node:
+        #         return
+        #     nonlocal absDiff, res
+        #     backtrack(node.left)
+        #     if res and abs(res[-1] - node.val) < absDiff:
+        #         absDiff = abs(res[-1] - node.val)
+        #     res.append(node.val)
+        #     backtrack(node.right)
+        
+        # backtrack(root)
+        # return absDiff
+
+    def findMode(self, root: Optional[TreeNode]) -> List[int]:
+        """ 501.二叉搜索数中的众数  """
+        ## 递归--二叉搜索树, 中序
+        # res = []
+        # max_count = 0
+        # cur_count = 0
+        # pre = None
+
+        # def backtrack(node):
+        #     nonlocal max_count, cur_count, pre
+        #     if not node:
+        #         return
+        #     backtrack(node.left)
+        #     if pre is None:
+        #         cur_count = 1
+        #     elif pre.val == node.val:
+        #         cur_count += 1
+        #     else:
+        #         cur_count = 1
+        #     pre = node
+
+        #     if cur_count == max_count:
+        #         res.append(node.val)
+        #     elif cur_count > max_count:
+        #         max_count = cur_count
+        #         res.clear()
+        #         res.append(node.val)
+        #     backtrack(node.right)
+        
+        # backtrack(root)
+        # return res
+
+        ## 迭代
+        if not root:
+            return []
+        cur = root
+        stack = []
+        res = []
+        maxCount = 0
+        curCount = 0
+        pre = None
+        while cur or stack:
+            if cur:
+                stack.append(cur)
+                cur = cur.left
+            else:
+                node = stack.pop()
+                if pre is None:
+                    curCount = 1
+                elif pre.val == node.val:
+                    curCount += 1
+                else:
+                    curCount = 1
+                pre = node
+
+                if curCount == maxCount:
+                    res.append(node.val)
+                elif curCount > maxCount:
+                    maxCount = curCount
+                    res.clear()
+                    res.append(node.val)
+                pre = node
+
+                cur = node.right
+        return res
+    
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        """ 236.二叉树的最近公共祖先 """
+        ## 后序遍历, 要通过左右子树的结果判断
+        if not root or root in [p, q]:
+            return root
+        left = self.lowestCommonAncestor(root.left, p, q)
+        right = self.lowestCommonAncestor(root.right, p, q)
+        if left and right:
+            return root
+        elif not (left and right):
+            return left or right
