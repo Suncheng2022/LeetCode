@@ -676,3 +676,97 @@ class Solution:
             return root
         elif not (left and right):
             return left or right
+        
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        """ 235.二叉搜索树的最近公共祖先 """
+        ## 解法一: 236.二叉树的最近公共祖先
+
+        ## 解法二: 利用二叉搜索树的性质--从上到下, 当前节点值在[p.val, q.val]之间, 当前节点就是所求
+        # if not root:
+        #     return
+        # if root.val > p.val and root.val > q.val:
+        #     left = self.lowestCommonAncestor(root.left, p, q)
+        #     if left:
+        #         return left
+        # elif root.val < p.val and root.val < q.val:
+        #     right = self.lowestCommonAncestor(root.right, p, q)
+        #     if right:
+        #         return right
+        # elif min(p.val, q.val) <= root.val <= max(p.val, q.val):
+        #     return root
+
+        ## 解法三: 二叉搜索树 迭代
+        while root:
+            if root.val > p.val and root.val > q.val:
+                root = root.left
+            elif root.val < p.val and root.val < q.val:
+                root = root.right
+            else:
+                return root
+        return
+    
+    def insertIntoBST(self, root: Optional[TreeNode], val: int) -> Optional[TreeNode]:
+        """ 701.二叉搜索树中的插入操作 """
+        ## 遇到空节点插入就行, 别想太多
+        ## 递归, 关键点: 通过递归完成父子节点赋值
+        # if not root:
+        #     return TreeNode(val)
+        # if root.val > val:
+        #     root.left = self.insertIntoBST(root.left, val)
+        # elif root.val < val:
+        #     root.right = self.insertIntoBST(root.right, val)
+        # return root
+
+        ## 迭代, 需记录父节点
+        if not root:
+            return TreeNode(val)
+        parent = root
+        cur = root
+        while cur:
+            parent = cur
+            if cur.val > val:
+                cur = cur.left
+            elif cur.val < val:
+                cur = cur.right
+        _node = TreeNode(val)
+        if parent.val < val:
+            parent.right = _node
+        else:
+            parent.left = _node
+        return root
+    
+    def deleteNode(self, root: Optional[TreeNode], key: int) -> Optional[TreeNode]:
+        """ 450.删除二叉搜索树中的节点 """
+        if not root:
+            return
+        if root.val < key:
+            root.right = self.deleteNode(root.right, key)
+        elif root.val > key:
+            root.left = self.deleteNode(root.left, key)
+        else:
+            if not (root.left or root.right):
+                return
+            elif not root.left and root.right:
+                return root.right
+            elif root.left and not root.right:
+                return root.left
+            else:
+                cur = root.right
+                while cur.left:
+                    cur = cur.left
+                cur.left = root.left
+                return root.right
+        return root
+    
+    def trimBST(self, root: Optional[TreeNode], low: int, high: int) -> Optional[TreeNode]:
+        """ 669.修剪二叉搜索树 """
+        if not root:
+            return
+        if root.val < low:
+            return self.trimBST(root.right, low, high)
+        elif root.val > high:
+            return self.trimBST(root.left, low, high)
+        else:
+            root.left = self.trimBST(root.left, low, high)
+            root.right = self.trimBST(root.right, low, high)
+        return root
