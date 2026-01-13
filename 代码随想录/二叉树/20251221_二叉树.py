@@ -770,3 +770,29 @@ class Solution:
             root.left = self.trimBST(root.left, low, high)
             root.right = self.trimBST(root.right, low, high)
         return root
+    
+    def sortedArrayToBST(self, nums: List[int]) -> Optional[TreeNode]:
+        """ 108.将有序数组转化为二叉搜索树 """
+        if not nums:
+            return
+        ind = len(nums) // 2
+        root = TreeNode(nums[ind])
+        root.left = self.sortedArrayToBST(nums[:ind])
+        root.right = self.sortedArrayToBST(nums[ind + 1:])
+        return root
+    
+    def convertBST(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+        """ 538.把二叉搜索树转换为累加树 """
+        pre = 0
+
+        def backtrack(node):
+            nonlocal pre
+            if not node:
+                return
+            backtrack(node.right)
+            node.val += pre
+            pre = node.val
+            backtrack(node.left)
+        
+        backtrack(root)
+        return root
